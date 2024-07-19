@@ -6,13 +6,8 @@
 class FWeaponCommand : public TCommands<FWeaponCommand>
 {
 public:
-	FWeaponCommands();
-	~FWeaponCommands();
-
-	FWeaponCommand()
-		: TCommands<FWeaponCommand>(TEXT("WeaponPlugin"), NSLOCTEXT("Contexts", "WeaponPlugin", "WeaponPlugin Plugin"), NAME_None, FWeaponStyle::GetStyleSetName())
-	{
-	}
+	FWeaponCommand();
+	~FWeaponCommand();
 
 	// TCommands<> interface
 	virtual void RegisterCommands() override;

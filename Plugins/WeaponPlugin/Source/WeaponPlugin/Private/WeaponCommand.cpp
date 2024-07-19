@@ -2,13 +2,13 @@
 
 #include "LevelEditor.h"
 
-FWeaponCommands::FWeaponCommands()
+FWeaponCommand::FWeaponCommand()
 	: TCommands(TEXT("WeaponPlugin"), NSLOCTEXT("Contexts", "WeaponPlugin", "WeaponPlugin Plugin"), NAME_None, FWeaponStyle::GetStyleSetName())
 {
 	Command = MakeShareable(new FUICommandList());
 }
 
-FWeaponCommands::~FWeaponCommands()
+FWeaponCommand::~FWeaponCommand()
 {
 	if (Command.IsValid())
 	{
@@ -28,6 +28,6 @@ void FWeaponCommand::RegisterCommands()
 #undef LOCTEXT_NAMESPACE
 }
 
-void FWeaponCommands::Startup()
+void FWeaponCommand::Startup()
 {
 }

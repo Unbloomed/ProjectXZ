@@ -4,6 +4,7 @@
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
 #include "WeaponContextMenu.h"
+#include "AssetEditor/XZWeaponAssetEditor.h"
 
 static const FName WeaponPluginTabName("WeaponPlugin");
 
@@ -63,15 +64,11 @@ void FWeaponModule::ShutdownModule()
 
 void FWeaponModule::PluginButtonClicked()
 {
-	// Put your "OnButtonClicked" stuff here
-	FText DialogText = FText::Format(
-		LOCTEXT("PluginButtonDialogText", "Add code to {0} in {1} to override this button's actions"),
-		FText::FromString(TEXT("FWeaponPluginModule::PluginButtonClicked()")),
-		FText::FromString(TEXT("WeaponPlugin.cpp"))
-	);
-	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
+	FXZWeaponAssetEditor::OpenWindow();
+	
 }
 
+// Toolbar에 등록
 void FWeaponModule::RegisterMenus()
 {
 	// Owner will be used for cleanup in call to UToolMenus::UnregisterOwner
