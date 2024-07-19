@@ -1,6 +1,6 @@
 #include "WeaponModule.h"
 #include "WeaponStyle.h"
-#include "WeaponCommands.h"
+#include "WeaponCommand.h"
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
 
@@ -17,12 +17,12 @@ void FWeaponModule::StartupModule()
 	FWeaponStyle::Initialize();
 	FWeaponStyle::ReloadTextures();
 
-	FWeaponCommands::Register();
+	FWeaponCommand::Register();
 	
 	PluginCommands = MakeShareable(new FUICommandList);
 
 	PluginCommands->MapAction(
-		FWeaponCommands::Get().PluginAction,
+		FWeaponCommand::Get().PluginAction,
 		FExecuteAction::CreateRaw(this, &FWeaponModule::PluginButtonClicked),
 		FCanExecuteAction());
 
@@ -40,7 +40,7 @@ void FWeaponModule::ShutdownModule()
 
 	FWeaponStyle::Shutdown();
 
-	FWeaponCommands::Unregister();
+	FWeaponCommand::Unregister();
 }
 
 void FWeaponModule::PluginButtonClicked()
@@ -63,7 +63,7 @@ void FWeaponModule::RegisterMenus()
 		UToolMenu* Menu = UToolMenus::Get()->ExtendMenu("LevelEditor.MainMenu.Window");
 		{
 			FToolMenuSection& Section = Menu->FindOrAddSection("WindowLayout");
-			Section.AddMenuEntryWithCommandList(FWeaponCommands::Get().PluginAction, PluginCommands);
+			Section.AddMenuEntryWithCommandList(FWeaponCommand::Get().PluginAction, PluginCommands);
 		}
 	}
 
@@ -72,7 +72,7 @@ void FWeaponModule::RegisterMenus()
 		{
 			FToolMenuSection& Section = ToolbarMenu->FindOrAddSection("PluginTools");
 			{
-				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FWeaponCommands::Get().PluginAction));
+				FToolMenuEntry& Entry = Section.AddEntry(FToolMenuEntry::InitToolBarButton(FWeaponCommand::Get().PluginAction));
 				Entry.SetCommandList(PluginCommands);
 			}
 		}

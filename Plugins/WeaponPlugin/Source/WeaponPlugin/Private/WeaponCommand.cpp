@@ -1,8 +1,8 @@
-#include "WeaponCommands.h"
+#include "WeaponCommand.h"
 
 #define LOCTEXT_NAMESPACE "FWeaponPluginModule"
 
-void FWeaponCommands::RegisterCommands()
+void FWeaponCommand::RegisterCommands()
 {
 	UI_COMMAND(PluginAction, "WeaponPlugin", "Execute WeaponPlugin action", EUserInterfaceActionType::Button, FInputChord());
 }

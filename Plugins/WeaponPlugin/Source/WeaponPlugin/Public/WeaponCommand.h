@@ -3,12 +3,12 @@
 #include "Framework/Commands/Commands.h"
 #include "WeaponStyle.h"
 
-class FWeaponCommands : public TCommands<FWeaponCommands>
+class FWeaponCommand : public TCommands<FWeaponCommand>
 {
 public:
 
-	FWeaponCommands()
-		: TCommands<FWeaponCommands>(TEXT("WeaponPlugin"), NSLOCTEXT("Contexts", "WeaponPlugin", "WeaponPlugin Plugin"), NAME_None, FWeaponStyle::GetStyleSetName())
+	FWeaponCommand()
+		: TCommands<FWeaponCommand>(TEXT("WeaponPlugin"), NSLOCTEXT("Contexts", "WeaponPlugin", "WeaponPlugin Plugin"), NAME_None, FWeaponStyle::GetStyleSetName())
 	{
 	}
 
