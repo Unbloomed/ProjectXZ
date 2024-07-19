@@ -2,6 +2,10 @@
 #include "CoreMinimal.h"
 #include "Styling/SlateStyle.h"
 
+/** 언리얼 에디터 내 Toolbar에 아이콘 형태로 노출
+ *
+ */
+
 class FWeaponStyle
 {
 public:

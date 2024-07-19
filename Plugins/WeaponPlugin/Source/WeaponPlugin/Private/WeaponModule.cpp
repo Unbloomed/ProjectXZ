@@ -3,12 +3,13 @@
 #include "WeaponCommand.h"
 #include "Misc/MessageDialog.h"
 #include "ToolMenus.h"
+#include "WeaponContextMenu.h"
 
 static const FName WeaponPluginTabName("WeaponPlugin");
 
 #define LOCTEXT_NAMESPACE "FWeaponModule"
 
-IMPLEMENT_MODULE(FWeaponModule, WeaponPlugin) // WeaponPlugin.upluginÀÇ ¸ðµâ ÀÌ¸§°ú ÀÏÄ¡
+IMPLEMENT_MODULE(FWeaponModule, WeaponPlugin) // WeaponPlugin.upluginï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ì¸ï¿½ï¿½ï¿½ ï¿½ï¿½Ä¡
 
 void FWeaponModule::StartupModule()
 {
@@ -21,21 +22,38 @@ void FWeaponModule::StartupModule()
 	
 	PluginCommands = MakeShareable(new FUICommandList);
 
+	IAssetTools& AssetTools = FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	EAssetTypeCategories::Type Categories = AssetTools.RegisterAdvancedAssetCategory("DataAsset_Weapon", FText::FromString("WeaponPlugin"));
+
+	ContextMenu = MakeShareable(new FWeaponContextMenu(Categories));
+	AssetTools.RegisterAssetTypeActions(ContextMenu.ToSharedRef());
+	
+	///////////////////////////////////////////////////////////////////////////////////////////
+	PluginCommands = MakeShareable(new FUICommandList);
 	PluginCommands->MapAction(
 		FWeaponCommand::Get().PluginAction,
 		FExecuteAction::CreateRaw(this, &FWeaponModule::PluginButtonClicked),
 		FCanExecuteAction());
 
 	UToolMenus::RegisterStartupCallback(FSimpleMulticastDelegate::FDelegate::CreateRaw(this, &FWeaponModule::RegisterMenus));
+	///////////////////////////////////////////////////////////////////////////////////////////
 }
 
 void FWeaponModule::ShutdownModule()
 {
+	if (ContextMenu.IsValid())
+	{
+		ContextMenu.Reset();
+	}
+	if (Command.IsValid())
+	{
+		Command.Reset();
+	}
+
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
 	UToolMenus::UnRegisterStartupCallback(this);
-
 	UToolMenus::UnregisterOwner(this);
 
 	FWeaponStyle::Shutdown();
@@ -47,10 +65,10 @@ void FWeaponModule::PluginButtonClicked()
 {
 	// Put your "OnButtonClicked" stuff here
 	FText DialogText = FText::Format(
-							LOCTEXT("PluginButtonDialogText", "Add code to {0} in {1} to override this button's actions"),
-							FText::FromString(TEXT("FWeaponPluginModule::PluginButtonClicked()")),
-							FText::FromString(TEXT("WeaponPlugin.cpp"))
-					   );
+		LOCTEXT("PluginButtonDialogText", "Add code to {0} in {1} to override this button's actions"),
+		FText::FromString(TEXT("FWeaponPluginModule::PluginButtonClicked()")),
+		FText::FromString(TEXT("WeaponPlugin.cpp"))
+	);
 	FMessageDialog::Open(EAppMsgType::Ok, DialogText);
 }
 
