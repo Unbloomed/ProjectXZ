@@ -44,9 +44,7 @@ public class WeaponPlugin : ModuleRules
 				"Slate",
 				"SlateCore",
 
-				"ProjectXZ",
-				"UnrealEd",
-				"EditorStyle"
+				"UnrealEd"
 			}
 			);
 		

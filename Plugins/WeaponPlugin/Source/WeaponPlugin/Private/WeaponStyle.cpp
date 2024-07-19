@@ -12,7 +12,7 @@ TSharedPtr<FSlateStyleSet> FWeaponStyle::StyleInstance = nullptr;
 
 void FWeaponStyle::Initialize()
 {
-	if (false == StyleInstance.IsValid())
+	if (!StyleInstance.IsValid())
 	{
 		StyleInstance = Create();
 		FSlateStyleRegistry::RegisterSlateStyle(*StyleInstance);
@@ -41,7 +41,7 @@ TSharedRef< FSlateStyleSet > FWeaponStyle::Create()
 	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("WeaponPluginStyle"));
 	Style->SetContentRoot(IPluginManager::Get().FindPlugin("WeaponPlugin")->GetBaseDir() / TEXT("Resources"));
 
-	Style->Set("WeaponPlugin.PluginAction", new IMAGE_BRUSH(TEXT("WeaponButtonIcon"), Icon20x20));
+	Style->Set("WeaponPlugin.PluginAction", new IMAGE_BRUSH_SVG(TEXT("PlaceholderButtonIcon"), Icon20x20));
 	return Style;
 }
 

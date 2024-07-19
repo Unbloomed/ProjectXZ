@@ -17,12 +17,9 @@ public:
 
 	/** This function will be bound to Command. */
 	void PluginButtonClicked();
-
+	
 private:
 	void RegisterMenus();
-
-	TSharedPtr< class FUICommandList > PluginCommands;
-
-	TSharedPtr< class FWeaponContextMenu > ContextMenu;
-	TSharedPtr< class FWeaponConmmands > Command;
+	
+	TSharedPtr<class FUICommandList> PluginCommands;
 };

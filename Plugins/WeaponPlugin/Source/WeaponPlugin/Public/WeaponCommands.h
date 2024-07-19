@@ -6,21 +6,15 @@
 class FWeaponCommands : public TCommands<FWeaponCommands>
 {
 public:
-	FWeaponCommands();
-	~FWeaponCommands();
 
-	//*****************************************************
-	//** TCommands<> interface
+	FWeaponCommands()
+		: TCommands<FWeaponCommands>(TEXT("WeaponPlugin"), NSLOCTEXT("Contexts", "WeaponPlugin", "WeaponPlugin Plugin"), NAME_None, FWeaponStyle::GetStyleSetName())
+	{
+	}
+
+	// TCommands<> interface
 	virtual void RegisterCommands() override;
-	//*****************************************************
 
-	void Startup();
-
-	TSharedPtr< FUICommandList > Command;
+public:
 	TSharedPtr< FUICommandInfo > PluginAction;
-
-private:
-	TSharedPtr< FExtender > Extender;
-
 };
-
