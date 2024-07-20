@@ -3,7 +3,7 @@
 #include "ProjectXZ/Weapon/XZDA_Weapon.h"
 
 const FName FXZWeaponAssetEditor::EditorName = "WeaponAssetEditor";
-const FName FXZWeaponAssetEditor::ListViewTabId = "ListView";
+const FName FXZWeaponAssetEditor::LeftAreaTabId = "LeftArea";
 const FName FXZWeaponAssetEditor::DetailTabId = "Details";
 
 TSharedPtr< FXZWeaponAssetEditor > FXZWeaponAssetEditor::Instance = nullptr;
@@ -56,7 +56,7 @@ void FXZWeaponAssetEditor::Open(FString InAssetName)
 				(
 					FTabManager::NewStack()
 					->SetSizeCoefficient(0.175f) // ¿ÞÂÊ 17.5% »ç¿ë
-					->AddTab(ListViewTabId, ETabState::OpenedTab)//ListViewTabId
+					->AddTab(LeftAreaTabId, ETabState::OpenedTab)//ListViewTabId
 					->SetHideTabWell(true)
 				)
 				->Split
@@ -79,11 +79,11 @@ void FXZWeaponAssetEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& In
 	FAssetEditorToolkit::RegisterTabSpawners(InTabManager);
 
 	FOnSpawnTab Tab;
-	Tab.BindSP(this, &FXZWeaponAssetEditor::Spawn_ListViewTab);
-	TabManager->RegisterTabSpawner(ListViewTabId, Tab);
+	Tab.BindSP(this, &FXZWeaponAssetEditor::Spawn_LeftAreaTab);
+	TabManager->RegisterTabSpawner(LeftAreaTabId, Tab);
 }
 
-TSharedRef<SDockTab> FXZWeaponAssetEditor::Spawn_ListViewTab(const FSpawnTabArgs& InArgs)
+TSharedRef<SDockTab> FXZWeaponAssetEditor::Spawn_LeftAreaTab(const FSpawnTabArgs& InArgs)
 {
 	return SNew(SDockTab)
 		[
