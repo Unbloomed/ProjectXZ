@@ -37,6 +37,9 @@ private:
 	FWeaponRowDataPtr Data;
 };
 
+// 이벤트 델리게이트. FWeaponRowDataPtr이 눌렸을때 호출.
+DECLARE_DELEGATE_OneParam(FWeaponListViewSelectedItemSignature, FWeaponRowDataPtr /* */) 
+
 /** Slate UI 창의 왼쪽 부분을 담당하는 클래스
  * 
  */
@@ -44,17 +47,26 @@ class WEAPONPLUGIN_API XZWeaponLeftArea : public SCompoundWidget
 {
 public:
 	SLATE_BEGIN_ARGS(XZWeaponLeftArea) {}
+	SLATE_EVENT(FWeaponListViewSelectedItemSignature, WeaponSelectedItem)
 	SLATE_END_ARGS()
 
 	void Construct(const FArguments& InArgs);
+	void SelectedDataAsset(UXZDA_Weapon* InDA_Weapon); // 선택한 XZDA_Weapon
 
 private:
 	TSharedRef<ITableRow> OnGenerateRow(FWeaponRowDataPtr InRow, const TSharedRef<STableViewBase>& InTable);
 
+	void ReadDataAssetList();
+	void OnTextChanged(const FText& InText);
+	void OnTextCommitted(const FText& InText, ETextCommit::Type InType);
+	void OnSelectedChanged(FWeaponRowDataPtr InDataPtr, ESelectInfo::Type InType);
 	FText OnGetAssetCount() const;
 
-	void ReadDataAssetList();
+	FWeaponListViewSelectedItemSignature WeaponListViewSelectedItemDelegate;
 
 	TArray<FWeaponRowDataPtr> RowDatas;
 	TSharedPtr<SListView<FWeaponRowDataPtr>> ListView;
+
+	TSharedPtr< SSearchBox > SearchBox;
+	FText SearchText; // 검색할 문자열을 관리할 변수
 };
