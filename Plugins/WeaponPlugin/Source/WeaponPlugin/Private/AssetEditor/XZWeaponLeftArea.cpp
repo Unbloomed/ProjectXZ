@@ -83,7 +83,7 @@ void XZWeaponLeftArea::SelectedDataAsset(UXZDA_Weapon* InDA_Weapon)
 
 	for (FWeaponRowDataPtr RowData : RowDatas)
 	{
-		if (RowData->Asset == InDA_Weapon)
+		if (RowData->DA_Weapon == InDA_Weapon)
 		{
 			ListView->SetSelection(RowData);
 			return;

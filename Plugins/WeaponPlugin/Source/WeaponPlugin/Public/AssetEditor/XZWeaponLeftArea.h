@@ -7,11 +7,11 @@ struct FWeaponRowData
 {
 	int Number;
 	FString Name;
-	class UXZDA_Weapon* Asset;
+	class UXZDA_Weapon* DA_Weapon;
 
 	FWeaponRowData() { }
 	FWeaponRowData(int32 InNumber, FString InName, class UXZDA_Weapon* InAsset)
-		: Number(InNumber), Name(InName), Asset(InAsset) {	}
+		: Number(InNumber), Name(InName), DA_Weapon(InAsset) {	}
 
 	static TSharedPtr<FWeaponRowData> Make(int32 InNumber, FString InName, class UXZDA_Weapon* InAsset)
 	{
@@ -52,6 +52,7 @@ public:
 
 	void Construct(const FArguments& InArgs);
 	void SelectedDataAsset(UXZDA_Weapon* InDA_Weapon); // º±≈√«— XZDA_Weapon
+	FWeaponRowDataPtr GetFirstDataPtr() { return RowDatas[0]; }
 
 private:
 	TSharedRef<ITableRow> OnGenerateRow(FWeaponRowDataPtr InRow, const TSharedRef<STableViewBase>& InTable);
