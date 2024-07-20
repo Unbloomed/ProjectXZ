@@ -33,8 +33,9 @@ public class WeaponPlugin : ModuleRules
 		
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
-			{
-				"Projects",
+            {
+                "ProjectXZ",
+                "Projects",
 				"InputCore",
 				"EditorFramework",
 				"UnrealEd",
@@ -44,9 +45,9 @@ public class WeaponPlugin : ModuleRules
 				"Slate",
 				"SlateCore",
 
-				"ProjectXZ",
 				"UnrealEd",
-				"EditorStyle"
+				"EditorStyle",
+				"InputCore"
 			}
 			);
 		

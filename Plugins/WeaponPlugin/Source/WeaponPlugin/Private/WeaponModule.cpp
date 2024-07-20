@@ -65,7 +65,6 @@ void FWeaponModule::ShutdownModule()
 void FWeaponModule::PluginButtonClicked()
 {
 	FXZWeaponAssetEditor::OpenWindow();
-	
 }
 
 // Toolbar에 등록

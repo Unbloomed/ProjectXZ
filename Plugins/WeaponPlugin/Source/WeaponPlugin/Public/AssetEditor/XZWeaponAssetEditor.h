@@ -2,9 +2,10 @@
 #include "CoreMinimal.h"
 #include "Toolkits/AssetEditorToolkit.h"
 
-/**
+/** Slate UI Å¬·¡½º
  * 
  */
+
 class WEAPONPLUGIN_API FXZWeaponAssetEditor : public FAssetEditorToolkit
 {
 
@@ -28,4 +29,6 @@ private:
 	static const FName EditorName;
 	static const FName ListViewTabId;
 	static const FName DetailTabId;
+
+	TSharedPtr< class XZWeaponLeftArea > LeftArea;
 };

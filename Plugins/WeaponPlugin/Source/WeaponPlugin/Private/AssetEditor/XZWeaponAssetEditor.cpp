@@ -1,4 +1,5 @@
 #include "AssetEditor/XZWeaponAssetEditor.h"
+#include "AssetEditor/XZWeaponLeftArea.h"
 #include "ProjectXZ/Weapon/XZDA_Weapon.h"
 
 const FName FXZWeaponAssetEditor::EditorName = "WeaponAssetEditor";
@@ -11,7 +12,7 @@ void FXZWeaponAssetEditor::OpenWindow(FString InAssetName)
 {
 	if (Instance.IsValid())
 	{
-		Instance->CloseWindow();
+		Instance->OnClose();
 
 		Instance.Reset();
 		Instance = nullptr;
@@ -25,7 +26,7 @@ void FXZWeaponAssetEditor::Shutdown()
 {
 	if (Instance.IsValid())
 	{
-		Instance->CloseWindow();
+		Instance->OnClose();
 
 		Instance.Reset();
 		Instance = nullptr;
@@ -34,38 +35,42 @@ void FXZWeaponAssetEditor::Shutdown()
 
 void FXZWeaponAssetEditor::Open(FString InAssetName)
 {
-	TSharedRef<FTabManager::FLayout> layout = FTabManager::NewLayout("WeaponAssetEditor_Layout")
+	LeftArea = SNew(XZWeaponLeftArea); // XZWeaponLeftArea에서 받은 자료형을 생성하여 넣어준다.
+
+	// Layout 설정
+	TSharedRef<FTabManager::FLayout> Layout = FTabManager::NewLayout("WeaponAssetEditor_Layout")
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
-			->Split
-			(
-				FTabManager::NewStack()
-				->SetSizeCoefficient(0.1f)
-				->AddTab(GetToolbarTabId(), ETabState::OpenedTab)
-			)
-			->Split
+			//->Split // 위
+			//(
+			//	FTabManager::NewStack()
+			//	->SetSizeCoefficient(0.1f) // 10% 사용
+			//	//->AddTab(GetToolbarTabId(), ETabState::OpenedTab) // depreciated
+			//	->AddTab(GetEditingAssetTypeName(), ETabState::OpenedTab)
+			//)
+			->Split // 아래
 			(
 				FTabManager::NewSplitter()->SetOrientation(Orient_Horizontal)
 				->Split
 				(
 					FTabManager::NewStack()
-					->SetSizeCoefficient(0.175f)
+					->SetSizeCoefficient(0.175f) // 왼쪽 17.5% 사용
 					->AddTab(ListViewTabId, ETabState::OpenedTab)//ListViewTabId
 					->SetHideTabWell(true)
 				)
 				->Split
 				(
 					FTabManager::NewStack()
-					->SetSizeCoefficient(0.725f)
+					->SetSizeCoefficient(0.725f) // 오른쪽 72.5% 사용
 					->AddTab(DetailTabId, ETabState::OpenedTab)//DetailTabId
 					->SetHideTabWell(true)
 				)
 			)
 		);
 
-	UXZDA_Weapon* asset = NewObject<UXZDA_Weapon>();
-	FAssetEditorToolkit::InitAssetEditor(EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), EditorName, layout, true, true, asset);
+	UXZDA_Weapon* XZDA_Weapon = NewObject<UXZDA_Weapon>();
+	FAssetEditorToolkit::InitAssetEditor(EToolkitMode::Standalone, TSharedPtr<IToolkitHost>(), EditorName, Layout, true, true, XZDA_Weapon);
 
 }
 
@@ -73,26 +78,17 @@ void FXZWeaponAssetEditor::RegisterTabSpawners(const TSharedRef<FTabManager>& In
 {
 	FAssetEditorToolkit::RegisterTabSpawners(InTabManager);
 
-	FOnSpawnTab tab;
-	tab.BindSP(this, &FXZWeaponAssetEditor::Spawn_ListViewTab);
-	TabManager->RegisterTabSpawner(ListViewTabId, tab);
+	FOnSpawnTab Tab;
+	Tab.BindSP(this, &FXZWeaponAssetEditor::Spawn_ListViewTab);
+	TabManager->RegisterTabSpawner(ListViewTabId, Tab);
 }
 
 TSharedRef<SDockTab> FXZWeaponAssetEditor::Spawn_ListViewTab(const FSpawnTabArgs& InArgs)
 {
-	TSharedPtr<SDockTab> tab = SNew(SDockTab)
+	return SNew(SDockTab)
 		[
-			SNew(SButton)
-				.OnClicked(this, &FXZWeaponAssetEditor::OnClicked)
-				[
-					SNew(STextBlock)
-						.Text(FText::FromString("Test"))
-				]
+			LeftArea.ToSharedRef()
 		];
-
-	return tab.ToSharedRef();
-
-	//return SNew(SDockTab);
 }
 
 FName FXZWeaponAssetEditor::GetToolkitFName() const
