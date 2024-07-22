@@ -22,11 +22,8 @@ public:
 
 	//********************************************************
 	// Enhanced Input
-	FGameplayTag InputTag_A;
-	FGameplayTag InputTag_W;
-	FGameplayTag InputTag_S;
-	FGameplayTag InputTag_D;
 	FGameplayTag InputTag_Move;
+	FGameplayTag InputTag_Look_Mouse;
 
 	FGameplayTag InputTag_Jump;
 	FGameplayTag InputTag_Crouch;

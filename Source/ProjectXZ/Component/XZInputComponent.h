@@ -1,5 +1,5 @@
 #pragma once
-//#include "CoreMinimal.h"
+#include "CoreMinimal.h"
 #include "EnhancedInputComponent.h"
 #include "ProjectXZ/Input/XZDA_InputConfig.h"
 #include "XZInputComponent.generated.h"

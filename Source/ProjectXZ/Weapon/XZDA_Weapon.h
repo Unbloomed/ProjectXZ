@@ -17,7 +17,9 @@ public:
 	void BeginPlay(class ACharacter* InOwner, class UCWeaponData** OutWeaponData);
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AActor> AttachmentClass;
 	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> EquipmentClass;
 };

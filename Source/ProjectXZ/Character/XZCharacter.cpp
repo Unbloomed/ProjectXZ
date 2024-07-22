@@ -39,19 +39,18 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	XZMoveComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
 	XZMoveComponent->bCanWalkOffLedgesWhenCrouching = true;
 	XZMoveComponent->SetCrouchedHalfHeight(65.0f);
-
+	
 	PawnExtComponent = CreateDefaultSubobject<UXZPawnExtensionComponent>(TEXT("PawnExtensionComponent"));
-
+	
 	// Camera
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	CameraSpringArm->SetupAttachment(GetMesh());//Mesh 아래 항목으로 붙인다.
-	CameraSpringArm->TargetArmLength = 600.0f;
+	CameraSpringArm->TargetArmLength = 400.0f;
 	CameraSpringArm->bUsePawnControlRotation = true;//true: 마우스를 움직일 때 controller를 따라 SpringArm를 회전시킬 수 있다
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraSpringArm);
 	FollowCamera->bUsePawnControlRotation = false;
-
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;

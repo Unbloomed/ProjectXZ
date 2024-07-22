@@ -46,6 +46,7 @@ void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* Playe
 	if (IsValid(XZInputComponent))
 	{
 		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
 		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
 	}
 }
@@ -60,17 +61,34 @@ void UXZPawnExtensionComponent::Input_Move(const FInputActionValue& InputActionV
 		const FVector2D Value = InputActionValue.Get<FVector2D>();
 		const FRotator MovementRotation(0.f, Controller->GetControlRotation().Yaw, 0.f);
 
-		if (Value.X != 0.f)
+		if (Value.X != 0.0f)
 		{
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::RightVector);
 			Pawn->AddMovementInput(MovementDirection, Value.X);
 		}
 
-		if (Value.Y != 0.f)
+		if (Value.Y != 0.0f)
 		{
 			const FVector MovementDirection = MovementRotation.RotateVector(FVector::ForwardVector);
 			Pawn->AddMovementInput(MovementDirection, Value.Y);
 		}
+	}
+}
+void UXZPawnExtensionComponent::Input_LookMouse(const FInputActionValue& InputActionValue)
+{
+	APawn* Pawn = GetPawn<APawn>();
+	if (false == IsValid(Pawn)) return;
+
+	const FVector2D Value = InputActionValue.Get<FVector2D>();
+
+	if (Value.X != 0.0f)
+	{
+		Pawn->AddControllerYawInput(Value.X);
+	}
+
+	if (Value.Y != 0.0f)
+	{
+		Pawn->AddControllerPitchInput(Value.Y);
 	}
 }
 

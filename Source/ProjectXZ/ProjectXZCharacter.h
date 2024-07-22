@@ -8,7 +8,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
-class UWeaponComponent;
+class UXZWeaponComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -40,7 +40,7 @@ protected:
 	void Look(const FInputActionValue& Value);
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UWeaponComponent> WeaponComponent;
+	TObjectPtr<UXZWeaponComponent> WeaponComponent;
 
 private:
 	/** Camera boom positioning the camera behind the character */

@@ -1,12 +1,13 @@
-#include "WeaponComponent.h"
+#include "XZWeaponComponent.h"
 #include "ProjectXZ/Character/XZCharacter.h"
 
-UWeaponComponent::UWeaponComponent()
+UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
 }
 
-TObjectPtr<AXZCharacter> UWeaponComponent::GetXZCharacter()
+TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
 {
 	if (IsValid(XZCharacter)) return XZCharacter;
 
@@ -14,11 +15,8 @@ TObjectPtr<AXZCharacter> UWeaponComponent::GetXZCharacter()
 	return XZCharacter;
 }
 
-void UWeaponComponent::BeginPlay()
+void UXZWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	
 }
-
