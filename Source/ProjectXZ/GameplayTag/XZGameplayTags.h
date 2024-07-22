@@ -26,15 +26,17 @@ public:
 	FGameplayTag InputTag_W;
 	FGameplayTag InputTag_S;
 	FGameplayTag InputTag_D;
-	FGameplayTag InputTag_LMB;
-	FGameplayTag InputTag_RMB;
-	FGameplayTag InputTag_Spacebar; // Jump
-	FGameplayTag InputTag_Ctrl;		// Crouch
+	FGameplayTag InputTag_Move;
+
+	FGameplayTag InputTag_Jump;
+	FGameplayTag InputTag_Crouch;
+	FGameplayTag InputTag_Weapon_Reload;
+	FGameplayTag InputTag_Weapon_Fire;
 
 	// Input ป๓ลย: Pressed, Held, Released
-	FGameplayTag BlockTag_InputPressed;
-	FGameplayTag BlockTag_InputHeld;
-	FGameplayTag BlockTag_InputReleased;
+	//FGameplayTag BlockTag_InputPressed;
+	//FGameplayTag BlockTag_InputHeld;
+	//FGameplayTag BlockTag_InputReleased;
 	//********************************************************
 
 private:

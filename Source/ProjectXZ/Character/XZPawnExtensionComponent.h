@@ -4,6 +4,10 @@
 #include "Components/PawnComponent.h"
 #include "XZPawnExtensionComponent.generated.h"
 
+struct FInputActionValue;
+class UXZDA_InputConfig;
+class UInputAction;
+class UInputMappingContext;
 /**
  * 
  */
@@ -20,9 +24,19 @@ public:
 	virtual void CheckDefaultInitialization() override;
 	//*****************************************************
 
-	void SetupPlayerInputComponent();
+	void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent);
 
 	/** Pawn data used to create the pawn. Specified from a spawn function or on a placed instance. */
 	//UPROPERTY(EditInstanceOnly, ReplicatedUsing = OnRep_PawnData, Category = "Lyra|Pawn")
 	//TObjectPtr<const ULyraPawnData> PawnData;
+
+private:
+	void Input_Move(const FInputActionValue& InputActionValue);
+	void Input_Crouch(const FInputActionValue& InputActionValue);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
+	TObjectPtr<UInputMappingContext> DefaultIMC;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
+	TObjectPtr<UXZDA_InputConfig> InputConfig;
 };

@@ -5,6 +5,7 @@
 
 class UXZPawnExtensionComponent;
 class UCameraComponent;
+class UXZWeaponComponent;
 
 UCLASS()
 class PROJECTXZ_API AXZCharacter : public ACharacter
@@ -16,7 +17,7 @@ public:
 	virtual void BeginPlay() override;
 
 protected:
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
@@ -24,4 +25,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> CameraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UXZWeaponComponent> WeaponComponent;
 };
