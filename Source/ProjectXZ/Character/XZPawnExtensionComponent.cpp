@@ -27,7 +27,6 @@ void UXZPawnExtensionComponent::CheckDefaultInitialization()
 	//ContinueInitStateChain(StateChain);
 }
 
-
 void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	check(PlayerInputComponent);

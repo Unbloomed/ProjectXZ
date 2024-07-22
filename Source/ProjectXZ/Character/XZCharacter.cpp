@@ -4,6 +4,7 @@
 #include "XZPawnExtensionComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "ProjectXZ/Component/XZInputComponent.h"
 
 AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
@@ -41,8 +42,16 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 
 	PawnExtComponent = CreateDefaultSubobject<UXZPawnExtensionComponent>(TEXT("PawnExtensionComponent"));
 
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
+	// Camera
+	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
+	CameraSpringArm->SetupAttachment(GetMesh());//Mesh 아래 항목으로 붙인다.
+	CameraSpringArm->TargetArmLength = 600.0f;
+	CameraSpringArm->bUsePawnControlRotation = true;//true: 마우스를 움직일 때 controller를 따라 SpringArm를 회전시킬 수 있다
+
+	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	FollowCamera->SetupAttachment(CameraSpringArm);
+	FollowCamera->bUsePawnControlRotation = false;
+
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -60,6 +69,6 @@ void AXZCharacter::BeginPlay()
 void AXZCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
+	
 	PawnExtComponent->SetupPlayerInputComponent(PlayerInputComponent);
 }
