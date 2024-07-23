@@ -20,11 +20,3 @@ void AXZAttachment::BeginPlay()
 	//}
 	
 }
-
-// Called every frame
-void AXZAttachment::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-

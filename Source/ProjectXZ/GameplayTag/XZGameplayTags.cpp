@@ -19,6 +19,11 @@ void FXZTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Move = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Move"), FString("이동 버튼 Input Tag"));
 	GameplayTags.InputTag_Look_Mouse = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Look.Mouse"), FString("마우스 Input Tag"));
 
+	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.1"), FString("1 Input Tag"));
+	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.2"), FString("2 Input Tag"));
+	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.3"), FString("3 Input Tag"));
+	GameplayTags.InputTag_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.4"), FString("4 Input Tag"));
+
 	GameplayTags.InputTag_Jump = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Jump"), FString("점프 Input Tag"));
 	GameplayTags.InputTag_Crouch = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Crouch"), FString("쪼그려 앉기 버튼 Input Tag"));
 	GameplayTags.InputTag_Weapon_Reload = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Weapon_Reload"), FString("재장전 버튼 Input Tag"));

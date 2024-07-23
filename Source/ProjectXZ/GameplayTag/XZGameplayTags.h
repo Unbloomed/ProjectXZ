@@ -11,6 +11,11 @@ public:
 	static const FXZTags& GetXZTags() { return GameplayTags; }
 	static void InitializeNativeGameplayTags(); // GameplayTags µî·Ï
 
+	// State
+	FGameplayTag State_UnEquipped;
+	FGameplayTag State_Equipped;
+
+
 	// Weapon
 	FGameplayTag Weapon_Projectile_Rifle;
 	FGameplayTag Weapon_Projectile_Pistol;
@@ -24,6 +29,11 @@ public:
 	// Enhanced Input
 	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_Look_Mouse;
+
+	FGameplayTag InputTag_1;
+	FGameplayTag InputTag_2;
+	FGameplayTag InputTag_3;
+	FGameplayTag InputTag_4;
 
 	FGameplayTag InputTag_Jump;
 	FGameplayTag InputTag_Crouch;
