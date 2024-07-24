@@ -107,6 +107,16 @@ void UXZPawnExtensionComponent::Input_Crouch(const FInputActionValue& InputActio
 	{
 		// TODO: Crouch 앉기 구현하기
 		//Character->ToggleCrouch();
+		if (Character->CanCrouch())
+		{
+			UE_LOG(LogTemp, Log, TEXT("Crouch"));
+			Character->Crouch();
+		}
+		else 
+		{
+			UE_LOG(LogTemp, Log, TEXT("UnCrouch"));
+			Character->UnCrouch();
+		}
 	}
 }
 
@@ -143,11 +153,9 @@ void UXZPawnExtensionComponent::Input_StopAiming(const FInputActionValue& InputA
 {
 	if (AXZCharacter* Character = GetPawn<AXZCharacter>())
 	{
-		UE_LOG(LogTemp, Log, TEXT("StopAiming"));
-
 		if (UXZWeaponComponent* WeaponComponent = Character->GetWeaponComponent())
 		{
-			
+			UE_LOG(LogTemp, Log, TEXT("StopAiming"));
 		}
 	}
 }
@@ -156,11 +164,9 @@ void UXZPawnExtensionComponent::Input_WeaponFire(const FInputActionValue& InputA
 {
 	if (AXZCharacter* Character = GetPawn<AXZCharacter>())
 	{
-		UE_LOG(LogTemp, Log, TEXT("WeaponFire"));
-
 		if (UXZWeaponComponent* WeaponComponent = Character->GetWeaponComponent())
 		{
-			
+			UE_LOG(LogTemp, Log, TEXT("WeaponFire"));
 		}
 	}
 }
@@ -169,11 +175,9 @@ void UXZPawnExtensionComponent::Input_WeaponReload(const FInputActionValue& Inpu
 {
 	if (AXZCharacter* Character = GetPawn<AXZCharacter>())
 	{
-		UE_LOG(LogTemp, Log, TEXT("WeaponReload"));
-
 		if (UXZWeaponComponent* WeaponComponent = Character->GetWeaponComponent())
 		{
-			
+			UE_LOG(LogTemp, Log, TEXT("WeaponReload"));
 		}
 	}
 }
