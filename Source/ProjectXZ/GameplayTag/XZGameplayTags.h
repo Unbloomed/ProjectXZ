@@ -1,15 +1,22 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h" // GameplayTag Å¸ÀÔ Á¤º¸
+#include "GameplayTagContainer.h" // GameplayTag Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
-/** native GamplayTags¸¦ °¡Áö´Â Singleton
- *  ÄÚµå·Î ¿¡µðÅÍ¿¡ TDGameplayTags µî·Ï
+/** native GamplayTagsï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Singleton
+ *  ï¿½Úµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ TDGameplayTags ï¿½ï¿½ï¿½
  */
 struct FXZTags
 {
 public:
 	static const FXZTags& GetXZTags() { return GameplayTags; }
-	static void InitializeNativeGameplayTags(); // GameplayTags µî·Ï
+	static void InitializeNativeGameplayTags(); // GameplayTags ï¿½ï¿½ï¿½
+
+	void RegisterTag(const FName& TagName);
+
+	// State
+	FGameplayTag State_UnEquipped;
+	FGameplayTag State_Equipped;
+
 
 	// Weapon
 	FGameplayTag Weapon_Projectile_Rifle;
@@ -30,7 +37,7 @@ public:
 	FGameplayTag InputTag_Weapon_Reload;
 	FGameplayTag InputTag_Weapon_Fire;
 
-	// Input »óÅÂ: Pressed, Held, Released
+	// Input ï¿½ï¿½ï¿½ï¿½: Pressed, Held, Released
 	//FGameplayTag BlockTag_InputPressed;
 	//FGameplayTag BlockTag_InputHeld;
 	//FGameplayTag BlockTag_InputReleased;

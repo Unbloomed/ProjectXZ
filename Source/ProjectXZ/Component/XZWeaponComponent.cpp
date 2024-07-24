@@ -4,7 +4,7 @@
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
+	
 }
 
 TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
