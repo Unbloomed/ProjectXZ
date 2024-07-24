@@ -2,6 +2,7 @@
 #include "ProjectXZ/Character/XZCharacter.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 #include "ProjectXZ/Weapon/XZDA_Weapon.h"
+#include "ProjectXZ/Weapon/XZEquipment.h"
 #include "ProjectXZ/Weapon/XZWeaponData.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
@@ -14,26 +15,57 @@ void UXZWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	FGameplayTag Temp = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
-
-	TObjectPtr<ACharacter> character;
-	TWeakObjectPtr<ACharacter> Xcharacter;
-
-	OwnerCharacter = Cast<ACharacter>(GetOwner());
-	for (UXZDA_Weapon* Weapon : Init_Weapons)
+	// 무기 목록
+	for (const TTuple<FGameplayTag, UXZDA_Weapon*>& Weapon : WeaponList)
 	{
-		// Weapon->CreateInstance(OwnerCharacter, &Datas[])
+		UXZWeaponData* Temp = NewObject<UXZWeaponData>(this);
+		Datas.Add(Weapon.Key, Temp);
 	}
 
+	// 시작 무기 생성
+	OwnerCharacter = Cast<ACharacter>(GetOwner());
+	for (const FGameplayTag& Tag : Init_WeaponTags)
+	{
+		WeaponList[Tag]->CreateInstance(OwnerCharacter, &Datas[Tag]);
+	}
 }
 
-void UXZWeaponComponent::EquipWeapon1()
+void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	// TODO: 1번 슬롯의 무기의 GameplayTag를 가져옴
-	FGameplayTag WeaponTag = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
+	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
 
-	if (Datas.Find(WeaponTag))
+	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
-		Datas[WeaponTag]->GetEquipment();
+		if (*FoundData)
+		{
+			(*FoundData)->GetEquipment()->Equip();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameplayTag is not found in Datas"));
+	}
+}
+
+void UXZWeaponComponent::Fire(const FGameplayTag& InTag)
+{
+	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	{
+		if (*FoundData)
+		{
+			// 
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GameplayTag is not found in Datas"));
 	}
 }

@@ -3,6 +3,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "XZCharacter.h"
 #include "ProjectXZ/Component/XZInputComponent.h"
+#include "ProjectXZ/Component/XZWeaponComponent.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 
 UXZPawnExtensionComponent::UXZPawnExtensionComponent(const FObjectInitializer& ObjectInitializer)
@@ -14,6 +15,14 @@ UXZPawnExtensionComponent::UXZPawnExtensionComponent(const FObjectInitializer& O
 	SetIsReplicatedByDefault(true);
 
 	//PawnData = nullptr;
+}
+
+TObjectPtr<AXZCharacter> UXZPawnExtensionComponent::GetXZCharacter()
+{
+	if (IsValid(XZCharacter)) return XZCharacter;
+
+	XZCharacter = GetPawn<AXZCharacter>();
+	return XZCharacter;
 }
 
 void UXZPawnExtensionComponent::CheckDefaultInitialization()
@@ -48,6 +57,11 @@ void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* Playe
 		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
 		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+
+		// Weapon
+		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_1, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot1);
+		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_2, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot2);
+		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Fire, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponFire);
 	}
 }
 
@@ -98,5 +112,35 @@ void UXZPawnExtensionComponent::Input_Crouch(const FInputActionValue& InputActio
 	{
 		// TODO: Crouch 앉기 구현하기
 		//Character->ToggleCrouch();
+	}
+}
+
+void UXZPawnExtensionComponent::Input_EquipSlot1(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Pistol;
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+	}
+}
+
+void UXZPawnExtensionComponent::Input_EquipSlot2(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+	}
+}
+
+void UXZPawnExtensionComponent::Input_WeaponFire(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
+		GetXZCharacter()->GetWeaponComponent()->Fire(Tag);
 	}
 }

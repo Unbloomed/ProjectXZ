@@ -8,7 +8,7 @@ void FXZTags::InitializeNativeGameplayTags()
 	// Weapon
 	GameplayTags.Weapon_Projectile_Rifle = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Projectile.Rifle")), FString("소총"));
 	GameplayTags.Weapon_Projectile_Pistol = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Projectile.Pistol")), FString("권총"));
-	GameplayTags.Weapon_Projectile_Rifle = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Projectile.SMG")), FString("서브머신건"));
+	GameplayTags.Weapon_Projectile_SMG = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Projectile.SMG")), FString("서브머신건"));
 	GameplayTags.Weapon_Hitscan_SnipperRifle = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Hitscan.SnipperRifle")), FString("저격총"));
 	GameplayTags.Weapon_Hitscan_Shotgun = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Hitscan.Shotgun")), FString("샷건"));
 	GameplayTags.Weapon_Melee_Dagger = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Melee.Dagger")), FString("단검"));

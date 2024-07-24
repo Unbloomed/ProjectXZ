@@ -12,6 +12,7 @@ void AXZAttachment::BeginPlay()
 
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 
+	
 	//TArray<USceneComponent*> Children;
 	//Root->GetChildrenComponents(true, Children);
 	//for (USceneComponent* child : Children)

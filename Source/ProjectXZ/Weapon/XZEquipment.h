@@ -1,7 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "WeaponLibrary.h"
-#include "UObject/NoExportTypes.h"
 #include "XZEquipment.generated.h"
 
 /**
@@ -13,13 +12,18 @@ class PROJECTXZ_API UXZEquipment : public UObject
 	GENERATED_BODY()
 
 public:
-	void Init(class ACharacter* InOwner, const FEquipmentData& InData);
+	void Init(class AXZAttachment* InWeapon, ACharacter* InOwner, const FEquipmentData& InData);
 
 	void Equip();
-
+	void Unequip();
+	void EquipChangeSocket();
+	void UnequipChangeSocket();
 
 private:
+	TObjectPtr<AXZAttachment> WeaponAttachment;
+
 	ACharacter* OwnerCharacter;
 	FEquipmentData EquipmentData;
 
+	bool bEquipped = false;
 };

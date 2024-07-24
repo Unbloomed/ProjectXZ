@@ -4,6 +4,7 @@
 #include "Components/PawnComponent.h"
 #include "XZPawnExtensionComponent.generated.h"
 
+class AXZCharacter;
 struct FInputActionValue;
 class UXZDA_InputConfig;
 class UInputAction;
@@ -20,6 +21,7 @@ class PROJECTXZ_API UXZPawnExtensionComponent : public UPawnComponent, public IG
 
 public:
 	UXZPawnExtensionComponent(const FObjectInitializer& ObjectInitializer);
+	TObjectPtr<AXZCharacter> GetXZCharacter();
 
 	//*****************************************************
 	//** IGameFrameworkInitStateInterface
@@ -37,9 +39,17 @@ private:
 	void Input_LookMouse(const FInputActionValue& InputActionValue);
 	void Input_Crouch(const FInputActionValue& InputActionValue);
 
+	void Input_EquipSlot1(const FInputActionValue& InputActionValue);
+	void Input_EquipSlot2(const FInputActionValue& InputActionValue);
+	void Input_WeaponFire(const FInputActionValue& InputActionValue);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UInputMappingContext> DefaultIMC;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UXZDA_InputConfig> InputConfig;
+
+
+	UPROPERTY()
+	TObjectPtr<AXZCharacter> XZCharacter;
 };

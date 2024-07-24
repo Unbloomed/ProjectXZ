@@ -13,9 +13,21 @@ struct FEquipmentData
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
-	UAnimMontage* Montage;
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* EquipMontage;
 
-	UPROPERTY(EditAnywhere)
-	float PlayRate = 1.0f;
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UAnimMontage> UnequipMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Equip_FrameTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float Unequip_FrameTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName HolsterSocketName;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName WeaponSocketName;
 };

@@ -28,7 +28,7 @@ void UXZDA_Weapon::CreateInstance(ACharacter* InOwner, UXZWeaponData** OutWeapon
 	if (IsValid(EquipmentClass))
 	{
 		XZEquipment = NewObject<UXZEquipment>(this, EquipmentClass);
-		XZEquipment->Init(InOwner, EquipmentData);
+		XZEquipment->Init(XZAttachment, InOwner, EquipmentData);
 		
 		//if (IsValid(attachment))//Attachment가 있다면
 		//{
