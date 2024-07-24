@@ -20,7 +20,7 @@ public:
 	AXZCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void BeginPlay() override;
 
-	UXZWeaponComponent* GetWeaponComponent() { return WeaponComponent; }
+	TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
 
 protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

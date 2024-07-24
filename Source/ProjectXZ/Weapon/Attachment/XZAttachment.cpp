@@ -12,6 +12,7 @@ void AXZAttachment::BeginPlay()
 
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 
+	
 	//TArray<USceneComponent*> Children;
 	//Root->GetChildrenComponents(true, Children);
 	//for (USceneComponent* child : Children)
@@ -20,11 +21,3 @@ void AXZAttachment::BeginPlay()
 	//}
 	
 }
-
-// Called every frame
-void AXZAttachment::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
