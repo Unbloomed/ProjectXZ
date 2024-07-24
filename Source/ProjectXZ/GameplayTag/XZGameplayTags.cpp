@@ -14,6 +14,10 @@ void FXZTags::InitializeNativeGameplayTags()
 	GameplayTags.Weapon_Melee_Dagger = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Melee.Dagger")), FString("단검"));
 	GameplayTags.Weapon_Melee_Axe = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("Weapon.Melee.Axe")), FString("단검"));
 
+	// State
+	GameplayTags.State_Unequipped = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("State.Unequipped")), FString("장착 해제"));
+	GameplayTags.State_Equipped = UGameplayTagsManager::Get().AddNativeGameplayTag(FName(TEXT("State.Equipped")), FString("장착"));
+
 	//************************************************************************************************
 	// Enhanced Input
 	GameplayTags.InputTag_Move = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Move"), FString("이동 버튼 Input Tag"));

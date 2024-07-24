@@ -11,17 +11,9 @@ public:
 	static const FXZTags& GetXZTags() { return GameplayTags; }
 	static void InitializeNativeGameplayTags(); // GameplayTags ���
 
-	void RegisterTag(const FName& TagName);
-
 	// State
-	FGameplayTag State_UnEquipped;
+	FGameplayTag State_Unequipped;
 	FGameplayTag State_Equipped;
-
-
-	// State
-	FGameplayTag State_UnEquipped;
-	FGameplayTag State_Equipped;
-
 
 	// Weapon
 	FGameplayTag Weapon_Projectile_Rifle;

@@ -54,14 +54,19 @@ void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* Playe
 
 	if (IsValid(XZInputComponent))
 	{
-		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
-		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
-		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
 
 		// Weapon
-		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_1, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot1);
-		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_2, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot2);
-		XZInputComponent->BindNativeActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Fire, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponFire);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_1, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot1);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_2, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot2);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Fire, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponFire);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Reload, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponReload);
+
+		// Jump
+		//XZInputComponent->BindPressReleaseActions(InputConfig, this, &ThisClass::Input_Jump, &ThisClass::Input_StopJumping);
 	}
 }
 
@@ -88,6 +93,24 @@ void UXZPawnExtensionComponent::Input_Move(const FInputActionValue& InputActionV
 		}
 	}
 }
+
+void UXZPawnExtensionComponent::Input_Jump(const FInputActionValue& InputActionValue)
+{
+	if (ACharacter* Character = GetPawn<ACharacter>())
+	{
+		Character->Jump();
+	}
+}
+
+void UXZPawnExtensionComponent::Input_StopJumping(const FInputActionValue& InputActionValue)
+{
+	if (ACharacter* Character = GetPawn<ACharacter>())
+	{
+		Character->StopJumping();
+	}
+}
+
+
 void UXZPawnExtensionComponent::Input_LookMouse(const FInputActionValue& InputActionValue)
 {
 	APawn* Pawn = GetPawn<APawn>();
@@ -110,8 +133,14 @@ void UXZPawnExtensionComponent::Input_Crouch(const FInputActionValue& InputActio
 {
 	if (AXZCharacter* Character = GetPawn<AXZCharacter>())
 	{
-		// TODO: Crouch 앉기 구현하기
-		//Character->ToggleCrouch();
+		if (Character->CanCrouch())
+		{
+			Character->Crouch();
+		}
+		else
+		{
+			Character->UnCrouch();
+		}
 	}
 }
 
@@ -132,6 +161,32 @@ void UXZPawnExtensionComponent::Input_EquipSlot2(const FInputActionValue& InputA
 		// TODO : 현재 Tag 하드코딩한거 로직짜기
 		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
 		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+	}
+}
+
+void UXZPawnExtensionComponent::Input_WeaponReload(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Weapon Reload"));
+		
+	}
+}
+
+void UXZPawnExtensionComponent::Input_Aim(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Weapon Aim"));
+	}
+}
+
+void UXZPawnExtensionComponent::Input_StopAiming(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Stop Aiming"));
+		
 	}
 }
 

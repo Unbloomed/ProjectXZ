@@ -16,6 +16,7 @@ class PROJECTXZ_API UXZWeaponComponent : public UActorComponent
 public:	
 	UXZWeaponComponent();
 
+	// ¸í·É
 	void EquipWeapon(const FGameplayTag& InTag);
 	void Fire(const FGameplayTag& InTag);
 
