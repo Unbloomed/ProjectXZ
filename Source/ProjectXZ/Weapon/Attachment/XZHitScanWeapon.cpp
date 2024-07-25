@@ -1,0 +1,2 @@
+#include "XZHitScanWeapon.h"
+

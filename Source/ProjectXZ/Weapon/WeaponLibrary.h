@@ -7,6 +7,7 @@
  * 
  */
 
+class AXZProjectile;
 USTRUCT()
 struct FEquipmentData
 {
@@ -30,4 +31,23 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FName WeaponSocketName;
+};
+
+USTRUCT()
+struct FActionData 
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	UAnimMontage* ActionMontage; // 전투 몽타주(발사, 단검 공격 등)
+
+	UPROPERTY(EditDefaultsOnly)
+	float Action_FrameTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName MuzzleSocketName = TEXT("MuzzleFlash");
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AXZProjectile> ProjectileClass;
 };

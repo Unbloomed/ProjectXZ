@@ -30,7 +30,7 @@ void UXZEquipment::Equip()
 
 		FTimerHandle EquipTimerHandle;
 		FTimerDelegate EquipTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::EquipChangeSocket);
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, 1.0f, false);
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, EquipmentData.Equip_FrameTime, false);
 
 		bEquipped = true;
 	}
@@ -44,7 +44,7 @@ void UXZEquipment::Unequip()
 
 		FTimerHandle UnequipTimerHandle;
 		FTimerDelegate UnequipTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::UnequipChangeSocket);
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UnequipTimerHandle, UnequipTimerDelegate, 1.0f, false);
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UnequipTimerHandle, UnequipTimerDelegate, EquipmentData.Unequip_FrameTime, false);
 
 		bEquipped = false;
 	}

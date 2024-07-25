@@ -1,14 +1,33 @@
 #include "XZWeaponComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "ProjectXZ/Character/XZCharacter.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 #include "ProjectXZ/Weapon/XZDA_Weapon.h"
 #include "ProjectXZ/Weapon/XZEquipment.h"
 #include "ProjectXZ/Weapon/XZWeaponData.h"
+#include "ProjectXZ/Weapon/Combat/XZCombat.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	
+}
+
+void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FHitResult HitResult;
+	TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
+	HitTarget = HitResult.ImpactPoint;
+}
+
+TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
+{
+	if (IsValid(OwnerCharacter)) return OwnerCharacter;
+
+	OwnerCharacter = Cast<AXZCharacter>(GetOwner());
+	return OwnerCharacter;
 }
 
 void UXZWeaponComponent::BeginPlay()
@@ -23,10 +42,55 @@ void UXZWeaponComponent::BeginPlay()
 	}
 
 	// 시작 무기 생성
-	OwnerCharacter = Cast<ACharacter>(GetOwner());
 	for (const FGameplayTag& Tag : Init_WeaponTags)
 	{
-		WeaponList[Tag]->CreateInstance(OwnerCharacter, &Datas[Tag]);
+		WeaponList[Tag]->CreateInstance(GetXZCharacter(), &Datas[Tag]);
+	}
+}
+
+void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f); //화면 중앙
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	); // DeprojectScreenToWorld 성공하면 true, 실패하면 false
+
+	if (bScreenToWorld)
+	{
+		FVector Start = CrosshairWorldPosition;
+
+		if (GetXZCharacter())
+		{
+			float DistanceToCharacter = (GetXZCharacter()->GetActorLocation() - Start).Size();
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.0f);
+			DrawDebugSphere(GetWorld(), Start, 16.0f, 12, FColor::Red, false); // 디버깅용
+		}
+
+		FVector End = Start + CrosshairWorldDirection * 80000.0f; // TRACE_LENGTH 80000.0f
+
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility
+		);
+
+		if (TraceHitResult.bBlockingHit == false) // 하늘 같이 충돌할게 없는곳에 쏘는 경우
+		{
+			TraceHitResult.ImpactPoint = End; // 충돌하는게 없다면 End 값을 ImpactPoint값으로 설정.
+		}
+		
 	}
 }
 
@@ -57,7 +121,7 @@ void UXZWeaponComponent::Fire(const FGameplayTag& InTag)
 	{
 		if (*FoundData)
 		{
-			// 
+			(*FoundData)->GetCombat()->FireAction(HitTarget);
 		}
 		else
 		{

@@ -15,6 +15,8 @@ class PROJECTXZ_API UXZWeaponComponent : public UActorComponent
 
 public:	
 	UXZWeaponComponent();
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	TObjectPtr<AXZCharacter> GetXZCharacter();
 
 	// 명령
 	void EquipWeapon(const FGameplayTag& InTag);
@@ -25,6 +27,8 @@ protected:
 
 
 private:
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon Data", meta = (AllowPrivateAccess = true))
 	TMap<FGameplayTag, UXZDA_Weapon*> WeaponList; // 무기 목록
 
@@ -36,6 +40,7 @@ private:
 	TMap<FGameplayTag, UXZWeaponData*> Datas; // 무기 목록
 
 
-	TObjectPtr<ACharacter> OwnerCharacter;
+	TObjectPtr<AXZCharacter> OwnerCharacter;
 
+	FVector HitTarget; // 총알이 발사되서 충돌하게 될 지점
 };
