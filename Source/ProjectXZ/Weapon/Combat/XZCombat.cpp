@@ -36,22 +36,31 @@ void UXZCombat::FireAction(const FVector& HitTarget)
 
 void UXZCombat::OnFireBullet()
 {
-	// TODO: SpawnActor Bullet from Nozzle
+	// 무기 Nozzle에서 총알 발사
 
-	if (IsValid(XZAttachment) && IsValid(XZAttachment->GetWeaponMesh()))
-	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(ActionDatas[Idx].MuzzleSocketName);
-		if (MuzzleFlashSocket)
-		{
-			FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
-			FRotator TargetRotation = (HitTargetLocation - SocketTransform.GetLocation()).Rotation();
+    if (IsValid(XZAttachment) && IsValid(XZAttachment->GetWeaponMesh()))
+    {
+        const USkeletalMeshSocket* MuzzleFlashSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(ActionDatas[Idx].MuzzleSocketName);
+        if (MuzzleFlashSocket)
+        {
+            FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
+            FRotator TargetRotation = (HitTargetLocation - SocketTransform.GetLocation()).Rotation();
 
-			FActorSpawnParameters SpawnParams;
-			SpawnParams.Owner = XZAttachment->GetOwner();
-			SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
+            if (IsValid(OwnerCharacter) && IsValid(OwnerCharacter->GetWorld()) && IsValid(ActionDatas[Idx].ProjectileClass))
+            {
+                UE_LOG(LogTemp, Warning, TEXT("Spawning projectile at location: %s with rotation: %s"), *SocketTransform.GetLocation().ToString(), *TargetRotation.ToString());
 
-			SpawnedProjectile = GetWorld()->SpawnActor<AXZProjectile>(ActionDatas[Idx].ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
-			SpawnedProjectile->SetActorEnableCollision(false);
-		}
-	}
+                FActorSpawnParameters SpawnParams;
+                SpawnParams.Owner = XZAttachment->GetOwner();
+                SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
+                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+                SpawnedProjectile = OwnerCharacter->GetWorld()->SpawnActor<AXZProjectile>(ActionDatas[Idx].ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
+                if (IsValid(SpawnedProjectile))
+                {
+                    UE_LOG(LogTemp, Warning, TEXT("Projectile spawned successfully"));
+                }
+            }
+        }
+    }
 }

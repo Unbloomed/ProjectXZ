@@ -18,7 +18,6 @@ public:
 
 private:
 	void OnFireBullet();
-	//void OnFireBullet(const FVector& HitTarget);
 
 	TObjectPtr<AXZAttachment> XZAttachment;
 	ACharacter* OwnerCharacter;
