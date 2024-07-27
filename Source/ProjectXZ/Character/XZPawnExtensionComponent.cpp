@@ -54,19 +54,19 @@ void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* Playe
 
 	if (IsValid(XZInputComponent))
 	{
+		// Pressed Only
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
-		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Jump, ETriggerEvent::Triggered, this, &ThisClass::Input_Jump);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
-
-		// Weapon
+		
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_1, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot1);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_2, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot2);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Fire, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponFire);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Reload, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponReload);
 
-		// Jump
+		// Pressed & Released
 		//XZInputComponent->BindPressReleaseActions(InputConfig, this, &ThisClass::Input_Jump, &ThisClass::Input_StopJumping);
+		XZInputComponent->BindPressReleaseActions(InputConfig, this, &ThisClass::Input_Aim, &ThisClass::Input_StopAiming);
 	}
 }
 
@@ -94,7 +94,7 @@ void UXZPawnExtensionComponent::Input_Move(const FInputActionValue& InputActionV
 	}
 }
 
-void UXZPawnExtensionComponent::Input_Jump(const FInputActionValue& InputActionValue)
+void UXZPawnExtensionComponent::Input_Jump(FGameplayTag InputTag)
 {
 	if (ACharacter* Character = GetPawn<ACharacter>())
 	{
@@ -102,7 +102,7 @@ void UXZPawnExtensionComponent::Input_Jump(const FInputActionValue& InputActionV
 	}
 }
 
-void UXZPawnExtensionComponent::Input_StopJumping(const FInputActionValue& InputActionValue)
+void UXZPawnExtensionComponent::Input_StopJumping(FGameplayTag InputTag)
 {
 	if (ACharacter* Character = GetPawn<ACharacter>())
 	{
@@ -169,24 +169,24 @@ void UXZPawnExtensionComponent::Input_WeaponReload(const FInputActionValue& Inpu
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
 		UE_LOG(LogTemp, Log, TEXT("Weapon Reload"));
-		
 	}
 }
 
-void UXZPawnExtensionComponent::Input_Aim(const FInputActionValue& InputActionValue)
+void UXZPawnExtensionComponent::Input_Aim(FGameplayTag InputTag)
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Weapon Aim"));
+		UE_LOG(LogTemp, Log, TEXT("Aim"));
+		GetXZCharacter()->GetWeaponComponent()->Aiming(true);
 	}
 }
 
-void UXZPawnExtensionComponent::Input_StopAiming(const FInputActionValue& InputActionValue)
+void UXZPawnExtensionComponent::Input_StopAiming(FGameplayTag InputTag)
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
 		UE_LOG(LogTemp, Log, TEXT("Stop Aiming"));
-		
+		GetXZCharacter()->GetWeaponComponent()->Aiming(false);
 	}
 }
 

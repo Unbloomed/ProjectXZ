@@ -35,10 +35,12 @@ public:
 	FGameplayTag InputTag_4;
 
 	FGameplayTag InputTag_Jump;
+	FGameplayTag InputTag_StopJumping;
 	FGameplayTag InputTag_Crouch;
 	FGameplayTag InputTag_Weapon_Reload;
 	FGameplayTag InputTag_Weapon_Fire; 
 	FGameplayTag InputTag_Weapon_Aim; 
+	FGameplayTag InputTag_Weapon_StopAiming; 
 
 	// Input ����: Pressed, Held, Released
 	//FGameplayTag BlockTag_InputPressed;
