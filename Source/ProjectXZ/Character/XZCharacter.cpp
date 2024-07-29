@@ -40,6 +40,7 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	XZMoveComponent->GetNavAgentPropertiesRef().bCanCrouch = true;
 	XZMoveComponent->bCanWalkOffLedgesWhenCrouching = true;
 	XZMoveComponent->SetCrouchedHalfHeight(65.0f);
+	XZMoveComponent->NavAgentProps.bCanCrouch = true;
 	
 	PawnExtComponent = CreateDefaultSubobject<UXZPawnExtensionComponent>(TEXT("PawnExtensionComponent"));
 	

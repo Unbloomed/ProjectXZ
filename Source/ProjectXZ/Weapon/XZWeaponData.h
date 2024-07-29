@@ -3,6 +3,7 @@
 #include "UObject/NoExportTypes.h"
 #include "XZWeaponData.generated.h"
 
+class UXZCombat;
 class AXZAttachment;
 class UXZEquipment;
 
@@ -20,6 +21,7 @@ private:
 
 public:
 	FORCEINLINE UXZEquipment* GetEquipment() { return Equipment; }
+	FORCEINLINE UXZCombat* GetCombat() { return Combat; }
 
 private:
 	UPROPERTY()
@@ -27,6 +29,9 @@ private:
 
 	UPROPERTY()
 	UXZEquipment* Equipment;
+
+	UPROPERTY()
+	UXZCombat* Combat;
 };
 
 /*  부연설명

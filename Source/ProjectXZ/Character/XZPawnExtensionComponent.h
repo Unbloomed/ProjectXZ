@@ -36,8 +36,6 @@ public:
 
 private:
 	void Input_Move(const FInputActionValue& InputActionValue);
-	void Input_Jump(const FInputActionValue& InputActionValue);
-	void Input_StopJumping(const FInputActionValue& InputActionValue);
 	void Input_LookMouse(const FInputActionValue& InputActionValue);
 	void Input_Crouch(const FInputActionValue& InputActionValue);
 
@@ -47,8 +45,10 @@ private:
 	void Input_WeaponFire(const FInputActionValue& InputActionValue);
 	void Input_WeaponReload(const FInputActionValue& InputActionValue);
 
-	void Input_Aim(const FInputActionValue& InputActionValue);
-	void Input_StopAiming(const FInputActionValue& InputActionValue);
+	void Input_Jump(FGameplayTag InputTag);
+	void Input_StopJumping(FGameplayTag InputTag);
+	void Input_Aim(FGameplayTag InputTag);
+	void Input_StopAiming(FGameplayTag InputTag);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UInputMappingContext> DefaultIMC;
