@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
 #include "XZAnimInstance.generated.h"
 
@@ -33,4 +34,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character State Data")
 	float GroundDistance = -1.0f;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Weapon Type Tag")
+	TMap<FGameplayTag, int> WeaponTypeTag;
 };

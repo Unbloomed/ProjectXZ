@@ -44,10 +44,72 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	float Action_FrameTime = 0.0f;
-
+	
 	UPROPERTY(EditDefaultsOnly)
 	FName MuzzleSocketName = TEXT("MuzzleFlash");
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AXZProjectile> ProjectileClass;
+};
+
+USTRUCT()
+struct FBulletData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UAnimMontage> ReloadMontage;
+
+	UPROPERTY(EditDefaultsOnly)
+	float RemoveMagazine_FrameTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float AttachMagazine_FrameTime = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName MagazineSocketName = TEXT("MagazineSocket");
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AXZProjectile> ProjectileClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> CasingClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> MagazineClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	uint32 Ammo = 10; // 현재 발사할 수 있는 총알 수
+
+	UPROPERTY(EditDefaultsOnly)
+	uint32 MagCapacity = 10; // 한 탄창에 담을 수 있는 최대 총알 수
+
+	UPROPERTY(EditDefaultsOnly)
+	uint32 TotalAmmo = 30; // (현재 발사 가능한 총알을 제외한) 전체 총알 수
+
+	UPROPERTY(EditDefaultsOnly)
+	float Damage = 10.0f;
+};
+
+USTRUCT()
+struct FProjectileData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	float InitialSpeed = 15000.0f; // ProjectileBullet(=총알) 속도
+
+	UPROPERTY(EditDefaultsOnly)
+	float GravityScale = 0.0f;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UParticleSystem> ImpactBlood; // 충돌 후 피 튀김
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UParticleSystem> ImpactParticles; // 충돌 후 파티클
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USoundBase> ImpactSound;  // 충돌 후 사운드
 };

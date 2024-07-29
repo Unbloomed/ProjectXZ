@@ -4,37 +4,31 @@
 #include "ProjectXZ/Weapon/Attachment/XZAttachment.h"
 #include "ProjectXZ/Weapon/Projectile/XZProjectile.h"
 
-void UXZCombat::Init(AXZAttachment* InAttachment, ACharacter* InOwner, const TArray<FActionData>& InActionDatas)
+void UXZCombat::Init(AXZAttachment* InAttachment, ACharacter* InOwner, const TArray<FActionData>& InActionDatas, const FBulletData& InBulletData)
 {
 	XZAttachment = InAttachment;
 	OwnerCharacter = InOwner;
 	ActionDatas = InActionDatas;
+    BulletData = InBulletData;
 }
 
 void UXZCombat::FireAction(const FVector& HitTarget)
 {
-	// 지역변수가 남아오는거여서
-
-	// 캡처 [ ] 에서 전달되면 될지도? <- 캡처의 대상은 주소값이 아니여야 한다. this 사용 시 주의해야 한다. 
-	// 람다 사용해보자 (캡처된게 유효한지! 확인하기!)
-
-	HitTargetLocation = HitTarget;
-
 	if (IsValid(ActionDatas[Idx].ActionMontage))
 	{
 		OwnerCharacter->PlayAnimMontage(ActionDatas[Idx].ActionMontage);
 
 		FTimerHandle FireTimerHandle;
-		FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnFireBullet);
 		//FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnFireBullet, HitTarget);
-		//FTimerDelegate FireTimerDelegate;
-		//FireTimerDelegate.BindUFunction(this, FName("OnFireBullet"), HitTarget);
-		//FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([HitTarget]() { OnFireBullet(HitTarget); });
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FireTimerDelegate, ActionDatas[Idx].Action_FrameTime, false);
-	}
+        FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, HitTarget]()
+            {
+                this->OnFireBullet(HitTarget);
+            });
+        OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FireTimerDelegate, ActionDatas[Idx].Action_FrameTime, false);
+    }
 }
 
-void UXZCombat::OnFireBullet()
+void UXZCombat::OnFireBullet(const FVector& HitTargetLocation)
 {
 	// 무기 Nozzle에서 총알 발사
 
@@ -63,4 +57,59 @@ void UXZCombat::OnFireBullet()
             }
         }
     }
+}
+
+void UXZCombat::ReloadAction()
+{
+    if (IsValid(BulletData.ReloadMontage))
+    {
+        OwnerCharacter->PlayAnimMontage(BulletData.ReloadMontage);
+
+        FTimerHandle ReloadTimerHandle;
+        FTimerDelegate ReloadTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnRemoveMagazine);
+        OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, ReloadTimerDelegate, BulletData.RemoveMagazine_FrameTime, false);
+
+        FTimerHandle ReloadTimerHandle2;
+        FTimerDelegate ReloadTimerDelegate2 = FTimerDelegate::CreateUObject(this, &ThisClass::OnAttachNewMagazine);
+        OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle2, ReloadTimerDelegate2, BulletData.AttachMagazine_FrameTime, false);
+    }
+}
+
+void UXZCombat::OnRemoveMagazine()
+{
+
+    if (IsValid(XZAttachment) && IsValid(XZAttachment->GetWeaponMesh()))
+    {
+        const USkeletalMeshSocket* MagazineSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(BulletData.MagazineSocketName);
+        if (MagazineSocket)
+        {
+            FTransform SocketTransform = MagazineSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
+            FRotator TargetRotation = XZAttachment->GetWeaponMesh()->GetRelativeLocation().Rotation();
+
+            if (IsValid(OwnerCharacter) && IsValid(OwnerCharacter->GetWorld()) && IsValid(BulletData.MagazineClass))
+            {
+                FActorSpawnParameters SpawnParams;
+                SpawnParams.Owner = XZAttachment->GetOwner();
+                SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
+                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+                // 탄창 스폰
+                //SpawnedMagazine = OwnerCharacter->GetWorld()->SpawnActor<AActor>(BulletData.MagazineClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
+                // SpawnedMagazine->AttachToComponent(OwnerCharacter, ); // 왼손에 부착
+                //SpawnedMagazine->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+                // TODO: SpawnedMagazine 중력 적용
+
+                //FTimerHandle DroppedMagazineTimerHandle;
+                //FTimerDelegate  DroppedMagazineTimerDelegate = FTimerDelegate::CreateLambda([this]()
+                //    {
+                //        this->BeginDestroy();
+                //    });
+                //SpawnedMagazine->GetWorld()->GetTimerManager().SetTimer(DroppedMagazineTimerHandle, DroppedMagazineTimerDelegate, 3.0f, false);
+            }
+        }
+    }
+}
+
+void UXZCombat::OnAttachNewMagazine()
+{
 }

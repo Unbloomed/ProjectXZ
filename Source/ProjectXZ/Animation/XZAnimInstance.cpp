@@ -6,6 +6,8 @@
 #include "Misc/DataValidation.h"
 #endif
 
+#include "ProjectXZ/GameplayTag/XZGameplayTags.h"
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(XZAnimInstance)
 
 
@@ -36,7 +38,9 @@ EDataValidationResult UXZAnimInstance::IsDataValid(FDataValidationContext& Conte
 void UXZAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
-	
+
+	WeaponTypeTag.Add(FXZTags::GetXZTags().Weapon_Projectile_Pistol, 0);
+	WeaponTypeTag.Add(FXZTags::GetXZTags().Weapon_Projectile_Rifle, 1);
 }
 
 void UXZAnimInstance::NativeUpdateAnimation(float DeltaSeconds)

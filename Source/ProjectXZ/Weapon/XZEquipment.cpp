@@ -15,13 +15,13 @@ void UXZEquipment::Init(AXZAttachment* InWeapon, ACharacter* InOwner, const FEqu
 	}
 }
 
-void UXZEquipment::Equip()
+bool UXZEquipment::Equip()
 {
 	// TODO: 임시. Unequip 로직 고도화하기
-	if(bEquipped)
+	if (bEquipped)
 	{
 		Unequip();
-		return;
+		return false;
 	}
 
 	if (IsValid(EquipmentData.EquipMontage))
@@ -33,7 +33,11 @@ void UXZEquipment::Equip()
 		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, EquipmentData.Equip_FrameTime, false);
 
 		bEquipped = true;
+
+		return true;
 	}
+
+	return false;
 }
 
 void UXZEquipment::Unequip()

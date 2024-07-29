@@ -40,5 +40,7 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UXZCombat> CombatClass;
 	UPROPERTY(EditAnywhere)
-	TArray<FActionData> CombatData;
+	TArray<FActionData> ActionData;
+	UPROPERTY(EditAnywhere)
+	FBulletData BulletData;
 };

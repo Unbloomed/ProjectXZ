@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Sound/SoundBase.h"
 
 AXZProjectile::AXZProjectile()
 {
@@ -32,6 +33,10 @@ AXZProjectile::AXZProjectile()
 void AXZProjectile::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ProjectileMovementComponent->InitialSpeed = ProjectileData.InitialSpeed;
+	ProjectileMovementComponent->MaxSpeed = ProjectileData.InitialSpeed;
+	ProjectileMovementComponent->ProjectileGravityScale = ProjectileData.GravityScale;
 
 	if (HasAuthority())
 	{
@@ -63,7 +68,7 @@ void AXZProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPri
 		}
 		if (ProjectileData.ImpactSound)
 		{
-			//UGameplayStatics::PlaySoundAtLocation(this, ProjectileData.ImpactSound, GetActorLocation());
+			UGameplayStatics::PlaySoundAtLocation(this, ProjectileData.ImpactSound, GetActorLocation());
 		}
 	}
 

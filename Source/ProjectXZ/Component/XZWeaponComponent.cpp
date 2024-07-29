@@ -1,7 +1,12 @@
 #include "XZWeaponComponent.h"
+#include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 #include "ProjectXZ/Character/XZCharacter.h"
+#include "ProjectXZ/Character/XZPlayerController.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
+#include "ProjectXZ/HUD/XZHUD.h"
 #include "ProjectXZ/Weapon/XZDA_Weapon.h"
 #include "ProjectXZ/Weapon/XZEquipment.h"
 #include "ProjectXZ/Weapon/XZWeaponData.h"
@@ -13,6 +18,13 @@ UXZWeaponComponent::UXZWeaponComponent()
 	
 }
 
+void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ThisClass, bIsAiming);
+}
+
 void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -20,6 +32,9 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	FHitResult HitResult;
 	TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
 	HitTarget = HitResult.ImpactPoint;
+
+	SetHUDCrosshairs(DeltaTime);
+	InterpFOV(DeltaTime);
 }
 
 TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
@@ -28,6 +43,22 @@ TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
 
 	OwnerCharacter = Cast<AXZCharacter>(GetOwner());
 	return OwnerCharacter;
+}
+
+TObjectPtr<AXZPlayerController> UXZWeaponComponent::GetXZPlayerController()
+{
+	if (IsValid(XZPlayerController)) return XZPlayerController;
+
+	XZPlayerController = Cast<AXZPlayerController>(GetXZCharacter()->GetController());
+	return XZPlayerController;
+}
+
+TObjectPtr<AXZHUD> UXZWeaponComponent::GetXZHUD()
+{
+	if (XZHUD) return XZHUD;
+
+	XZHUD = Cast<AXZHUD>(GetXZPlayerController()->GetHUD());
+	return XZHUD;
 }
 
 void UXZWeaponComponent::BeginPlay()
@@ -56,7 +87,7 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
 
-	FVector2D CrosshairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f); //화면 중앙
+	FVector2D CrosshairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f); // 화면 중앙
 	FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
 	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
@@ -74,17 +105,12 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			float DistanceToCharacter = (GetXZCharacter()->GetActorLocation() - Start).Size();
 			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.0f);
-			DrawDebugSphere(GetWorld(), Start, 16.0f, 12, FColor::Red, false); // 디버깅용
+			DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // 디버깅용
 		}
 
 		FVector End = Start + CrosshairWorldDirection * 80000.0f; // TRACE_LENGTH 80000.0f
 
-		GetWorld()->LineTraceSingleByChannel(
-			TraceHitResult,
-			Start,
-			End,
-			ECollisionChannel::ECC_Visibility
-		);
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult, 	Start, End, ECollisionChannel::ECC_Visibility);
 
 		if (TraceHitResult.bBlockingHit == false) // 하늘 같이 충돌할게 없는곳에 쏘는 경우
 		{
@@ -102,7 +128,49 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 	{
 		if (*FoundData)
 		{
-			(*FoundData)->GetEquipment()->Equip();
+			if (Datas[InTag]->GetEquipment()->Equip()) // 무기장착 O
+			{
+				EquippedWeaponTag = InTag;
+			}
+			else // 무기장착 X (= Unequip 수행한 경우)
+			{
+				EquippedWeaponTag = FXZTags::GetXZTags().Fist;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Weapon is not found. Check UXZWeaponComponent::EquipWeapon"));
+	}
+}
+
+void UXZWeaponComponent::Fire()
+{
+	FGameplayTag InTag = EquippedWeaponTag;
+
+	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	{
+		if (*FoundData)
+		{
+			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+			{
+				Reload(InTag); // 재장전
+				return;
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("Fire!"));
+			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
+			Datas[InTag]->GetCombat()->FireAction(HitTarget);
+			Datas[InTag]->GetCombat()->ConsumeAmmo();
+
+			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+			{
+				Reload(InTag); // 재장전
+			}
 		}
 		else
 		{
@@ -115,13 +183,28 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 	}
 }
 
-void UXZWeaponComponent::Fire(const FGameplayTag& InTag)
+void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 {
+	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) return; // 총알 없는 경우 return
+
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
 		{
-			(*FoundData)->GetCombat()->FireAction(HitTarget);
+			Datas[InTag]->GetCombat()->ReloadAction();
+
+			// 총알 채우기
+			if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo >= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity)
+			{
+				Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().MagCapacity;
+				Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo -= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity;
+			}
+			else
+			{
+				Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo;
+				Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo = 0;
+			}
+
 		}
 		else
 		{
@@ -131,5 +214,56 @@ void UXZWeaponComponent::Fire(const FGameplayTag& InTag)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GameplayTag is not found in Datas"));
+	}
+}
+
+void UXZWeaponComponent::StartAiming()
+{
+	if (false == IsValid(GetXZCharacter())) return;
+
+	GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
+	bIsAiming = true;
+}
+
+void UXZWeaponComponent::EndAiming()
+{
+	if (false == IsValid(GetXZCharacter())) return;
+
+	GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	bIsAiming = false;
+}
+
+void UXZWeaponComponent::InterpFOV(float InDeltaTime)
+{
+	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return; // 무기 장착 중이 아니라면 return
+
+	if (bIsAiming)
+	{
+		//UE_LOG(LogTemp, Log, TEXT("InterpFOV: Aim"));
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, ZoomedFOV, InDeltaTime, 20.0f);
+	}
+	else
+	{
+		//UE_LOG(LogTemp, Log, TEXT("InterpFOV: StopAiming"));
+		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, InDeltaTime, 20.0f);
+	}
+
+	GetXZCharacter()->GetFollowCamera()->SetFieldOfView(CurrentFOV);
+}
+
+void UXZWeaponComponent::SetHUDCrosshairs(float InDeltaTime)
+{
+	if (false == IsValid(GetXZCharacter()) || false == IsValid(GetXZPlayerController())) return;
+	if (false == IsValid(GetXZHUD())) return;
+	
+	if (EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon")))))
+	{
+		// TODO: 무기 별 Crosshair 설정하기
+		GetXZHUD()->CrosshairTexture2D = CrosshairTexture2D;
+		GetXZHUD()->DrawHUD();
+	}
+	else
+	{
+		GetXZHUD()->CrosshairTexture2D = nullptr;
 	}
 }

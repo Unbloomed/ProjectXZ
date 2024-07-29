@@ -16,6 +16,7 @@ public:
 	FGameplayTag State_Equipped;
 
 	// Weapon
+	FGameplayTag Fist;
 	FGameplayTag Weapon_Projectile_Rifle;
 	FGameplayTag Weapon_Projectile_Pistol;
 	FGameplayTag Weapon_Projectile_SMG;

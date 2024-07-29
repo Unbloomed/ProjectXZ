@@ -1,33 +1,12 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ProjectXZ/Weapon/WeaponLibrary.h"
 #include "XZProjectile.generated.h"
 
 class USoundCue;
 class UBoxComponent;
 class UProjectileMovementComponent;
-
-USTRUCT()
-struct FProjectileData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	float InitialSpeed = 15000.0f; // ProjectileBullet(=총알) 속도
-
-	UPROPERTY(EditDefaultsOnly)
-	float GravityScale = 0.0f;
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UParticleSystem> ImpactBlood; // 충돌 후 피 튀김
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UParticleSystem> ImpactParticles; // 충돌 후 파티클
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<USoundCue> ImpactSound;  // 충돌 후 사운드
-};
 
 UCLASS()
 class PROJECTXZ_API AXZProjectile : public AActor

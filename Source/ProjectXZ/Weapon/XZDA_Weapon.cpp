@@ -36,7 +36,7 @@ void UXZDA_Weapon::CreateInstance(ACharacter* InOwner, UXZWeaponData** OutWeapon
 	if (IsValid(CombatClass))
 	{
 		XZCombat = NewObject<UXZCombat>(this, CombatClass);
-		XZCombat->Init(XZAttachment, InOwner, CombatData);
+		XZCombat->Init(XZAttachment, InOwner, ActionData, BulletData);
 	}
 
 	*OutWeaponData = NewObject<UXZWeaponData>();
