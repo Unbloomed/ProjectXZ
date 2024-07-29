@@ -11,15 +11,15 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class PROJECTXZ_API UXZDataManager : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
-	public:
-		UXZDataManager();
-		virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
 public:
+		UXZDataManager();
+		virtual void Initialize(FSubsystemCollectionBase& Collection) override;
+		
 		FORCEINLINE FXZCharacterStat GetCharacterStat(EXZCharacterType InCharacterType) const { return CharacterStatDataMap[InCharacterType]; }
 		FORCEINLINE bool  IsCharacterStatDataValid() const { return CharacterStatDataMap.IsEmpty() ? false : true; }
 
@@ -27,5 +27,6 @@ private:
 		UPROPERTY()
 		TMap<EXZCharacterType, struct FXZCharacterStat> CharacterStatDataMap;
 
+		UPROPERTY(EditDefaultsOnly)
 		TObjectPtr<UDataTable> CharacterStatDataTable;
 };

@@ -3,19 +3,20 @@
 #include "GameplayTagContainer.h" // GameplayTag Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 /** native GamplayTagsï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Singleton
- *  ï¿½Úµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ TDGameplayTags ï¿½ï¿½ï¿½
+ *  ï¿½Úµï¿½ï¿?ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ TDGameplayTags ï¿½ï¿½ï¿?
  */
 struct FXZTags
 {
 public:
 	static const FXZTags& GetXZTags() { return GameplayTags; }
-	static void InitializeNativeGameplayTags(); // GameplayTags ï¿½ï¿½ï¿½
+	static void InitializeNativeGameplayTags(); // GameplayTags ï¿½ï¿½ï¿?
 
 	// State
 	FGameplayTag State_Unequipped;
 	FGameplayTag State_Equipped;
 
 	// Weapon
+	FGameplayTag Fist;
 	FGameplayTag Weapon_Projectile_Rifle;
 	FGameplayTag Weapon_Projectile_Pistol;
 	FGameplayTag Weapon_Projectile_SMG;

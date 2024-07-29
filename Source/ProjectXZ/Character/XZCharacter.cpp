@@ -81,8 +81,8 @@ void AXZCharacter::DisablePlayerInput()
 	{
 		if (APlayerController* ArcadePlayerController = Cast<APlayerController>(GetController()))
 		{
-			GetCharacterMovement()->Velocity = FVector::ZeroVector; // 이동 벡터 초기화
-			GetCharacterMovement()->StopMovementImmediately(); // 이동 중지
+			GetCharacterMovement()->Velocity = FVector::ZeroVector; // ?�동 벡터 초기??
+			GetCharacterMovement()->StopMovementImmediately(); // ?�동 중�?
 			ArcadePlayerController->SetIgnoreMoveInput(true);
 			ArcadePlayerController->SetIgnoreLookInput(true);
 			DisableInput(ArcadePlayerController);
@@ -121,7 +121,7 @@ void AXZCharacter::SetDead()
 		}
 	}
 
-	// 사격 중이면 중지
+	// ?�격 중이�?중�?
 	// if (WeaponComponent)
 	// {
 	// 	WeaponComponent->EndFire();
@@ -139,10 +139,10 @@ void AXZCharacter::EndDeadEvent()
 		StateComponent->SetState(FXZTags::GetXZTags().StateTag_Respawn);
 	}
 
-	// World에서 감추기
+	// World?�서 감추�?
 	SetActorHiddenInGame(true);
 
-	// Weapon 안보이도록
+	// Weapon ?�보?�도�?
 	// WeaponComponent->SetWeaponHiddenInGame(true);
 
 	if (UXZDataManager* DataManager = UGameInstance::GetSubsystem< UXZDataManager>(GetWorld()->GetGameInstance()))
@@ -154,7 +154,7 @@ void AXZCharacter::EndDeadEvent()
 			// Respawn Timer
 			GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AXZCharacter::RespawnPlayer, CharacterStatData.RespawnTime, false);
 	
-			// Respawn Time UI 표시 Timer
+			// Respawn Time UI ?�시 Timer
 			// GetWorld()->GetTimerManager().SetTimer(UpdateTimerHandle, this, &AXZCharacter::UpdateRespawnTime, CharacterRespawnData.RespawnTimerRate, true);
 		}
 	}
@@ -169,18 +169,18 @@ void AXZCharacter::RespawnPlayer()
 
 	SetActorHiddenInGame(false);
 
-	// Weapon 안보이도록
+	// Weapon ?�보?�도�?
 	// WeaponComponent->SetWeaponHiddenInGame(true);
 
 	ResetCharacterData();
 	SetActorEnableCollision(true);
 	EnablePlayerInput();
 
-	// RespawnTimer 중지
+	// RespawnTimer 중�?
 	GetWorld()->GetTimerManager().ClearTimer(RespawnTimerHandle);
 	
 
-	// Spawn 위치 설정
+	// Spawn ?�치 ?�정
 	// if (UACSpawnManager* SpawnManager = GetWorld()->GetSubsystem<UACSpawnManager>())
 	// {
 	// 	if (AACGameState* ArcadeGameState = Cast<AACGameState>(UGameplayStatics::GetGameState(GetWorld())))
@@ -194,7 +194,7 @@ void AXZCharacter::RespawnPlayer()
 
 void AXZCharacter::ResetCharacterData()
 {
-	// HP를 Reset한다.
+	// HP�?Reset?�다.
 	StatComponent->Reset();
 
 	// Weapon Data Rest 
