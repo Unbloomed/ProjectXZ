@@ -5,7 +5,7 @@ UWeaponAssetFactory::UWeaponAssetFactory()
 {
 	bCreateNew = true;
 
-	// Factory.h의 SupportedClass을 설정. 무기 데이터에셋의 클래스 타입으로 factory 설정.
+	// Factory.h의 SupportedClass을 설정.  이 factory에서 생성될 클래스 타입을 UXZDA_Weapon로 설정.
 	SupportedClass = UXZDA_Weapon::StaticClass();
 }
 
