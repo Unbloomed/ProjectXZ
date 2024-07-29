@@ -12,6 +12,7 @@ TSharedPtr<FSlateStyleSet> FWeaponStyle::StyleInstance = nullptr;
 
 void FWeaponStyle::Initialize()
 {
+	// Instance를 생성하고 등록
 	if (false == StyleInstance.IsValid())
 	{
 		StyleInstance = Create();
@@ -21,6 +22,7 @@ void FWeaponStyle::Initialize()
 
 void FWeaponStyle::Shutdown()
 {
+	// Instance 등록을 해제하고 리셋
 	FSlateStyleRegistry::UnRegisterSlateStyle(*StyleInstance);
 	ensure(StyleInstance.IsUnique());
 	StyleInstance.Reset();
@@ -38,10 +40,10 @@ const FVector2D Icon20x20(20.0f, 20.0f);
 
 TSharedRef< FSlateStyleSet > FWeaponStyle::Create()
 {
-	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("WeaponPluginStyle"));
-	Style->SetContentRoot(IPluginManager::Get().FindPlugin("WeaponPlugin")->GetBaseDir() / TEXT("Resources"));
+	TSharedRef< FSlateStyleSet > Style = MakeShareable(new FSlateStyleSet("WeaponPluginStyle")); // Style 인스턴스 생성
+	Style->SetContentRoot(IPluginManager::Get().FindPlugin("WeaponPlugin")->GetBaseDir() / TEXT("Resources")); // 파일 경로 설정
+	Style->Set("WeaponPlugin.PluginAction", new IMAGE_BRUSH(TEXT("WeaponButtonIcon"), Icon20x20)); // 툴바에 노출될 이미지 설정
 
-	Style->Set("WeaponPlugin.PluginAction", new IMAGE_BRUSH(TEXT("WeaponButtonIcon"), Icon20x20));
 	return Style;
 }
 

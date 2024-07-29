@@ -3,7 +3,7 @@
 #include "WeaponLibrary.h"
 #include "XZEquipment.generated.h"
 
-/**
+/** Equipment Å¬·¡½º
  * 
  */
 UCLASS()
@@ -14,7 +14,7 @@ class PROJECTXZ_API UXZEquipment : public UObject
 public:
 	void Init(class AXZAttachment* InWeapon, ACharacter* InOwner, const FEquipmentData& InData);
 
-	void Equip();
+	bool Equip();
 	void Unequip();
 	void EquipChangeSocket();
 	void UnequipChangeSocket();

@@ -23,8 +23,8 @@ public:
 	template<class UserClass, typename FuncType>
 	void BindPressActions(const UXZDA_InputConfig* InputConfig, const FGameplayTag& InputTag, ETriggerEvent TriggerEvent, UserClass* Object, FuncType Func);
 
-	//template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
-	//void BindPressReleaseActions(const UXZDA_InputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc);
+	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType>
+	void BindPressReleaseActions(const UXZDA_InputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc);
 
 	template<class UserClass, typename PressedFuncType, typename ReleasedFuncType, typename HeldFuncType>
 	void BindPressHeldReleaseActions(const UXZDA_InputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc, HeldFuncType HeldFunc);
@@ -41,14 +41,12 @@ void UXZInputComponent::BindPressActions(const UXZDA_InputConfig* InputConfig, c
 	}
 }
 
-
-/*
 template <class UserClass, typename PressedFuncType, typename ReleasedFuncType>
 void UXZInputComponent::BindPressReleaseActions(const UXZDA_InputConfig* InputConfig, UserClass* Object, PressedFuncType PressedFunc, ReleasedFuncType ReleasedFunc)
 {
 	checkf(InputConfig, TEXT("No InputConfig. Check UXZInputComponent::BindPressReleaseActions()"))
 
-	for (const 
+	for (const FXZInputAction& Action : InputConfig->AbilityInputActions)
 	{
 		if (Action.InputAction && Action.InputTag.IsValid())
 		{
@@ -58,12 +56,11 @@ void UXZInputComponent::BindPressReleaseActions(const UXZDA_InputConfig* InputCo
 			}
 			if (ReleasedFunc)
 			{
-				BindAction(Action.InputAction, ETriggerEvent::Completed, Object, ReleasedFunc, 
+				BindAction(Action.InputAction, ETriggerEvent::Completed, Object, ReleasedFunc, Action.InputTag);
 			}
 		}
 	}
 }
-*/
 
 
 template <class UserClass, typename PressedFuncType, typename ReleasedFuncType, typename HeldFuncType>
