@@ -7,6 +7,7 @@
 class UXZWeaponData;
 class AXZAttachment;
 class UXZEquipment;
+class UXZCombat;
 
 /** 무기 관련 정보를 기록하는 DataAsset 클래스
  * 
@@ -33,8 +34,13 @@ private:
 	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UXZEquipment> EquipmentClass;
-
 	UPROPERTY(EditAnywhere)
 	FEquipmentData EquipmentData;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UXZCombat> CombatClass;
+	UPROPERTY(EditAnywhere)
+	TArray<FActionData> ActionData;
+	UPROPERTY(EditAnywhere)
+	FBulletData BulletData;
 };
