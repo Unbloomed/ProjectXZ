@@ -15,14 +15,14 @@
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
+	SetIsReplicatedByDefault(true);
 }
 
 void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_OwnerOnly, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
 }
 
@@ -35,7 +35,8 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
 		HitTarget = HitResult.ImpactPoint;
-		UE_LOG(LogTemp, Log, TEXT("Crosshair HitTaget Location =  %s"), *HitTarget.ToString());
+
+		//UE_LOG(LogTemp, Log, TEXT("Crosshair HitTaget Location =  %s"), *HitTarget.ToString());
 
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
@@ -127,21 +128,23 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	UE_LOG(LogTemp, Log, TEXT("BEFORE: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
-	EquippedWeaponTag = InTag;
-	UE_LOG(LogTemp, Log, TEXT("AFTER: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
-
+	UE_LOG(LogTemp, Log, TEXT("EquipWeapon: BEFORE: Equipped Weapon Tag = %s"), *EquippedWeaponTag.ToString());
 	Server_EquipWeapon(InTag);
 }
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
 {
-	Server_EquipWeapon(EquippedWeaponTag);
+	//XZ_SUBLOG(LogXZNetwork, Warning, TEXT(""));
+	//XZ_LOG(LogXZNetwork, Log, TEXT("%s"), TEXT(""));
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_EquippedChanged: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
 }
 
 void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
+	EquippedWeaponTag = InTag;
 	Multicast_EquipWeapon(InTag);
+	UE_LOG(LogTemp, Log, TEXT("EquipWeapon: AFTER: Equipped Weapon Tag = %s"), *EquippedWeaponTag.ToString());
+	//OnRep_EquippedChanged(); // 서버에서 직접 호출하여 클라이언트와 동기화
 }
 
 void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
@@ -195,8 +198,7 @@ void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag
 				Reload(InTag); // 재장전
 				return;
 			}
-
-			//AB_LOG(LogABNetwork, Log, TEXT("%s"), TEXT("============================================================"));
+			
 			UE_LOG(LogTemp, Warning, TEXT("Fire!"));
 			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
 			Datas[InTag]->GetCombat()->FireAction(HitLocation);
