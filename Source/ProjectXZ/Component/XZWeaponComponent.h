@@ -26,7 +26,17 @@ public:
 
 	// 명령
 	void EquipWeapon(const FGameplayTag& InTag);
+	UFUNCTION(Server, Reliable)
+	void Server_EquipWeapon(const FGameplayTag& InTag);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EquipWeapon(const FGameplayTag& InTag);
+
 	void Fire();
+	UFUNCTION(Server, Reliable)
+	void Server_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+
 	void Reload(const FGameplayTag& InTag);
 	void StartAiming();
 	void EndAiming();
@@ -48,8 +58,10 @@ private:
 	UPROPERTY()
 	TMap<FGameplayTag, UXZWeaponData*> Datas; // 현재 가지고 있는 무기들 데이터
 
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedChanged)
 	FGameplayTag EquippedWeaponTag = FXZTags::GetXZTags().Fist; // 현재 장착 중인 무기
+	UFUNCTION()
+	void OnRep_EquippedChanged();
 
 	TObjectPtr<AXZCharacter> OwnerCharacter;
 	FVector HitTarget; // 총알이 발사되서 충돌하게 될 지점
@@ -65,6 +77,7 @@ private:
 
 	//***************************************************************
 	//** Aiming
+	UPROPERTY(Replicated)
 	bool bIsAiming = false;
 
 	float CurrentFOV = 90.0f; // 현재 FOV 값

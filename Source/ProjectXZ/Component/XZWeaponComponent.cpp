@@ -15,26 +15,31 @@
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	
+
 }
 
 void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ThisClass, bIsAiming);
+	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_OwnerOnly, REPNOTIFY_Always);
+	DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
 }
 
 void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FHitResult HitResult;
-	TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
-	HitTarget = HitResult.ImpactPoint;
+	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
+	{
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
+		HitTarget = HitResult.ImpactPoint;
+		UE_LOG(LogTemp, Log, TEXT("Crosshair HitTaget Location =  %s"), *HitTarget.ToString());
 
-	SetHUDCrosshairs(DeltaTime);
-	InterpFOV(DeltaTime);
+		SetHUDCrosshairs(DeltaTime);
+		InterpFOV(DeltaTime);
+	}
 }
 
 TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
@@ -105,7 +110,7 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			float DistanceToCharacter = (GetXZCharacter()->GetActorLocation() - Start).Size();
 			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.0f);
-			DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // 디버깅용
+			//DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // 디버깅용
 		}
 
 		FVector End = Start + CrosshairWorldDirection * 80000.0f; // TRACE_LENGTH 80000.0f
@@ -122,6 +127,25 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
+	UE_LOG(LogTemp, Log, TEXT("BEFORE: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
+	EquippedWeaponTag = InTag;
+	UE_LOG(LogTemp, Log, TEXT("AFTER: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
+
+	Server_EquipWeapon(InTag);
+}
+
+void UXZWeaponComponent::OnRep_EquippedChanged()
+{
+	Server_EquipWeapon(EquippedWeaponTag);
+}
+
+void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Multicast_EquipWeapon(InTag);
+}
+
+void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
+{
 	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
 
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
@@ -130,10 +154,11 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 		{
 			if (Datas[InTag]->GetEquipment()->Equip()) // 무기장착 O
 			{
-				EquippedWeaponTag = InTag;
+
 			}
 			else // 무기장착 X (= Unequip 수행한 경우)
 			{
+				Datas[InTag]->GetEquipment()->Unequip();
 				EquippedWeaponTag = FXZTags::GetXZTags().Fist;
 			}
 		}
@@ -148,10 +173,19 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 	}
 }
 
+
 void UXZWeaponComponent::Fire()
 {
-	FGameplayTag InTag = EquippedWeaponTag;
+	Server_Fire(EquippedWeaponTag, HitTarget);
+}
 
+void UXZWeaponComponent::Server_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
+	Multicast_Fire(InTag, HitLocation);
+}
+
+void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
@@ -162,9 +196,10 @@ void UXZWeaponComponent::Fire()
 				return;
 			}
 
+			//AB_LOG(LogABNetwork, Log, TEXT("%s"), TEXT("============================================================"));
 			UE_LOG(LogTemp, Warning, TEXT("Fire!"));
 			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
-			Datas[InTag]->GetCombat()->FireAction(HitTarget);
+			Datas[InTag]->GetCombat()->FireAction(HitLocation);
 			Datas[InTag]->GetCombat()->ConsumeAmmo();
 
 			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면

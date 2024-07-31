@@ -170,6 +170,26 @@ void UXZPawnExtensionComponent::Input_EquipSlot2(const FInputActionValue& InputA
 	}
 }
 
+void UXZPawnExtensionComponent::Input_EquipSlot3(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_SMG;
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+	}
+}
+
+void UXZPawnExtensionComponent::Input_EquipSlot4(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Hitscan_Shotgun;
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+	}
+}
+
 void UXZPawnExtensionComponent::Input_WeaponReload(const FInputActionValue& InputActionValue)
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
