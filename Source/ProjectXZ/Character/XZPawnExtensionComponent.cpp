@@ -155,9 +155,8 @@ void UXZPawnExtensionComponent::Input_EquipSlot1(const FInputActionValue& InputA
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		//FGameplayTag Tag = GetXZCharacter()->GetInventoryComponent()->GetEquipSlot1();
-		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Pistol;
-		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(
+			GetXZCharacter()->GetInventoryComponent()->GetEquipSlot1());
 	}
 }
 
@@ -165,9 +164,8 @@ void UXZPawnExtensionComponent::Input_EquipSlot2(const FInputActionValue& InputA
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		// TODO: 
-		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
-		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(
+			GetXZCharacter()->GetInventoryComponent()->GetEquipSlot2());
 	}
 }
 

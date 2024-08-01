@@ -3,6 +3,7 @@
 #include "XZCharacterMovementComponent.h"
 #include "XZPawnExtensionComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Component/XZInventoryComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "ProjectXZ/Component/XZInputComponent.h"
@@ -74,6 +75,9 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// StateComponent
 	StateComponent = CreateDefaultSubobject<UXZStateComponent>(TEXT("StateComponent"));
+
+	// InventoryComponent
+	InventoryComponent = CreateDefaultSubobject<UXZInventoryComponent>(TEXT("InventoryComponent"));
 }
 
 void AXZCharacter::DisablePlayerInput()
