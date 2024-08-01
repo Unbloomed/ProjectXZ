@@ -17,7 +17,7 @@ void UXZCombat::Init(AXZAttachment* InAttachment, ACharacter* InOwner, const TAr
 
 void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget)
 {
-    if (false == IsValid(OwnerCharacter) && false == IsValid(OwnerCharacter->GetWorld())) return;
+    if (false == IsValid(OwnerCharacter)) return;
 
     // 공격 몽타주 재생 & 총알 발사
 	if (IsValid(ActionDatas[Idx].ActionMontage))

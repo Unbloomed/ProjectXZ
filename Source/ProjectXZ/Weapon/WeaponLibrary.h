@@ -50,7 +50,7 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAnimationAsset> GunFireAnimation;
-	
+
 	UPROPERTY(EditDefaultsOnly)
 	FName MuzzleSocketName = TEXT("MuzzleFlash");
 

@@ -36,8 +36,6 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
 		HitTarget = HitResult.ImpactPoint;
 
-		UE_LOG(LogTemp, Log, TEXT("Crosshair HitTaget Location =  %s"), *HitTarget.ToString());
-
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
 	}
@@ -128,20 +126,18 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	UE_LOG(LogTemp, Log, TEXT("EquipWeapon: BEFORE: Equipped Weapon Tag = %s"), *EquippedWeaponTag.ToString());
 	Server_EquipWeapon(InTag);
 }
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_EquippedChanged: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
+
 }
 
 void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
 	EquippedWeaponTag = InTag;
 	Multicast_EquipWeapon(InTag);
-	UE_LOG(LogTemp, Log, TEXT("EquipWeapon: AFTER: Equipped Weapon Tag = %s"), *EquippedWeaponTag.ToString());
 }
 
 void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
@@ -184,7 +180,6 @@ void UXZWeaponComponent::Fire()
 
 void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation)
 {
-	UE_LOG(LogTemp, Log, TEXT("ServerFire - Crosshair HitTaget Location =  %s"), *HitLocation.ToString());
 	Multicast_Fire(EquippedWeaponTag, HitLocation);
 }
 
@@ -200,7 +195,6 @@ void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag
 				return;
 			}
 			
-			UE_LOG(LogTemp, Warning, TEXT("Fire!"));
 			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
 			Datas[InTag]->GetCombat()->FireAction(HitLocation);
 			Datas[InTag]->GetCombat()->ConsumeAmmo();
@@ -276,12 +270,10 @@ void UXZWeaponComponent::InterpFOV(float InDeltaTime)
 
 	if (bIsAiming)
 	{
-		//UE_LOG(LogTemp, Log, TEXT("InterpFOV: Aim"));
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, ZoomedFOV, InDeltaTime, 20.0f);
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Log, TEXT("InterpFOV: StopAiming"));
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, InDeltaTime, 20.0f);
 	}
 
