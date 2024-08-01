@@ -15,26 +15,30 @@
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	
+	SetIsReplicatedByDefault(true);
 }
 
 void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
-	DOREPLIFETIME(ThisClass, bIsAiming);
+	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
 }
 
 void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FHitResult HitResult;
-	TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
-	HitTarget = HitResult.ImpactPoint;
+	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
+	{
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
+		HitTarget = HitResult.ImpactPoint;
 
-	SetHUDCrosshairs(DeltaTime);
-	InterpFOV(DeltaTime);
+		SetHUDCrosshairs(DeltaTime);
+		InterpFOV(DeltaTime);
+	}
 }
 
 TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
@@ -105,7 +109,7 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			float DistanceToCharacter = (GetXZCharacter()->GetActorLocation() - Start).Size();
 			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.0f);
-			DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // 디버깅용
+			//DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // 디버깅용
 		}
 
 		FVector End = Start + CrosshairWorldDirection * 80000.0f; // TRACE_LENGTH 80000.0f
@@ -122,18 +126,35 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
+	Server_EquipWeapon(InTag);
+}
 
+void UXZWeaponComponent::OnRep_EquippedChanged()
+{
+
+}
+
+void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	EquippedWeaponTag = InTag;
+	Multicast_EquipWeapon(InTag);
+}
+
+void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
+	
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
 		{
 			if (Datas[InTag]->GetEquipment()->Equip()) // 무기장착 O
 			{
-				EquippedWeaponTag = InTag;
+
 			}
 			else // 무기장착 X (= Unequip 수행한 경우)
 			{
+				Datas[InTag]->GetEquipment()->Unequip();
 				EquippedWeaponTag = FXZTags::GetXZTags().Fist;
 			}
 		}
@@ -148,10 +169,22 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 	}
 }
 
+
 void UXZWeaponComponent::Fire()
 {
-	FGameplayTag InTag = EquippedWeaponTag;
+	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
+	{
+		Server_Fire(HitTarget);
+	}
+}
 
+void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation)
+{
+	Multicast_Fire(EquippedWeaponTag, HitLocation);
+}
+
+void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
@@ -161,10 +194,9 @@ void UXZWeaponComponent::Fire()
 				Reload(InTag); // 재장전
 				return;
 			}
-
-			UE_LOG(LogTemp, Warning, TEXT("Fire!"));
+			
 			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
-			Datas[InTag]->GetCombat()->FireAction(HitTarget);
+			Datas[InTag]->GetCombat()->FireAction(HitLocation);
 			Datas[InTag]->GetCombat()->ConsumeAmmo();
 
 			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
@@ -204,7 +236,6 @@ void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 				Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo;
 				Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo = 0;
 			}
-
 		}
 		else
 		{
@@ -239,12 +270,10 @@ void UXZWeaponComponent::InterpFOV(float InDeltaTime)
 
 	if (bIsAiming)
 	{
-		//UE_LOG(LogTemp, Log, TEXT("InterpFOV: Aim"));
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, ZoomedFOV, InDeltaTime, 20.0f);
 	}
 	else
 	{
-		//UE_LOG(LogTemp, Log, TEXT("InterpFOV: StopAiming"));
 		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, InDeltaTime, 20.0f);
 	}
 

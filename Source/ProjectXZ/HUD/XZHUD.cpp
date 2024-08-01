@@ -11,7 +11,7 @@ void AXZHUD::DrawHUD()
 		const FVector2D ViewportCenter(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
 
 		// Crosshair ±×¸®±â
-		DrawCrosshair(CrosshairTexture2D, ViewportSize, FLinearColor::White);
+		DrawCrosshair(CrosshairTexture2D, ViewportCenter, FLinearColor::White);
 	}
 }
 

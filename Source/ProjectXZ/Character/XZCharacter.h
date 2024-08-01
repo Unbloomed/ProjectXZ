@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "XZCharacter.generated.h"
 
+class UXZInventoryComponent;
 struct FInputActionValue;
 class USpringArmComponent;
 class UXZPawnExtensionComponent;
@@ -27,6 +28,7 @@ public:
 	virtual void BeginPlay() override;
 
 	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
+	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() { return InventoryComponent; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
 
 protected:
@@ -57,6 +59,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UXZStateComponent> StateComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UXZInventoryComponent> InventoryComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> CameraSpringArm;

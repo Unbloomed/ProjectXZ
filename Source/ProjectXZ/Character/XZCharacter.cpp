@@ -17,6 +17,7 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+	bReplicates = true;
 
 	NetCullDistanceSquared = 900000000.f;
 

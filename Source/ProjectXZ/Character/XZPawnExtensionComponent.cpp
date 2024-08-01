@@ -2,6 +2,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "XZCharacter.h"
+#include "Component/XZInventoryComponent.h"
 #include "ProjectXZ/Component/XZInputComponent.h"
 #include "ProjectXZ/Component/XZWeaponComponent.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
@@ -154,7 +155,7 @@ void UXZPawnExtensionComponent::Input_EquipSlot1(const FInputActionValue& InputA
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		//FGameplayTag Tag = GetXZCharacter()->GetInventoryComponent()->GetEquipSlot1();
 		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Pistol;
 		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
 	}
@@ -164,9 +165,27 @@ void UXZPawnExtensionComponent::Input_EquipSlot2(const FInputActionValue& InputA
 {
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		// TODO : 현재 Tag 하드코딩한거 로직짜기
+		// TODO: 
 		FGameplayTag Tag = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
 		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(Tag);
+	}
+}
+
+void UXZPawnExtensionComponent::Input_EquipSlot3(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(
+			GetXZCharacter()->GetInventoryComponent()->GetEquipSlot3());
+	}
+}
+
+void UXZPawnExtensionComponent::Input_EquipSlot4(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
+	{
+		GetXZCharacter()->GetWeaponComponent()->EquipWeapon(
+			GetXZCharacter()->GetInventoryComponent()->GetEquipSlot4());
 	}
 }
 
@@ -187,7 +206,6 @@ void UXZPawnExtensionComponent::Input_Aim(FGameplayTag InputTag)
 
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		//UE_LOG(LogTemp, Log, TEXT("Aim"));
 		GetXZCharacter()->GetWeaponComponent()->StartAiming();
 	}
 }
@@ -198,7 +216,6 @@ void UXZPawnExtensionComponent::Input_StopAiming(FGameplayTag InputTag)
 
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		//UE_LOG(LogTemp, Log, TEXT("Stop Aiming"));
 		GetXZCharacter()->GetWeaponComponent()->EndAiming();
 	}
 }
