@@ -3,13 +3,13 @@
 #include "GameplayTagContainer.h" // GameplayTag Å¸ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 
 /** native GamplayTagsï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Singleton
- *  ï¿½Úµï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ TDGameplayTags ï¿½ï¿½ï¿½
+ *  ï¿½Úµï¿½ï¿?ï¿½ï¿½ï¿½ï¿½ï¿½Í¿ï¿½ TDGameplayTags ï¿½ï¿½ï¿?
  */
 struct FXZTags
 {
 public:
 	static const FXZTags& GetXZTags() { return GameplayTags; }
-	static void InitializeNativeGameplayTags(); // GameplayTags ï¿½ï¿½ï¿½
+	static void InitializeNativeGameplayTags(); // GameplayTags ï¿½ï¿½ï¿?
 
 	// State
 	FGameplayTag State_Unequipped;
@@ -41,7 +41,20 @@ public:
 	FGameplayTag InputTag_Weapon_Reload;
 	FGameplayTag InputTag_Weapon_Fire; 
 	FGameplayTag InputTag_Weapon_Aim; 
-	FGameplayTag InputTag_Weapon_StopAiming; 
+	FGameplayTag InputTag_Weapon_StopAiming;
+
+	//********************************************************
+	// CharacterState
+	FGameplayTag StateTag_Alive_Posture_Idle;
+	FGameplayTag StateTag_Alive_Posture_Crouch;
+	FGameplayTag StateTag_Alive_Posture_Jump;
+	FGameplayTag StateTag_Alive_Equip_Idle;
+	FGameplayTag StateTag_Alive_Equip_Aim;
+	FGameplayTag StateTag_Alive_Equip_Shoulder;
+	FGameplayTag StateTag_Alive_Equip_Fire;
+	FGameplayTag StateTag_Respawn;
+	FGameplayTag StateTag_Dead;
+
 
 	// Input ï¿½ï¿½ï¿½ï¿½: Pressed, Held, Released
 	//FGameplayTag BlockTag_InputPressed;

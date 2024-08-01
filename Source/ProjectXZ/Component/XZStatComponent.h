@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Character/XZCharacter.h"
 #include "XZStatComponent.generated.h"
 
 // Header 
@@ -12,19 +13,22 @@ struct FXZCharacterStat : public FTableRowBase
 
 public:
 	FXZCharacterStat() 
-		: MaxHp(0.0f), MaxDashDistance(0.0f), ShootRange(0.0f), MovementSpeed(0.0f) {  }
+		: CharacterType(EXZCharacterType::eDefault), MaxHp(0.0f), ShootRange(0.0f), MovementSpeed(0.0f) {  }
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	EXZCharacterType CharacterType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	float MaxHp;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
-	float MaxDashDistance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	float ShootRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	float MovementSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	float RespawnTime;
 };
 
 DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);

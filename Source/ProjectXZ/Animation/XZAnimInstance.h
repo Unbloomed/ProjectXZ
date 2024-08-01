@@ -21,6 +21,8 @@ enum class EBlendSpaceMode : uint8
 	shoulder
 };
 
+class UXZStateComponent;
+
 UCLASS()
 class PROJECTXZ_API UXZAnimInstance : public UAnimInstance
 {
@@ -41,8 +43,15 @@ private:
 
 public:
 	UFUNCTION()
-	void PlayMontageWithTag(FGameplayTag Tag);
+	void PlayMontageWithTag(const FGameplayTag& Tag);
 
-	FORCEINLINE void SetCurrentState(EBlendSpaceMode Enum) { CurrentState = Enum; }
-	FORCEINLINE EBlendSpaceMode GetCurrentState() { return CurrentState; }
+	UFUNCTION(BlueprintCallable)
+	void SetCurrentState(EBlendSpaceMode Enum) { CurrentState = Enum; }
+
+	UFUNCTION(BlueprintCallable)
+	EBlendSpaceMode GetCurrentState() { return CurrentState; }
+
+protected:
+	UPROPERTY()
+	TObjectPtr<UXZStateComponent> StateComponent;
 };

@@ -11,4 +11,9 @@ class PROJECTXZ_API AXZPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+	AXZPlayerController();
+	
+protected:
+	virtual void PostNetInit() override;
+	virtual void OnPossess(APawn* InPawn) override;
 };

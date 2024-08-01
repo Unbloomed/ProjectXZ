@@ -1,5 +1,6 @@
 #include "XZStatComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Manager/XZDataManager.h"
 
 UXZStatComponent::UXZStatComponent()
 {
@@ -12,16 +13,18 @@ void UXZStatComponent::InitializeComponent()
 	
 	SetIsReplicated(true);
 	// DataManger
-	/*
+	
 	if (UXZDataManager* DataManager = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance()))
 	{
-		FXZCharacterStat CharacterTypeData = DataManager->GetCharacterStat(Character->GetCharacterType());
-		if(CharacterTypeData.IsValid())
+		if (DataManager->IsCharacterStatDataValid()) 
 		{
-			SetHP(CharacterTypeData.MaxHP);
+			FXZCharacterStat CharacterStatData = DataManager->GetCharacterStat(EXZCharacterType::eDefault);
+			CharacterStat = CharacterStatData;
+
+			SetHP(CharacterStatData.MaxHp);
 		}
 	}
-	*/
+	
 	Reset();
 }
 
