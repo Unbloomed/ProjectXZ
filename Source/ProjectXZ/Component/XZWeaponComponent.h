@@ -33,7 +33,7 @@ public:
 
 	void Fire();
 	UFUNCTION(Server, Reliable)
-	void Server_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+	void Server_Fire(const FVector_NetQuantize& HitLocation);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
 

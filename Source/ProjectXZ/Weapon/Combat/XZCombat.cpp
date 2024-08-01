@@ -24,8 +24,8 @@ void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget)
 	{
 		OwnerCharacter->PlayAnimMontage(ActionDatas[Idx].ActionMontage);
 
-		FTimerHandle FireTimerHandle;
-		//FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnFireBullet, HitTarget);
+        FTimerHandle FireTimerHandle;
+        //FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnFireBullet, HitTarget);
         FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, HitTarget]()
             {
                 this->OnFireBullet(HitTarget);
@@ -42,49 +42,56 @@ void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget)
 
 void UXZCombat::OnFireBullet(const FVector_NetQuantize& HitTargetLocation)
 {
-    //if (OwnerCharacter->IsLocallyControlled()) return;
-    
     if (IsValid(XZAttachment) && IsValid(XZAttachment->GetWeaponMesh()))
     {
-        // 무기 Nozzle에서 총알 발사
-        const USkeletalMeshSocket* MuzzleFlashSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(ActionDatas[Idx].MuzzleSocketName);
-        if (IsValid(MuzzleFlashSocket))
+        //*******************************************************************************
+        //** 무기 Nozzle에서 총알 발사
+        if (OwnerCharacter->HasAuthority()) // 총알은 서버에서만 발사
         {
-            FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
-            FRotator TargetRotation = (HitTargetLocation - SocketTransform.GetLocation()).Rotation();
+	        const USkeletalMeshSocket* MuzzleFlashSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(ActionDatas[Idx].MuzzleSocketName);
+	        if (IsValid(MuzzleFlashSocket))
+	        {
+	            FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
+	            FRotator TargetRotation = (HitTargetLocation - SocketTransform.GetLocation()).Rotation();
 
-            if (IsValid(ActionDatas[Idx].ProjectileClass))
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Spawning projectile at location: %s with rotation: %s"), *SocketTransform.GetLocation().ToString(), *TargetRotation.ToString());
+	            if (IsValid(ActionDatas[Idx].ProjectileClass))
+	            {
+	                UE_LOG(LogTemp, Warning, TEXT("Spawning projectile at location: %s with rotation: %s"), *SocketTransform.GetLocation().ToString(), *TargetRotation.ToString());
 
-                FActorSpawnParameters SpawnParams;
-                SpawnParams.Owner = XZAttachment->GetOwner();
-                SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
-                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	                FActorSpawnParameters SpawnParams;
+	                SpawnParams.Owner = XZAttachment->GetOwner();
+	                SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
+	                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-                SpawnedProjectile = OwnerCharacter->GetWorld()->SpawnActor<AXZProjectile>(ActionDatas[Idx].ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
-            }
+	                SpawnedProjectile = OwnerCharacter->GetWorld()->SpawnActor<AXZProjectile>(ActionDatas[Idx].ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
+	            }
+	        }
         }
+        //*******************************************************************************
 
-        // 발사 사운드
-        if (IsValid(ActionDatas[Idx].FireSound))
+        //*******************************************************************************
+        if (false == OwnerCharacter->HasAuthority())
         {
-            UGameplayStatics::PlaySoundAtLocation(XZAttachment->GetWeaponMesh(), ActionDatas[Idx].FireSound, XZAttachment->GetWeaponMesh()->GetComponentLocation());
-        }
+	        // 발사 사운드
+	        if (IsValid(ActionDatas[Idx].FireSound))
+	        {
+	            UGameplayStatics::PlaySoundAtLocation(XZAttachment->GetWeaponMesh(), ActionDatas[Idx].FireSound, XZAttachment->GetWeaponMesh()->GetComponentLocation());
+	        }
 
-        // 탄피 배출
-        if (IsValid(BulletData.CasingClass))
-        {
-            const USkeletalMeshSocket* AmmoEjectSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(BulletData.CasingSocketName);
-            if (IsValid(AmmoEjectSocket))
-            {
-                FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
+	        // 탄피 배출
+	        if (IsValid(BulletData.CasingClass))
+	        {
+	            const USkeletalMeshSocket* AmmoEjectSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(BulletData.CasingSocketName);
+	            if (IsValid(AmmoEjectSocket))
+	            {
+	                FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
 
-                OwnerCharacter->GetWorld()->SpawnActor<AXZCasing>(BulletData.CasingClass, SocketTransform.GetLocation(), SocketTransform.GetRotation().Rotator());
-            }
+	                OwnerCharacter->GetWorld()->SpawnActor<AXZCasing>(BulletData.CasingClass, SocketTransform.GetLocation(), SocketTransform.GetRotation().Rotator());
+	            }
+	        }
         }
+        //*******************************************************************************
     }
-
 }
 
 void UXZCombat::ReloadAction()

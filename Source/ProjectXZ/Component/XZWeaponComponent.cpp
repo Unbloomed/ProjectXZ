@@ -36,7 +36,7 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
 		HitTarget = HitResult.ImpactPoint;
 
-		//UE_LOG(LogTemp, Log, TEXT("Crosshair HitTaget Location =  %s"), *HitTarget.ToString());
+		UE_LOG(LogTemp, Log, TEXT("Crosshair HitTaget Location =  %s"), *HitTarget.ToString());
 
 		SetHUDCrosshairs(DeltaTime);
 		InterpFOV(DeltaTime);
@@ -134,8 +134,6 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
 {
-	//XZ_SUBLOG(LogXZNetwork, Warning, TEXT(""));
-	//XZ_LOG(LogXZNetwork, Log, TEXT("%s"), TEXT(""));
 	UE_LOG(LogTemp, Warning, TEXT("OnRep_EquippedChanged: Equipped Weapon Tag = %s"), *(EquippedWeaponTag.ToString()));
 }
 
@@ -144,13 +142,12 @@ void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& I
 	EquippedWeaponTag = InTag;
 	Multicast_EquipWeapon(InTag);
 	UE_LOG(LogTemp, Log, TEXT("EquipWeapon: AFTER: Equipped Weapon Tag = %s"), *EquippedWeaponTag.ToString());
-	//OnRep_EquippedChanged(); // 서버에서 직접 호출하여 클라이언트와 동기화
 }
 
 void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
 	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
-
+	
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
@@ -179,12 +176,16 @@ void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag
 
 void UXZWeaponComponent::Fire()
 {
-	Server_Fire(EquippedWeaponTag, HitTarget);
+	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
+	{
+		Server_Fire(HitTarget);
+	}
 }
 
-void UXZWeaponComponent::Server_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation)
 {
-	Multicast_Fire(InTag, HitLocation);
+	UE_LOG(LogTemp, Log, TEXT("ServerFire - Crosshair HitTaget Location =  %s"), *HitLocation.ToString());
+	Multicast_Fire(EquippedWeaponTag, HitLocation);
 }
 
 void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
@@ -241,7 +242,6 @@ void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 				Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo;
 				Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo = 0;
 			}
-
 		}
 		else
 		{
