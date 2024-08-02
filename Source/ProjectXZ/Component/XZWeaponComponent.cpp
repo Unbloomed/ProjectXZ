@@ -1,5 +1,6 @@
 #include "XZWeaponComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -11,6 +12,7 @@
 #include "ProjectXZ/Weapon/XZEquipment.h"
 #include "ProjectXZ/Weapon/XZWeaponData.h"
 #include "ProjectXZ/Weapon/Combat/XZCombat.h"
+#include "Weapon/Attachment/XZAttachment.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
 {
@@ -172,36 +174,42 @@ void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag
 
 void UXZWeaponComponent::Fire()
 {
+	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return; // 무기 장착 중이 아니라면 return
+
 	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
 	{
-		Server_Fire(HitTarget);
+		const USkeletalMeshSocket* MuzzleFlashSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
+			Datas[EquippedWeaponTag]->GetCombat()->GetActionData()[0].MuzzleSocketName);
+		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
+			
+		Server_Fire(HitTarget, SocketTransform);
 	}
 }
 
-void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation)
+void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
 {
-	Multicast_Fire(EquippedWeaponTag, HitLocation);
+	Multicast_Fire(HitLocation, SocketTransform);
 }
 
-void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+void UXZWeaponComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
 {
-	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	if (UXZWeaponData** FoundData = Datas.Find(EquippedWeaponTag))
 	{
 		if (*FoundData)
 		{
-			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+			if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
 			{
-				Reload(InTag); // 재장전
+				Reload(EquippedWeaponTag); // 재장전
 				return;
 			}
 			
-			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
-			Datas[InTag]->GetCombat()->FireAction(HitLocation);
-			Datas[InTag]->GetCombat()->ConsumeAmmo();
+			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo);
+			Datas[EquippedWeaponTag]->GetCombat()->FireAction(HitLocation, SocketTransform);
+			Datas[EquippedWeaponTag]->GetCombat()->ConsumeAmmo();
 
-			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+			if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
 			{
-				Reload(InTag); // 재장전
+				Reload(EquippedWeaponTag); // 재장전
 			}
 		}
 		else
@@ -217,14 +225,24 @@ void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag
 
 void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 {
-	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) return; // 총알 없는 경우 return
+	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Run out of Bullets"));
+		return; // 총알 없는 경우 return
+	}
+
+	const USkeletalMeshSocket* MagazineSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
+		Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().CasingSocketName);
+	FTransform SocketTransform = MagazineSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
+
+
+	Server_Reload(InTag, SocketTransform);
+
 
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
 		{
-			Datas[InTag]->GetCombat()->ReloadAction();
-
 			// 총알 채우기
 			if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo >= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity)
 			{
@@ -246,6 +264,16 @@ void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("GameplayTag is not found in Datas"));
 	}
+}
+
+void UXZWeaponComponent::Server_Reload_Implementation(const FGameplayTag& InTag, const FTransform& SocketTransform)
+{
+	Multicast_Reload(InTag, SocketTransform);
+}
+
+void UXZWeaponComponent::Multicast_Reload_Implementation(const FGameplayTag& InTag, const FTransform& SocketTransform)
+{
+	Datas[InTag]->GetCombat()->ReloadAction(SocketTransform);
 }
 
 void UXZWeaponComponent::StartAiming()

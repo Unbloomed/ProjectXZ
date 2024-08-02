@@ -33,11 +33,16 @@ public:
 
 	void Fire();
 	UFUNCTION(Server, Reliable)
-	void Server_Fire(const FVector_NetQuantize& HitLocation);
+	void Server_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+	void Multicast_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
 
 	void Reload(const FGameplayTag& InTag);
+	UFUNCTION(Server, Reliable)
+	void Server_Reload(const FGameplayTag& InTag, const FTransform& SocketTransform);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Reload(const FGameplayTag& InTag, const FTransform& SocketTransform);
+
 	void StartAiming();
 	void EndAiming();
 
