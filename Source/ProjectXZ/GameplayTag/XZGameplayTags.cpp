@@ -35,6 +35,8 @@ void FXZTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Move = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Move"), FString("이동 버튼 Input Tag"));
 	GameplayTags.InputTag_Look_Mouse = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Look.Mouse"), FString("마우스 Input Tag"));
 
+	GameplayTags.InputTag_PickupItem = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.PickupItem"), FString("아이템 줍기 Input Tag"));
+
 	GameplayTags.InputTag_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.1"), FString("1 Input Tag"));
 	GameplayTags.InputTag_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.2"), FString("2 Input Tag"));
 	GameplayTags.InputTag_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.3"), FString("3 Input Tag"));

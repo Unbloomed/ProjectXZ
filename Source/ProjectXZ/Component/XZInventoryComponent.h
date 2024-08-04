@@ -5,6 +5,8 @@
 #include "GameplayTag/XZGameplayTags.h"
 #include "XZInventoryComponent.generated.h"
 
+class AXZItemBase;
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTXZ_API UXZInventoryComponent : public UActorComponent
@@ -14,6 +16,18 @@ class PROJECTXZ_API UXZInventoryComponent : public UActorComponent
 public:	
 	UXZInventoryComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Reliable)
+	void Server_PickupItem();
+	void PickupItem();
+
+	UFUNCTION(Client, Reliable)
+	void Client_AddtoInventory(AXZItemBase* InItem);
+	void AddtoInventory(AXZItemBase* InItem);
+
+	UFUNCTION(Server, Reliable)
+	void Server_DestroyPickupItem(AXZItemBase* InItem);
+	void DestroyPickupItem(AXZItemBase* InItem);
 
 	const FGameplayTag& GetEquipSlot1() { return EquipSlot1; }
 	const FGameplayTag& GetEquipSlot2() { return EquipSlot2; }
@@ -28,5 +42,4 @@ private:
 	FGameplayTag EquipSlot2 = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
 	FGameplayTag EquipSlot3 = FXZTags::GetXZTags().Weapon_Projectile_SMG;
 	FGameplayTag EquipSlot4 = FXZTags::GetXZTags().Weapon_Hitscan_Shotgun;
-		
 };

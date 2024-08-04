@@ -59,6 +59,8 @@ void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* Playe
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Look_Mouse, ETriggerEvent::Triggered, this, &ThisClass::Input_LookMouse);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_PickupItem, ETriggerEvent::Triggered, this, &ThisClass::Input_PickupItem);
 		
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_1, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot1);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_2, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot2);
@@ -148,6 +150,14 @@ void UXZPawnExtensionComponent::Input_Crouch(const FInputActionValue& InputActio
 			UE_LOG(LogTemp, Log, TEXT("Uncrouch"));
 			Character->UnCrouch();
 		}
+	}
+}
+
+void UXZPawnExtensionComponent::Input_PickupItem(const FInputActionValue& InputActionValue)
+{
+	if (GetXZCharacter() && GetXZCharacter()->GetInventoryComponent())
+	{
+		GetXZCharacter()->GetInventoryComponent()->PickupItem();
 	}
 }
 
