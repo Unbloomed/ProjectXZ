@@ -54,10 +54,10 @@ private:
 	void Input_Aim(FGameplayTag InputTag);
 	void Input_StopAiming(FGameplayTag InputTag);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UInputMappingContext> DefaultIMC;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UXZDA_InputConfig> InputConfig;
 
 

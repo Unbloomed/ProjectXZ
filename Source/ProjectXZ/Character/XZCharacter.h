@@ -7,8 +7,11 @@ class UXZInventoryComponent;
 struct FInputActionValue;
 class USpringArmComponent;
 class UXZPawnExtensionComponent;
+class UXZStatComponent;
+class UXZStateComponent;
 class UCameraComponent;
 class UXZWeaponComponent;
+class UTextRenderComponent;
 class UObject;
 struct FFrame;
 
@@ -25,20 +28,21 @@ class PROJECTXZ_API AXZCharacter : public ACharacter
 
 public:
 	AXZCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-	virtual void BeginPlay() override;
 
 	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
+	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() { return StateComponent; }
 	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() { return InventoryComponent; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
 
 protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_Owner() override;
 	virtual void OnRep_PlayerState() override;
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
-protected:
 	void DisablePlayerInput();
 	void EnablePlayerInput();
 	void SetDead();
@@ -48,25 +52,25 @@ protected:
 	void ResetCharacterData();
 
 private:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UXZPawnExtensionComponent> PawnExtComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UXZWeaponComponent> WeaponComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UXZStatComponent> StatComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UXZStatComponent> StatComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UXZStateComponent> StateComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UXZStateComponent> StateComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UXZInventoryComponent> InventoryComponent;
 
-	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Camera", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> CameraSpringArm;
 
-	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Camera", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
 	UPROPERTY()
@@ -75,4 +79,16 @@ private:
 	float RemainingRespawnTime;
 	float RespawnTime;
 	FTimerHandle RespawnTimerHandle;
+
+
+	//*****************************************************
+	//** 디버깅용. 캐릭터 머리 위에 상태 띄우기.
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))
+	TObjectPtr<UTextRenderComponent> TextRender_State;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))
+	TObjectPtr<UTextRenderComponent> TextRender_Weapon;
+
+	FString CurrentCharacterState;
+	FString CurrentEquippedWeapon;
+	//*****************************************************
 };

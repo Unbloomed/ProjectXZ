@@ -23,6 +23,7 @@ public:
 	TObjectPtr<AXZCharacter> GetXZCharacter();
 	TObjectPtr<AXZPlayerController> GetXZPlayerController();
 	TObjectPtr<AXZHUD> GetXZHUD();
+	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
 
 	UFUNCTION(Server, Reliable)
 	void Server_AddNewWeapon(const FGameplayTag& InTag);
@@ -58,10 +59,10 @@ private:
 	void SetHUDCrosshairs(float InDeltaTime);
 	void InterpFOV(float InDeltaTime);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Data", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TMap<FGameplayTag, UXZDA_Weapon*> WeaponList; // 전체 무기 목록(에디터에서 등록)
 
-	UPROPERTY(EditDefaultsOnly, Category = "Weapon Data", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TArray<FGameplayTag> Init_WeaponTags; // 시작 시 가지고 있는 무기
 
 	UPROPERTY()
@@ -92,14 +93,14 @@ private:
 	void OnRep_Aiming();
 
 	float CurrentFOV = 90.0f; // 현재 FOV 값
-	UPROPERTY(EditDefaultsOnly, Category = "Aiming Data", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
 	float ZoomedFOV = 30.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "Aiming Data", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
 	float DefaultFOV = 90.0f;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Aiming Data", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
 	float AimWalkSpeed = 200.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "Aiming Data", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
 	float MaxWalkSpeed = 600.0f;
 	//***************************************************************
 
