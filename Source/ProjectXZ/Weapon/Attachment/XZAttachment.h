@@ -13,7 +13,7 @@ public:
 	AXZAttachment();
 	TObjectPtr<USkeletalMeshComponent> GetWeaponMesh() { return ItemMesh; }
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Properties")
 	FGameplayTag WeaponNameTag;
 
 protected:

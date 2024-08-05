@@ -64,6 +64,8 @@ void UXZPawnExtensionComponent::SetupPlayerInputComponent(UInputComponent* Playe
 		
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_1, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot1);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_2, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot2);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_3, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot3);
+		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_4, ETriggerEvent::Triggered, this, &ThisClass::Input_EquipSlot4);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Fire, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponFire);
 		XZInputComponent->BindPressActions(InputConfig, FXZTags::GetXZTags().InputTag_Weapon_Reload, ETriggerEvent::Triggered, this, &ThisClass::Input_WeaponReload);
 
@@ -214,7 +216,7 @@ void UXZPawnExtensionComponent::Input_Aim(FGameplayTag InputTag)
 
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		GetXZCharacter()->GetWeaponComponent()->StartAiming();
+		GetXZCharacter()->GetWeaponComponent()->Aiming(true);
 	}
 }
 
@@ -224,7 +226,7 @@ void UXZPawnExtensionComponent::Input_StopAiming(FGameplayTag InputTag)
 
 	if (GetXZCharacter() && GetXZCharacter()->GetWeaponComponent())
 	{
-		GetXZCharacter()->GetWeaponComponent()->EndAiming();
+		GetXZCharacter()->GetWeaponComponent()->Aiming(false);
 	}
 }
 

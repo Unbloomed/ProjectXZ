@@ -13,6 +13,7 @@ class PROJECTXZ_API AXZItemBase : public AActor
 	
 public:	
 	AXZItemBase();
+	FORCEINLINE const FString& GetItemName() { return ItemName; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -29,15 +30,6 @@ protected:
 	TObjectPtr<USphereComponent> SphereCollision;
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Item Properties")
-	TObjectPtr<UWidgetComponent> PickupWidget; //무기 줍기 Widget
-
-	UPROPERTY(EditDefaultsOnly)
 	FString ItemName;
-
-	UPROPERTY(EditAnywhere, Replicated)
-	int32 ItemQuantity = 1;
-
-private:
-	void ShowPickupWidget(bool bShow);
 
 };

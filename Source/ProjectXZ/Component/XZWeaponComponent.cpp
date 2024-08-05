@@ -85,6 +85,21 @@ void UXZWeaponComponent::BeginPlay()
 	}
 }
 
+void UXZWeaponComponent::AddNewWeapon(const FGameplayTag& InTag)
+{
+	Server_AddNewWeapon(InTag);
+}
+
+void UXZWeaponComponent::Server_AddNewWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Multicast_AddNewWeapon(InTag);
+}
+
+void UXZWeaponComponent::Multicast_AddNewWeapon_Implementation(const FGameplayTag& InTag)
+{
+	WeaponList[InTag]->CreateInstance(GetXZCharacter(), &Datas[InTag]);
+}
+
 void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	FVector2D ViewportSize;
@@ -130,6 +145,7 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
 	Server_EquipWeapon(InTag);
 }
+
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
 {
@@ -276,20 +292,23 @@ void UXZWeaponComponent::Multicast_Reload_Implementation(const FGameplayTag& InT
 	Datas[InTag]->GetCombat()->ReloadAction(SocketTransform);
 }
 
-void UXZWeaponComponent::StartAiming()
+void UXZWeaponComponent::Aiming(bool bAiming)
 {
 	if (false == IsValid(GetXZCharacter())) return;
 
-	GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
-	bIsAiming = true;
+	bIsAiming = bAiming;
 }
 
-void UXZWeaponComponent::EndAiming()
+void UXZWeaponComponent::OnRep_Aiming()
 {
-	if (false == IsValid(GetXZCharacter())) return;
-
-	GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
-	bIsAiming = false;
+	if (bIsAiming)
+	{
+		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
+	}
+	else
+	{
+		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	}
 }
 
 void UXZWeaponComponent::InterpFOV(float InDeltaTime)

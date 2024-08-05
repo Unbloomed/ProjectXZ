@@ -20,9 +20,6 @@ AXZItemBase::AXZItemBase()
 	SphereCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	SphereCollision->SetSphereRadius(100.0f);
 	SphereCollision->SetupAttachment(ItemMesh);
-
-	PickupWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("PickupWidget"));
-	PickupWidget->SetupAttachment(RootComponent);
 }
 
 void AXZItemBase::BeginPlay()
@@ -43,11 +40,7 @@ void AXZItemBase::OnSphereBeginOverlap(UPrimitiveComponent* OverlappedComponent,
 	}
 	else
 	{
-		ACharacter* Character = Cast<ACharacter>(OtherActor);
-		if (IsValid(Character))
-		{
-			ShowPickupWidget(true);
-		}
+
 	}
 }
 
@@ -59,18 +52,6 @@ void AXZItemBase::OnSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, A
 	}
 	else
 	{
-		ACharacter* Character = Cast<ACharacter>(OtherActor);
-		if (IsValid(Character))
-		{
-			ShowPickupWidget(false);
-		}
-	}
-}
 
-void AXZItemBase::ShowPickupWidget(bool bShow)
-{
-	if (IsValid(PickupWidget))
-	{
-		PickupWidget->SetVisibility(bShow);
 	}
 }

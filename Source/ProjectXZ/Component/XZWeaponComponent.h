@@ -24,7 +24,12 @@ public:
 	TObjectPtr<AXZPlayerController> GetXZPlayerController();
 	TObjectPtr<AXZHUD> GetXZHUD();
 
-	// 명령
+	UFUNCTION(Server, Reliable)
+	void Server_AddNewWeapon(const FGameplayTag& InTag);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AddNewWeapon(const FGameplayTag& InTag);
+	void AddNewWeapon(const FGameplayTag& InTag);
+
 	void EquipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeapon(const FGameplayTag& InTag);
@@ -43,8 +48,7 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_Reload(const FGameplayTag& InTag, const FTransform& SocketTransform);
 
-	void StartAiming();
-	void EndAiming();
+	void Aiming(bool bAiming);
 
 protected:
 	virtual void BeginPlay() override;
@@ -82,8 +86,10 @@ private:
 
 	//***************************************************************
 	//** Aiming
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
 	bool bIsAiming = false;
+	UFUNCTION()
+	void OnRep_Aiming();
 
 	float CurrentFOV = 90.0f; // 현재 FOV 값
 	UPROPERTY(EditDefaultsOnly, Category = "Aiming Data", meta = (AllowPrivateAccess = true))

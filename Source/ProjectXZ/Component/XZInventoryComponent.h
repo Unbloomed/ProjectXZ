@@ -40,6 +40,10 @@ protected:
 private:
 	FGameplayTag EquipSlot1 = FXZTags::GetXZTags().Weapon_Projectile_Pistol;
 	FGameplayTag EquipSlot2 = FXZTags::GetXZTags().Weapon_Projectile_Rifle;
-	FGameplayTag EquipSlot3 = FXZTags::GetXZTags().Weapon_Projectile_SMG;
-	FGameplayTag EquipSlot4 = FXZTags::GetXZTags().Weapon_Hitscan_Shotgun;
+
+	UPROPERTY(Replicated)
+	FGameplayTag EquipSlot3;
+
+	UPROPERTY(Replicated)
+	FGameplayTag EquipSlot4;
 };
