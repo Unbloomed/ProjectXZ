@@ -13,7 +13,8 @@ UCLASS()
 class PROJECTXZ_API UXZHpBarWidget : public UXZUserWidget
 {
 	GENERATED_BODY()
-	public:
+
+public:
 		UXZHpBarWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:

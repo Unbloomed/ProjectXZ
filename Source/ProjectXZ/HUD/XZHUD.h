@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/HUD.h"
@@ -16,20 +16,14 @@ class PROJECTXZ_API AXZHUD : public AHUD
 public:
 	AXZHUD();
 	virtual void DrawHUD() override;
-	virtual void BeginPlay() override;
 
-	// TODO: CrosshairTexture2D º¯¼öÀ§Ä¡ ÀÌµ¿
+	// TODO: CrosshairTexture2D 쨘짱쩌철?짠횆징 ?횑쨉쩔
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Texture")
 	TObjectPtr<UTexture2D> CrosshairTexture2D;
 
 
 protected:
-	void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Widget")
-	TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
-	UPROPERTY()
-	TObjectPtr<UUserWidget> CharacterOverlayWidget;
+	virtual void BeginPlay() override;
 
 
 private:
@@ -38,7 +32,13 @@ private:
 	// Test
 	void UpdateHPBarWidget(float MaxHP, float CurrentHP);
 
-private:
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Widget", meta = (AllowPrivateAccess = true))
+	TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
+	UPROPERTY()
+	TObjectPtr<UUserWidget> CharacterOverlayWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Widget", meta = (AllowPrivateAccess = true))
 	TSubclassOf<class UXZHpBarWidget> HpBarWidgetClass;
+	UPROPERTY()
 	TObjectPtr<class UXZHpBarWidget> HpBarWidget;
 };

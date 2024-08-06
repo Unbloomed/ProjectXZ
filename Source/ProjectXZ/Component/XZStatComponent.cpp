@@ -1,7 +1,6 @@
 #include "XZStatComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Manager/XZDataManager.h"
-#include "MVVMSubsystem.h"
 
 UXZStatComponent::UXZStatComponent()
 {
