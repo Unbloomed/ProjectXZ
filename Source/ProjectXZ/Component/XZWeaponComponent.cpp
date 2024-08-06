@@ -1,4 +1,6 @@
 #include "XZWeaponComponent.h"
+
+#include "XZStateComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -18,6 +20,7 @@ UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
+	//SetIsReplicated(true);
 }
 
 void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -25,7 +28,8 @@ void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
+	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, bIsAiming, COND_None, REPNOTIFY_Always);
+	//DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
 }
 
 void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -303,10 +307,12 @@ void UXZWeaponComponent::OnRep_Aiming()
 {
 	if (bIsAiming)
 	{
+		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Aim);
 		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
 	}
 	else
 	{
+		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Idle);
 		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 	}
 }

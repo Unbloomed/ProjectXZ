@@ -12,6 +12,24 @@ void AXZHUD::DrawHUD()
 
 		// Crosshair 그리기
 		DrawCrosshair(CrosshairTexture2D, ViewportCenter, FLinearColor::White);
+
+		// 캐릭터 상태창
+		APlayerController* PC = GetOwningPlayerController();
+		if (IsValid(PC) && CharacterOverlayWidgetClass)
+		{
+			CharacterOverlayWidget = CreateWidget<UUserWidget>(PC, CharacterOverlayWidgetClass);
+		}
+	}
+}
+
+void AXZHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (IsValid(CharacterOverlayWidget))
+	{
+		CharacterOverlayWidget->AddToViewport();
+		CharacterOverlayWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
@@ -29,3 +47,4 @@ void AXZHUD::DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLin
 	// Texture 그리기
 	DrawTexture(InTexture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.0f, 0.0f, 1.0f, 1.0f, CrosshairColor);
 }
+
