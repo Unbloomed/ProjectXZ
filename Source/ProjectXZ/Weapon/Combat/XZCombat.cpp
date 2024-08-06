@@ -62,6 +62,15 @@ void UXZCombat::OnFireBullet(const FVector_NetQuantize& HitTargetLocation, const
             UGameplayStatics::PlaySoundAtLocation(XZAttachment->GetWeaponMesh(), ActionDatas[Idx].FireSound, XZAttachment->GetWeaponMesh()->GetComponentLocation());
         }
 
+        // CameraShake 효과
+        if (IsValid(ActionDatas[Idx].CameraShakeClass))
+        {
+            if (OwnerCharacter->GetController<APlayerController>())
+            {
+                OwnerCharacter->GetController<APlayerController>()->PlayerCameraManager->StartCameraShake(ActionDatas[Idx].CameraShakeClass);
+            }
+        }
+
         // 탄피 배출
         if (IsValid(BulletData.CasingClass))
         {

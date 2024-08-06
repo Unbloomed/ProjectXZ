@@ -58,6 +58,9 @@ public:
 	TObjectPtr<UParticleSystem> MuzzleFlashEffect;
 
 	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
+
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AXZProjectile> ProjectileClass;
 };
 
