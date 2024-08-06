@@ -4,6 +4,7 @@
 #include "XZCharacter.h"
 #include "ProjectXZ/Component/XZInputComponent.h"
 #include "ProjectXZ/Component/XZWeaponComponent.h"
+#include "ProjectXZ/Component/XZStateComponent.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 
 UXZPawnExtensionComponent::UXZPawnExtensionComponent(const FObjectInitializer& ObjectInitializer)
@@ -98,9 +99,10 @@ void UXZPawnExtensionComponent::Input_Jump(FGameplayTag InputTag)
 {
 	if (false == InputTag.MatchesTagExact(FXZTags::GetXZTags().InputTag_Jump)) return;
 
-	if (ACharacter* Character = GetPawn<ACharacter>())
+	if (AXZCharacter* Character = GetPawn<AXZCharacter>())
 	{
 		Character->Jump();
+		Character->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Posture_Jump);
 	}
 }
 
@@ -108,9 +110,10 @@ void UXZPawnExtensionComponent::Input_StopJumping(FGameplayTag InputTag)
 {
 	if (false == InputTag.MatchesTagExact(FXZTags::GetXZTags().InputTag_StopJumping)) return;
 
-	if (ACharacter* Character = GetPawn<ACharacter>())
+	if (AXZCharacter* Character = GetPawn<AXZCharacter>())
 	{
 		Character->StopJumping();
+		Character->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Posture_Idle);
 	}
 }
 

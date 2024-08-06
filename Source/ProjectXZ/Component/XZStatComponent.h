@@ -59,8 +59,10 @@ public:
 	FOnHpChangedDelegate OnHpChanged;
 	FOnStatChangedDelegate OnStatChanged;
 
-protected:
+private:
 	void SetHP(float NewHp);
+	void IncreaseHealth(float Amount);
+	void DecreaseHealth(float Amount);
 
 	UFUNCTION()
 	void OnRep_CurrentHp();

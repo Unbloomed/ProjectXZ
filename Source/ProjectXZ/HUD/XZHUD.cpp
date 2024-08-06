@@ -1,4 +1,14 @@
 #include "XZHUD.h"
+#include "Widget/XZHpBarWidget.h"
+
+AXZHUD::AXZHUD() 
+{
+	static ConstructorHelpers::FClassFinder<UXZHpBarWidget> HpBarWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/BP/Widget/BP_TestHPBar.BP_TestHPBar_C'"));
+	if (HpBarWidgetClassRef.Class)
+	{
+		HpBarWidgetClass = HpBarWidgetClassRef.Class;
+	}
+}
 
 void AXZHUD::DrawHUD()
 {
@@ -15,6 +25,21 @@ void AXZHUD::DrawHUD()
 	}
 }
 
+void AXZHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Create HpBarWidget
+	if (HpBarWidgetClass)
+	{
+		HpBarWidget = CreateWidget<UXZHpBarWidget>(PlayerOwner, HpBarWidgetClass, TEXT("HpBarWidget"));
+		if (HpBarWidget) 
+		{
+			HpBarWidget->AddToViewport();
+		}
+	}
+}
+
 void AXZHUD::DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLinearColor CrosshairColor)
 {
 	const float TextureWidth = InTexture->GetSizeX();  // Texture 너비
@@ -28,4 +53,10 @@ void AXZHUD::DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLin
 
 	// Texture 그리기
 	DrawTexture(InTexture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.0f, 0.0f, 1.0f, 1.0f, CrosshairColor);
+}
+
+void AXZHUD::UpdateHPBarWidget(float MaxHP, float CurrentHP)
+{
+	const float NewPercent = FMath::Clamp((CurrentHP / MaxHP), 0.0f, 1.0f);
+	HpBarWidget->UpdateHpBar(NewPercent);
 }

@@ -10,6 +10,7 @@ class UCameraComponent;
 class UXZWeaponComponent;
 class UObject;
 struct FFrame;
+class UXZStateComponent;
 
 UENUM()
 enum class EXZCharacterType : uint8
@@ -27,6 +28,7 @@ public:
 	virtual void BeginPlay() override;
 
 	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
+	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() { return StateComponent; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
 
 protected:
