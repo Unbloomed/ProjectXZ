@@ -3,23 +3,27 @@
 #include "XZCharacterMovementComponent.h"
 #include "XZPawnExtensionComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Component/XZInventoryComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "ProjectXZ/Component/XZInputComponent.h"
 #include "ProjectXZ/Component/XZWeaponComponent.h"
 #include "Component/XZStateComponent.h"
 #include "Component/XZStatComponent.h"
+#include "Components/TextRenderComponent.h"
 #include "GameplayTag/XZGameplayTags.h"
 #include "Manager/XZDataManager.h"
 
 AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UXZCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-	PrimaryActorTick.bCanEverTick = false;
-	PrimaryActorTick.bStartWithTickEnabled = false;
+	// TODO: 캐릭터 머리 위 디버깅용 텍스트 때문에 틱 당 봐야해서 true설정. 추후에 false로 변경.
+	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
+
 	bReplicates = true;
 
-	NetCullDistanceSquared = 900000000.f;
+	NetCullDistanceSquared = 900000000.0f;
 
 	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
 	checkf(CapsuleComp, TEXT("No CapsuleComp. Check ALLCharacter::ALLCharacter"));
@@ -74,6 +78,23 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 
 	// StateComponent
 	StateComponent = CreateDefaultSubobject<UXZStateComponent>(TEXT("StateComponent"));
+
+	// InventoryComponent
+	InventoryComponent = CreateDefaultSubobject<UXZInventoryComponent>(TEXT("InventoryComponent"));
+
+
+	//***********************************************************************************
+	//** 디버깅용. 캐릭터 머리 위에 상태 띄우기.
+	TextRender_State = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_State"));
+	TextRender_State->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	TextRender_State->SetRelativeLocation(FVector(0.0f, 0.0f, 110.0f));
+	TextRender_State->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+
+	TextRender_Weapon = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_Weapon"));
+	TextRender_Weapon->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	TextRender_Weapon->SetRelativeLocation(FVector(0.0f, 0.0f, 90.0f));
+	TextRender_Weapon->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	//***********************************************************************************
 }
 
 void AXZCharacter::DisablePlayerInput()
@@ -210,6 +231,21 @@ void AXZCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 디버깅용.
+	TextRender_State->SetVisibility(true);
+	TextRender_Weapon->SetVisibility(true);
+}
+
+void AXZCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// 디버깅용.
+	CurrentCharacterState = GetStateComponent()->GetState().ToString();
+	TextRender_State->SetText(FText::FromString(CurrentCharacterState));
+
+	CurrentEquippedWeapon = GetWeaponComponent()->GetEquippedWeaponTag().ToString();
+	TextRender_Weapon->SetText(FText::FromString(CurrentEquippedWeapon));
 }
 
 void AXZCharacter::PossessedBy(AController* NewController)

@@ -55,6 +55,12 @@ public:
 	FName MuzzleSocketName = TEXT("MuzzleFlash");
 
 	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UParticleSystem> MuzzleFlashEffect;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UCameraShakeBase> CameraShakeClass;
+
+	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AXZProjectile> ProjectileClass;
 };
 

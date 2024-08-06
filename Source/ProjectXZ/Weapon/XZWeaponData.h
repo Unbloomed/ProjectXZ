@@ -20,6 +20,7 @@ private:
 	friend class UXZDA_Weapon;
 
 public:
+	FORCEINLINE AXZAttachment* GetAttachment() { return Attachment; }
 	FORCEINLINE UXZEquipment* GetEquipment() { return Equipment; }
 	FORCEINLINE UXZCombat* GetCombat() { return Combat; }
 

@@ -1,5 +1,8 @@
 #include "XZWeaponComponent.h"
+
+#include "XZStateComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -11,11 +14,13 @@
 #include "ProjectXZ/Weapon/XZEquipment.h"
 #include "ProjectXZ/Weapon/XZWeaponData.h"
 #include "ProjectXZ/Weapon/Combat/XZCombat.h"
+#include "Weapon/Attachment/XZAttachment.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
+	//SetIsReplicated(true);
 }
 
 void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -23,7 +28,8 @@ void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
+	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, bIsAiming, COND_None, REPNOTIFY_Always);
+	//DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
 }
 
 void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -83,6 +89,21 @@ void UXZWeaponComponent::BeginPlay()
 	}
 }
 
+void UXZWeaponComponent::AddNewWeapon(const FGameplayTag& InTag)
+{
+	Server_AddNewWeapon(InTag);
+}
+
+void UXZWeaponComponent::Server_AddNewWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Multicast_AddNewWeapon(InTag);
+}
+
+void UXZWeaponComponent::Multicast_AddNewWeapon_Implementation(const FGameplayTag& InTag)
+{
+	WeaponList[InTag]->CreateInstance(GetXZCharacter(), &Datas[InTag]);
+}
+
 void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 {
 	FVector2D ViewportSize;
@@ -129,6 +150,7 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 	Server_EquipWeapon(InTag);
 }
 
+
 void UXZWeaponComponent::OnRep_EquippedChanged()
 {
 
@@ -172,36 +194,42 @@ void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag
 
 void UXZWeaponComponent::Fire()
 {
+	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return; // 무기 장착 중이 아니라면 return
+
 	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
 	{
-		Server_Fire(HitTarget);
+		const USkeletalMeshSocket* MuzzleFlashSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
+			Datas[EquippedWeaponTag]->GetCombat()->GetActionData()[0].MuzzleSocketName);
+		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
+			
+		Server_Fire(HitTarget, SocketTransform);
 	}
 }
 
-void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation)
+void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
 {
-	Multicast_Fire(EquippedWeaponTag, HitLocation);
+	Multicast_Fire(HitLocation, SocketTransform);
 }
 
-void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+void UXZWeaponComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
 {
-	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	if (UXZWeaponData** FoundData = Datas.Find(EquippedWeaponTag))
 	{
 		if (*FoundData)
 		{
-			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+			if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
 			{
-				Reload(InTag); // 재장전
+				Reload(EquippedWeaponTag); // 재장전
 				return;
 			}
 			
-			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[InTag]->GetCombat()->GetBulletData().Ammo);
-			Datas[InTag]->GetCombat()->FireAction(HitLocation);
-			Datas[InTag]->GetCombat()->ConsumeAmmo();
+			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo);
+			Datas[EquippedWeaponTag]->GetCombat()->FireAction(HitLocation, SocketTransform);
+			Datas[EquippedWeaponTag]->GetCombat()->ConsumeAmmo();
 
-			if (Datas[InTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+			if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
 			{
-				Reload(InTag); // 재장전
+				Reload(EquippedWeaponTag); // 재장전
 			}
 		}
 		else
@@ -217,14 +245,24 @@ void UXZWeaponComponent::Multicast_Fire_Implementation(const FGameplayTag& InTag
 
 void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 {
-	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) return; // 총알 없는 경우 return
+	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Run out of Bullets"));
+		return; // 총알 없는 경우 return
+	}
+
+	const USkeletalMeshSocket* MagazineSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
+		Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().CasingSocketName);
+	FTransform SocketTransform = MagazineSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
+
+
+	Server_Reload(InTag, SocketTransform);
+
 
 	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
 		if (*FoundData)
 		{
-			Datas[InTag]->GetCombat()->ReloadAction();
-
 			// 총알 채우기
 			if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo >= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity)
 			{
@@ -248,20 +286,35 @@ void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 	}
 }
 
-void UXZWeaponComponent::StartAiming()
+void UXZWeaponComponent::Server_Reload_Implementation(const FGameplayTag& InTag, const FTransform& SocketTransform)
 {
-	if (false == IsValid(GetXZCharacter())) return;
-
-	GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
-	bIsAiming = true;
+	Multicast_Reload(InTag, SocketTransform);
 }
 
-void UXZWeaponComponent::EndAiming()
+void UXZWeaponComponent::Multicast_Reload_Implementation(const FGameplayTag& InTag, const FTransform& SocketTransform)
+{
+	Datas[InTag]->GetCombat()->ReloadAction(SocketTransform);
+}
+
+void UXZWeaponComponent::Aiming(bool bAiming)
 {
 	if (false == IsValid(GetXZCharacter())) return;
 
-	GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
-	bIsAiming = false;
+	bIsAiming = bAiming;
+}
+
+void UXZWeaponComponent::OnRep_Aiming()
+{
+	if (bIsAiming)
+	{
+		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Aim);
+		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
+	}
+	else
+	{
+		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Idle);
+		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
+	}
 }
 
 void UXZWeaponComponent::InterpFOV(float InDeltaTime)

@@ -17,16 +17,17 @@ class PROJECTXZ_API UXZCombat : public UObject
 public:
 	void Init(class AXZAttachment* InWeapon, ACharacter* InOwner, const TArray<FActionData>& InActionDatas, const FBulletData& InBulletData);
 
+	FORCEINLINE const TArray<FActionData>& GetActionData() { return ActionDatas; }
 	FORCEINLINE FBulletData& GetBulletData() { return BulletData; }
 	FORCEINLINE void ConsumeAmmo() { BulletData.Ammo--; }
 
-	void FireAction(const FVector_NetQuantize& HitTaget);
-	void ReloadAction();
+	void FireAction(const FVector_NetQuantize& HitTaget, const FTransform& SocketTransform);
+	void ReloadAction(const FTransform& SocketTransform);
 
 
 private:
-	void OnFireBullet(const FVector_NetQuantize& HitTargettLocation);
-	void OnEjectMagazine();
+	void OnFireBullet(const FVector_NetQuantize& HitTargetLocation, const FTransform& SocketTransform);
+	void OnEjectMagazine(const FTransform& SocketTransform);
 	void OnThrowMagazineToGround();
 	void OnAttachNewMagazine();
 
@@ -40,5 +41,4 @@ private:
 	TObjectPtr<AXZProjectile> SpawnedProjectile;
 	TObjectPtr<AXZMagazine> EjectedMagazine;
 	TObjectPtr<AXZMagazine> NewMagazine;
-	
 };

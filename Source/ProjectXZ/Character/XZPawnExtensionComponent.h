@@ -39,6 +39,8 @@ private:
 	void Input_LookMouse(const FInputActionValue& InputActionValue);
 	void Input_Crouch(const FInputActionValue& InputActionValue);
 
+	void Input_PickupItem(const FInputActionValue& InputActionValue);
+
 	void Input_EquipSlot1(const FInputActionValue& InputActionValue);
 	void Input_EquipSlot2(const FInputActionValue& InputActionValue);
 	void Input_EquipSlot3(const FInputActionValue& InputActionValue);
@@ -52,10 +54,10 @@ private:
 	void Input_Aim(FGameplayTag InputTag);
 	void Input_StopAiming(FGameplayTag InputTag);
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UInputMappingContext> DefaultIMC;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Input", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Input", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UXZDA_InputConfig> InputConfig;
 
 

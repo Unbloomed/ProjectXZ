@@ -38,7 +38,7 @@ void AXZProjectile::BeginPlay()
 	ProjectileMovementComponent->MaxSpeed = ProjectileData.InitialSpeed;
 	ProjectileMovementComponent->ProjectileGravityScale = ProjectileData.GravityScale;
 
-	if (HasAuthority())
+	//if (HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &ThisClass::OnHit);
 		CollisionBox->IgnoreActorWhenMoving(Owner, true);

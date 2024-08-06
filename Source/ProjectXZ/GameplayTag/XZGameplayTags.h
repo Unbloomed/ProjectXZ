@@ -30,6 +30,8 @@ public:
 	FGameplayTag InputTag_Move;
 	FGameplayTag InputTag_Look_Mouse;
 
+	FGameplayTag InputTag_PickupItem;
+
 	FGameplayTag InputTag_1;
 	FGameplayTag InputTag_2;
 	FGameplayTag InputTag_3;

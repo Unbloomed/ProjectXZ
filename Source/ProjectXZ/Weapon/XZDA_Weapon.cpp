@@ -9,6 +9,7 @@ UXZDA_Weapon::UXZDA_Weapon()
 {
 	AttachmentClass = AXZAttachment::StaticClass();
 	EquipmentClass = UXZEquipment::StaticClass();
+	CombatClass = UXZCombat::StaticClass();
 }
 
 // 객체를 생성해서 리턴한다. 생성 리턴이기 때문에 이차 포인터를 사용

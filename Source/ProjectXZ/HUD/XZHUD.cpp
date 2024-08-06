@@ -20,8 +20,26 @@ void AXZHUD::DrawHUD()
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
 
-		// Crosshair ±×¸®±â
+		// Crosshair ê·¸ë¦¬ê¸°
 		DrawCrosshair(CrosshairTexture2D, ViewportCenter, FLinearColor::White);
+
+		// ìºë¦­í„° ìƒíƒœì°½
+		APlayerController* PC = GetOwningPlayerController();
+		if (IsValid(PC) && CharacterOverlayWidgetClass)
+		{
+			CharacterOverlayWidget = CreateWidget<UUserWidget>(PC, CharacterOverlayWidgetClass);
+		}
+	}
+}
+
+void AXZHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (IsValid(CharacterOverlayWidget))
+	{
+		CharacterOverlayWidget->AddToViewport();
+		CharacterOverlayWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
@@ -42,21 +60,23 @@ void AXZHUD::BeginPlay()
 
 void AXZHUD::DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLinearColor CrosshairColor)
 {
-	const float TextureWidth = InTexture->GetSizeX();  // Texture ³Êºñ
-	const float TextureHeight = InTexture->GetSizeY(); // Texture ³ôÀÌ
+	const float TextureWidth = InTexture->GetSizeX();  // Texture ë„ˆë¹„
+	const float TextureHeight = InTexture->GetSizeY(); // Texture ë†’ì´
 
-	// Texture ±×¸®±â À§Ä¡ ¼³Á¤
+	// Texture ê·¸ë¦¬ê¸° ìœ„ì¹˜ ì„¤ì •
 	const FVector2D TextureDrawPoint(
 		ViewportCenter.X - (TextureWidth / 2.0f),
 		ViewportCenter.Y - (TextureHeight / 2.0f)
 	);
 
-	// Texture ±×¸®±â
+	// Texture ê·¸ë¦¬ê¸°
 	DrawTexture(InTexture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.0f, 0.0f, 1.0f, 1.0f, CrosshairColor);
 }
+
 
 void AXZHUD::UpdateHPBarWidget(float MaxHP, float CurrentHP)
 {
 	const float NewPercent = FMath::Clamp((CurrentHP / MaxHP), 0.0f, 1.0f);
 	HpBarWidget->UpdateHpBar(NewPercent);
 }
+

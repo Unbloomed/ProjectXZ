@@ -15,7 +15,7 @@ void UXZCombat::Init(AXZAttachment* InAttachment, ACharacter* InOwner, const TAr
     BulletData = InBulletData;
 }
 
-void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget)
+void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget, const FTransform& SocketTransform)
 {
     if (false == IsValid(OwnerCharacter)) return;
 
@@ -26,9 +26,9 @@ void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget)
 
         FTimerHandle FireTimerHandle;
         //FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnFireBullet, HitTarget);
-        FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, HitTarget]()
+        FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, HitTarget, SocketTransform]()
             {
-                this->OnFireBullet(HitTarget);
+                this->OnFireBullet(HitTarget, SocketTransform);
             });
         OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FireTimerDelegate, ActionDatas[Idx].Action_FrameTime, false);
     }
@@ -40,86 +40,105 @@ void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget)
     }
 }
 
-void UXZCombat::OnFireBullet(const FVector_NetQuantize& HitTargetLocation)
+void UXZCombat::OnFireBullet(const FVector_NetQuantize& HitTargetLocation, const FTransform& SocketTransform)
 {
-    if (IsValid(XZAttachment) && IsValid(XZAttachment->GetWeaponMesh()))
+    if (false == IsValid(XZAttachment) && false == IsValid(XZAttachment->GetWeaponMesh())) return;
+    
+    FRotator TargetRotation = (HitTargetLocation - SocketTransform.GetLocation()).Rotation();
+
+    //*******************************************************************************
+    //** 클라이언트에서만 재생되도되는 이펙트: 총구 이펙트, 발사 사운드, 탄피 배출
+    if (false == OwnerCharacter->HasAuthority())
     {
-        //*******************************************************************************
-        //** 무기 Nozzle에서 총알 발사
-        if (OwnerCharacter->HasAuthority()) // 총알은 서버에서만 발사
+        // 총구 이펙트
+        if (ActionDatas[Idx].MuzzleFlashEffect)
         {
-	        const USkeletalMeshSocket* MuzzleFlashSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(ActionDatas[Idx].MuzzleSocketName);
-	        if (IsValid(MuzzleFlashSocket))
-	        {
-	            FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
-	            FRotator TargetRotation = (HitTargetLocation - SocketTransform.GetLocation()).Rotation();
-
-	            if (IsValid(ActionDatas[Idx].ProjectileClass))
-	            {
-	                UE_LOG(LogTemp, Warning, TEXT("Spawning projectile at location: %s with rotation: %s"), *SocketTransform.GetLocation().ToString(), *TargetRotation.ToString());
-
-	                FActorSpawnParameters SpawnParams;
-	                SpawnParams.Owner = XZAttachment->GetOwner();
-	                SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
-	                SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-	                SpawnedProjectile = OwnerCharacter->GetWorld()->SpawnActor<AXZProjectile>(ActionDatas[Idx].ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
-	            }
-	        }
+            UGameplayStatics::SpawnEmitterAtLocation(XZAttachment->GetWeaponMesh(), ActionDatas[Idx].MuzzleFlashEffect, SocketTransform.GetLocation(), TargetRotation);
         }
-        //*******************************************************************************
 
-        //*******************************************************************************
-        if (false == OwnerCharacter->HasAuthority())
+        // 발사 사운드
+        if (IsValid(ActionDatas[Idx].FireSound))
         {
-	        // 발사 사운드
-	        if (IsValid(ActionDatas[Idx].FireSound))
-	        {
-	            UGameplayStatics::PlaySoundAtLocation(XZAttachment->GetWeaponMesh(), ActionDatas[Idx].FireSound, XZAttachment->GetWeaponMesh()->GetComponentLocation());
-	        }
-
-	        // 탄피 배출
-	        if (IsValid(BulletData.CasingClass))
-	        {
-	            const USkeletalMeshSocket* AmmoEjectSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(BulletData.CasingSocketName);
-	            if (IsValid(AmmoEjectSocket))
-	            {
-	                FTransform SocketTransform = AmmoEjectSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
-
-	                OwnerCharacter->GetWorld()->SpawnActor<AXZCasing>(BulletData.CasingClass, SocketTransform.GetLocation(), SocketTransform.GetRotation().Rotator());
-	            }
-	        }
+            UGameplayStatics::PlaySoundAtLocation(XZAttachment->GetWeaponMesh(), ActionDatas[Idx].FireSound, XZAttachment->GetWeaponMesh()->GetComponentLocation());
         }
-        //*******************************************************************************
+
+        // CameraShake 효과
+        if (IsValid(ActionDatas[Idx].CameraShakeClass))
+        {
+            if (OwnerCharacter->GetController<APlayerController>())
+            {
+                OwnerCharacter->GetController<APlayerController>()->PlayerCameraManager->StartCameraShake(ActionDatas[Idx].CameraShakeClass);
+            }
+        }
+
+        // 탄피 배출
+        if (IsValid(BulletData.CasingClass))
+        {
+            const USkeletalMeshSocket* AmmoEjectSocket = XZAttachment->GetWeaponMesh()->GetSocketByName(BulletData.CasingSocketName);
+            if (IsValid(AmmoEjectSocket))
+            {
+                FTransform AmmoEjectSocketTransform = AmmoEjectSocket->GetSocketTransform(XZAttachment->GetWeaponMesh());
+
+                OwnerCharacter->GetWorld()->SpawnActor<AXZCasing>(BulletData.CasingClass, AmmoEjectSocketTransform.GetLocation(), AmmoEjectSocketTransform.GetRotation().Rotator());
+            }
+        }
     }
+    //*******************************************************************************
+
+    //*******************************************************************************
+    //** 서버: 무기 Nozzle에서 총알 발사
+    if (OwnerCharacter->HasAuthority())
+    {
+        // 총알 발사
+        if (IsValid(ActionDatas[Idx].ProjectileClass))
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Spawning projectile at location: %s with rotation: %s"), *SocketTransform.GetLocation().ToString(), *TargetRotation.ToString());
+
+            FActorSpawnParameters SpawnParams;
+            SpawnParams.Owner = XZAttachment->GetOwner();
+            SpawnParams.Instigator = Cast<APawn>(XZAttachment->GetOwner());
+            SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+            SpawnedProjectile = OwnerCharacter->GetWorld()->SpawnActor<AXZProjectile>(ActionDatas[Idx].ProjectileClass, SocketTransform.GetLocation(), TargetRotation, SpawnParams);
+        }
+    }
+    //*******************************************************************************
 }
 
-void UXZCombat::ReloadAction()
+void UXZCombat::ReloadAction(const FTransform& SocketTransform)
 {
+    if (false == IsValid(OwnerCharacter)) return;
+
     if (IsValid(BulletData.ReloadMontage))
     {
         OwnerCharacter->PlayAnimMontage(BulletData.ReloadMontage);
 
-        FTimerHandle ReloadTimerHandle;
-        FTimerDelegate ReloadTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnEjectMagazine);
-        OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, ReloadTimerDelegate, BulletData.EjectMagazine_FrameTime, false);
+        if (OwnerCharacter->HasAuthority())
+        {
+            FTimerHandle ReloadTimerHandle;
+            //FTimerDelegate ReloadTimerDelegate = FTimerDelegate::CreateUObject(this, &ThisClass::OnEjectMagazine, SocketTransform);
+            FTimerDelegate ReloadTimerDelegate = FTimerDelegate::CreateLambda([this, SocketTransform]()
+                {
+                    this->OnEjectMagazine(SocketTransform);
+                });
+            OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle, ReloadTimerDelegate, BulletData.EjectMagazine_FrameTime, false);
 
-        FTimerHandle ReloadTimerHandle2;
-        FTimerDelegate ReloadTimerDelegate2 = FTimerDelegate::CreateUObject(this, &ThisClass::OnAttachNewMagazine);
-        OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle2, ReloadTimerDelegate2, BulletData.AttachMagazine_FrameTime, false);
+            //FTimerHandle ReloadTimerHandle2;
+            //FTimerDelegate ReloadTimerDelegate2 = FTimerDelegate::CreateUObject(this, &ThisClass::OnAttachNewMagazine);
+            //OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(ReloadTimerHandle2, ReloadTimerDelegate2, BulletData.AttachMagazine_FrameTime, false);
+        }
     }
 }
 
-void UXZCombat::OnEjectMagazine()
+void UXZCombat::OnEjectMagazine(const FTransform& SocketTransform)
 {
     if (IsValid(XZAttachment) && IsValid(XZAttachment->GetWeaponMesh()))
     {
         if (BulletData.MagazineSocketName.IsValid())
         {
             XZAttachment->GetWeaponMesh()->HideBoneByName(BulletData.MagazineSocketName, EPhysBodyOp::PBO_None);
-            
 
-        	FTransform SocketTransform = XZAttachment->GetWeaponMesh()->GetSocketTransform(BulletData.MagazineSocketName);
+        	//FTransform SocketTransform = XZAttachment->GetWeaponMesh()->GetSocketTransform(BulletData.MagazineSocketName);
 
             if (IsValid(OwnerCharacter) && IsValid(OwnerCharacter->GetWorld()) && IsValid(BulletData.MagazineClass))
             {
@@ -146,9 +165,9 @@ void UXZCombat::OnThrowMagazineToGround()
 
 void UXZCombat::OnAttachNewMagazine()
 {
-    FActorSpawnParameters params;
-    params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-    NewMagazine = OwnerCharacter->GetWorld()->SpawnActor<AXZMagazine>(BulletData.MagazineClass, params);
-    NewMagazine->AttachToActor(OwnerCharacter, FAttachmentTransformRules::KeepRelativeTransform, FName(TEXT("hand_l")));
+    //FActorSpawnParameters params;
+    //params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    //
+    //NewMagazine = OwnerCharacter->GetWorld()->SpawnActor<AXZMagazine>(BulletData.MagazineClass, params);
+    //NewMagazine->AttachToActor(OwnerCharacter, FAttachmentTransformRules::KeepRelativeTransform, FName(TEXT("hand_l")));
 }
