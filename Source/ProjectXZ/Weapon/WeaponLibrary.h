@@ -44,7 +44,13 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	float Action_FrameTime = 0.0f;
-	
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USoundBase> FireSound;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UAnimationAsset> GunFireAnimation;
+
 	UPROPERTY(EditDefaultsOnly)
 	FName MuzzleSocketName = TEXT("MuzzleFlash");
 
@@ -59,13 +65,22 @@ struct FBulletData
 
 public:
 	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AActor> CasingClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	FName CasingSocketName = TEXT("CasingSocket");
+
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAnimMontage> ReloadMontage;
 
 	UPROPERTY(EditDefaultsOnly)
-	float RemoveMagazine_FrameTime = 0.0f;
+	float EjectMagazine_FrameTime = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	float AttachMagazine_FrameTime = 0.0f;
+	float ThrowMagazine_FrameTime = 0.5f;
+
+	UPROPERTY(EditDefaultsOnly)
+	float AttachMagazine_FrameTime = 0.8f;
 
 	UPROPERTY(EditDefaultsOnly)
 	FName MagazineSocketName = TEXT("MagazineSocket");
@@ -73,8 +88,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AXZProjectile> ProjectileClass;
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AActor> CasingClass;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AActor> MagazineClass;

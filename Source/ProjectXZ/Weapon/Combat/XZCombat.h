@@ -4,6 +4,7 @@
 #include "XZCombat.generated.h"
 
 class AXZProjectile;
+class AXZMagazine;
 
 /**
  * 
@@ -19,13 +20,14 @@ public:
 	FORCEINLINE FBulletData& GetBulletData() { return BulletData; }
 	FORCEINLINE void ConsumeAmmo() { BulletData.Ammo--; }
 
-	void FireAction(const FVector& HitTaget);
+	void FireAction(const FVector_NetQuantize& HitTaget);
 	void ReloadAction();
 
 
 private:
-	void OnFireBullet(const FVector& HitTargettLocation);
-	void OnRemoveMagazine();
+	void OnFireBullet(const FVector_NetQuantize& HitTargettLocation);
+	void OnEjectMagazine();
+	void OnThrowMagazineToGround();
 	void OnAttachNewMagazine();
 
 	TObjectPtr<AXZAttachment> XZAttachment;
@@ -36,6 +38,7 @@ private:
 	uint32 Idx = 0;
 
 	TObjectPtr<AXZProjectile> SpawnedProjectile;
-	TObjectPtr<AActor> SpawnedMagazine;
+	TObjectPtr<AXZMagazine> EjectedMagazine;
+	TObjectPtr<AXZMagazine> NewMagazine;
 	
 };

@@ -17,6 +17,7 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+	bReplicates = true;
 
 	NetCullDistanceSquared = 900000000.f;
 
@@ -209,6 +210,43 @@ void AXZCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+}
+
+void AXZCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	PlayerController = Cast<APlayerController>(GetController());
+	if (!PlayerController)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AXZCharacter::PossessedBy - Do Not Have PlayerController!"));
+		return;
+	}
+}
+
+void AXZCharacter::OnRep_Owner()
+{
+	PlayerController = Cast<APlayerController>(GetController());
+	if (!PlayerController)
+	{
+		UE_LOG(LogTemp, Log, TEXT("AXZCharacter::OnRep_Owner - Do Not Have PlayerController!"));
+		return;
+	}
+
+	AActor* OwnerActor = GetOwner();
+	if (OwnerActor)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Owner : %s"), *OwnerActor->GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("AXZCharacter::OnRep_Owner - Do Not Have OwnerActor!"));
+	}
+}
+
+void AXZCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
 }
 
 void AXZCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

@@ -3,6 +3,7 @@
 #include "GameFramework/Character.h"
 #include "XZCharacter.generated.h"
 
+class UXZInventoryComponent;
 struct FInputActionValue;
 class USpringArmComponent;
 class UXZPawnExtensionComponent;
@@ -29,9 +30,14 @@ public:
 
 	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
 	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() { return StateComponent; }
+	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() { return InventoryComponent; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
 
 protected:
+	virtual void PossessedBy(AController* NewController) override;
+	virtual void OnRep_Owner() override;
+	virtual void OnRep_PlayerState() override;
+
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
 protected:
@@ -56,12 +62,17 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UXZStateComponent> StateComponent;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UXZInventoryComponent> InventoryComponent;
+
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USpringArmComponent> CameraSpringArm;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
+	UPROPERTY()
+	APlayerController* PlayerController;
 
 	float RemainingRespawnTime;
 	float RespawnTime;

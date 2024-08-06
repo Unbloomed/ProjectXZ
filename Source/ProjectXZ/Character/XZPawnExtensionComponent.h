@@ -41,6 +41,8 @@ private:
 
 	void Input_EquipSlot1(const FInputActionValue& InputActionValue);
 	void Input_EquipSlot2(const FInputActionValue& InputActionValue);
+	void Input_EquipSlot3(const FInputActionValue& InputActionValue);
+	void Input_EquipSlot4(const FInputActionValue& InputActionValue);
 
 	void Input_WeaponFire(const FInputActionValue& InputActionValue);
 	void Input_WeaponReload(const FInputActionValue& InputActionValue);

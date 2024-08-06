@@ -8,6 +8,8 @@
 
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnStateChangedDelegate, const FGameplayTag& /*GamePlayTag*/);
 
+class UXZAnimInstance;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTXZ_API UXZStateComponent : public UActorComponent
 {
@@ -32,4 +34,7 @@ public:
 protected:
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentState, Transient, VisibleInstanceOnly, Category = State)
 	FGameplayTag CurrentState;
+
+	UPROPERTY()
+	TObjectPtr<UXZAnimInstance> AnimInstance;
 };

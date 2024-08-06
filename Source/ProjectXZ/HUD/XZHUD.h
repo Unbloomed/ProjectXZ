@@ -16,7 +16,7 @@ public:
 	virtual void DrawHUD() override;
 
 	// TODO: CrosshairTexture2D 변수위치 이동
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UTexture2D> CrosshairTexture2D;
 
 protected:

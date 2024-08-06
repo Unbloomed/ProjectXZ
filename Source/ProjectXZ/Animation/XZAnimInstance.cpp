@@ -17,8 +17,9 @@ EBlendSpaceMode UXZAnimInstance::GetEnumFromTag(FGameplayTag Tag)
 }
 
 // 상태변경
-void UXZAnimInstance::PlayMontageWithTag(FGameplayTag Tag)
+void UXZAnimInstance::PlayMontageWithTag(const FGameplayTag& Tag)
 {
 	EBlendSpaceMode BlendSpaceMode = GetEnumFromTag(Tag);
 	SetCurrentState(BlendSpaceMode);
+	UE_LOG(LogTemp, Log, TEXT("%s"), BlendSpaceMode);
 }

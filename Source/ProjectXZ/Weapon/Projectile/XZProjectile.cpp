@@ -41,23 +41,18 @@ void AXZProjectile::BeginPlay()
 	if (HasAuthority())
 	{
 		CollisionBox->OnComponentHit.AddDynamic(this, &ThisClass::OnHit);
+		CollisionBox->IgnoreActorWhenMoving(Owner, true);
 	}
 
-}
-
-// 내장함수 Destroyed()는 Destroy()함수가 호출된 후 호출된다.
-void AXZProjectile::Destroyed()
-{
-	Super::Destroyed();
-
+	StartDestroyTimer();
 }
 
 void AXZProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	ACharacter* HittedCharacter = Cast<ACharacter>(Hit.GetActor());
-	if (IsValid(HittedCharacter))
+	if (IsValid(HittedCharacter) && ProjectileData.ImpactBlood)
 	{
-		// TODO: 피 튀기기 효과 + 사운드
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ProjectileData.ImpactBlood, GetActorTransform());
 	}
 	else
 	{
@@ -83,4 +78,11 @@ void AXZProjectile::StartDestroyTimer()
 void AXZProjectile::EndDestroyTimer()
 {
 	Destroy();
+}
+
+// 내장함수 Destroyed()는 Destroy()함수가 호출된 후 호출된다.
+void AXZProjectile::Destroyed()
+{
+	Super::Destroyed();
+
 }

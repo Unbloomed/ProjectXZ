@@ -2,13 +2,15 @@
 #include "Net/UnrealNetwork.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 #include "Character/XZCharacter.h"
-#include "Character/XZCharacter.h"
 #include "ProjectXZ.h"
+#include "Animation/XZAnimInstance.h"
+
 
 UXZStateComponent::UXZStateComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
+	SetIsReplicatedByDefault(true);
 	CurrentState = FXZTags::GetXZTags().StateTag_Alive_Posture_Idle;
 }
 
@@ -17,7 +19,12 @@ void UXZStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	// :: AnimInstance Bind 
-	// Cast<UXZAnimInstnace>(GetOwner<ACharacter>()->GetMesh()->GetAnimInstance())
+	AnimInstance = Cast<UXZAnimInstance>(GetOwner<ACharacter>()->GetMesh()->GetAnimInstance());
+
+	if (AnimInstance)
+	{
+		OnStateChanged.AddUObject(AnimInstance, &UXZAnimInstance::PlayMontageWithTag);
+	}
 }
 
 void UXZStateComponent::InitializeComponent()
@@ -60,6 +67,7 @@ void UXZStateComponent::SetState(FGameplayTag NewState)
 
 void UXZStateComponent::OnRep_CurrentState()
 {
+	UE_LOG(LogTemp, Log, TEXT("UXZStateComponent::OnRep_CurrentState - Begin!"));
 	OnChangeState();
 
 	const FString NetModeInfo =
@@ -83,5 +91,6 @@ void UXZStateComponent::OnRep_CurrentState()
 
 void UXZStateComponent::OnChangeState()
 {
+	UE_LOG(LogTemp, Log, TEXT("UXZStateComponent::OnChangeState - Begin!"));
 	OnStateChanged.Broadcast(CurrentState);
 }
