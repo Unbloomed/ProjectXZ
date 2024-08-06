@@ -1,4 +1,14 @@
 #include "XZHUD.h"
+#include "Widget/XZHpBarWidget.h"
+
+AXZHUD::AXZHUD() 
+{
+	static ConstructorHelpers::FClassFinder<UXZHpBarWidget> HpBarWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/BP/Widget/BP_TestHPBar.BP_TestHPBar_C'"));
+	if (HpBarWidgetClassRef.Class)
+	{
+		HpBarWidgetClass = HpBarWidgetClassRef.Class;
+	}
+}
 
 void AXZHUD::DrawHUD()
 {
@@ -10,10 +20,10 @@ void AXZHUD::DrawHUD()
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
 
-		// Crosshair ±◊∏Æ±‚
+		// Crosshair Í∑∏Î¶¨Í∏∞
 		DrawCrosshair(CrosshairTexture2D, ViewportCenter, FLinearColor::White);
 
-		// ƒ≥∏Ø≈Õ ªÛ≈¬√¢
+		// Ï∫êÎ¶≠ÌÑ∞ ÏÉÅÌÉúÏ∞Ω
 		APlayerController* PC = GetOwningPlayerController();
 		if (IsValid(PC) && CharacterOverlayWidgetClass)
 		{
@@ -33,18 +43,40 @@ void AXZHUD::BeginPlay()
 	}
 }
 
+void AXZHUD::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Create HpBarWidget
+	if (HpBarWidgetClass)
+	{
+		HpBarWidget = CreateWidget<UXZHpBarWidget>(PlayerOwner, HpBarWidgetClass, TEXT("HpBarWidget"));
+		if (HpBarWidget) 
+		{
+			HpBarWidget->AddToViewport();
+		}
+	}
+}
+
 void AXZHUD::DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLinearColor CrosshairColor)
 {
-	const float TextureWidth = InTexture->GetSizeX();  // Texture ≥ ∫Ò
-	const float TextureHeight = InTexture->GetSizeY(); // Texture ≥Ù¿Ã
+	const float TextureWidth = InTexture->GetSizeX();  // Texture ÎÑàÎπÑ
+	const float TextureHeight = InTexture->GetSizeY(); // Texture ÎÜíÏù¥
 
-	// Texture ±◊∏Æ±‚ ¿ßƒ° º≥¡§
+	// Texture Í∑∏Î¶¨Í∏∞ ÏúÑÏπò ÏÑ§Ï†ï
 	const FVector2D TextureDrawPoint(
 		ViewportCenter.X - (TextureWidth / 2.0f),
 		ViewportCenter.Y - (TextureHeight / 2.0f)
 	);
 
-	// Texture ±◊∏Æ±‚
+	// Texture Í∑∏Î¶¨Í∏∞
 	DrawTexture(InTexture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.0f, 0.0f, 1.0f, 1.0f, CrosshairColor);
+}
+
+
+void AXZHUD::UpdateHPBarWidget(float MaxHP, float CurrentHP)
+{
+	const float NewPercent = FMath::Clamp((CurrentHP / MaxHP), 0.0f, 1.0f);
+	HpBarWidget->UpdateHpBar(NewPercent);
 }
 

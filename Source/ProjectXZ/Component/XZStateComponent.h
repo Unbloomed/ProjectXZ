@@ -19,8 +19,10 @@ public:
 	UXZStateComponent();
 	void SetState(FGameplayTag NewState);
 	FORCEINLINE FGameplayTag GetState() const { return CurrentState; }
+
 protected:
 	virtual void BeginPlay() override;
+	void InitializeComponent() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	UFUNCTION()
 	void OnRep_CurrentState();

@@ -14,6 +14,7 @@ class UXZWeaponComponent;
 class UTextRenderComponent;
 class UObject;
 struct FFrame;
+class UXZStateComponent;
 
 UENUM()
 enum class EXZCharacterType : uint8
