@@ -1,9 +1,11 @@
 #include "XZStatComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Manager/XZDataManager.h"
 
 UXZStatComponent::UXZStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	bWantsInitializeComponent = true;
 }
 
 void UXZStatComponent::InitializeComponent()
@@ -12,16 +14,17 @@ void UXZStatComponent::InitializeComponent()
 	
 	SetIsReplicated(true);
 	// DataManger
-	/*
 	if (UXZDataManager* DataManager = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance()))
 	{
-		FXZCharacterStat CharacterTypeData = DataManager->GetCharacterStat(Character->GetCharacterType());
-		if(CharacterTypeData.IsValid())
+		if (DataManager->IsCharacterStatDataValid()) 
 		{
-			SetHP(CharacterTypeData.MaxHP);
+			FXZCharacterStat CharacterStatData = DataManager->GetCharacterStat(EXZCharacterType::eDefault);
+			CharacterStat = CharacterStatData;
+
+			SetHP(CharacterStatData.MaxHp);
 		}
 	}
-	*/
+	
 	Reset();
 }
 
@@ -56,10 +59,21 @@ float UXZStatComponent::ApplyDamage(float InDamage)
 void UXZStatComponent::SetHP(float NewHp)
 {
 	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, CharacterStat.MaxHp);
+
 	if (OnHpChanged.IsBound())
 	{
 		OnHpChanged.Broadcast(NewHp, CharacterStat.MaxHp);
 	}
+}
+
+void UXZStatComponent::IncreaseHealth(float Amount)
+{
+	SetHP(CurrentHp + Amount);
+}
+
+void UXZStatComponent::DecreaseHealth(float Amount)
+{
+	SetHP(CurrentHp - Amount);
 }
 
 void UXZStatComponent::OnRep_CurrentHp()

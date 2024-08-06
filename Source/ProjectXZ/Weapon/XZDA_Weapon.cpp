@@ -2,12 +2,14 @@
 #include "Attachment/XZAttachment.h"
 #include "XZEquipment.h"
 #include "XZWeaponData.h"
+#include "Combat/XZCombat.h"
 #include "GameFramework/Character.h"
 
 UXZDA_Weapon::UXZDA_Weapon()
 {
 	AttachmentClass = AXZAttachment::StaticClass();
 	EquipmentClass = UXZEquipment::StaticClass();
+	CombatClass = UXZCombat::StaticClass();
 }
 
 // 객체를 생성해서 리턴한다. 생성 리턴이기 때문에 이차 포인터를 사용
@@ -29,17 +31,19 @@ void UXZDA_Weapon::CreateInstance(ACharacter* InOwner, UXZWeaponData** OutWeapon
 	{
 		XZEquipment = NewObject<UXZEquipment>(this, EquipmentClass);
 		XZEquipment->Init(XZAttachment, InOwner, EquipmentData);
-		
-		//if (IsValid(attachment))//Attachment가 있다면
-		//{
-		//	equipment->OnEquipmentBeginEquip.AddDynamic(attachment, &ACAttachment::OnBeginEquip);
-		//	equipment->OnEquipmentUnequip.AddDynamic(attachment, &ACAttachment::OnUnequip);
-		//}
+	}
+
+	UXZCombat* XZCombat = nullptr;
+	if (IsValid(CombatClass))
+	{
+		XZCombat = NewObject<UXZCombat>(this, CombatClass);
+		XZCombat->Init(XZAttachment, InOwner, ActionData, BulletData);
 	}
 
 	*OutWeaponData = NewObject<UXZWeaponData>();
 	(*OutWeaponData)->Attachment = XZAttachment;
 	(*OutWeaponData)->Equipment = XZEquipment;
+	(*OutWeaponData)->Combat = XZCombat;
 }
 
 #if WITH_EDITOR //Editor 내에서만 수행

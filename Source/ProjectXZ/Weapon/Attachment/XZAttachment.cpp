@@ -1,23 +1,18 @@
 #include "XZAttachment.h"
-#include "GameFramework/Character.h"
+#include "Components/SphereComponent.h"
 
 AXZAttachment::AXZAttachment()
 {
-	//Root = CreateDefaultSubobject<AXZAttachment>(FName(TEXT("Root")));
+	//PrimaryActorTick.bCanEverTick = false;
+	SetReplicateMovement(true);
+
+
 }
 
 void AXZAttachment::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
-
-	
-	//TArray<USceneComponent*> Children;
-	//Root->GetChildrenComponents(true, Children);
-	//for (USceneComponent* child : Children)
-	//{
-	//	//UShape
-	//}
-	
+	SphereCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SphereCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 }
