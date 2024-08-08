@@ -137,13 +137,20 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
 	Server_EquipWeapon(InTag);
 
-	if (InTag == EquippedWeaponTag)
+	// 현재 가지고 있는 무기들 중 하나라면
+	if (UXZWeaponData** FoundData = Datas.Find(InTag))
 	{
-		Datas[InTag]->GetAim()->ShowCrosshair(false);
-	}
-	else
-	{
-		Datas[InTag]->GetAim()->ShowCrosshair(true);
+		if (*FoundData)
+		{
+			if (InTag == EquippedWeaponTag)
+			{
+				Datas[InTag]->GetAim()->ShowCrosshair(false);
+			}
+			else
+			{
+				Datas[InTag]->GetAim()->ShowCrosshair(true);
+			}
+		}
 	}
 }
 

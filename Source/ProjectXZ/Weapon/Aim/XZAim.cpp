@@ -88,6 +88,8 @@ void UXZAim::EndAiming()
 
 void UXZAim::ShowCrosshair(bool bShowCrosshair)
 {
+	if (false == IsValid(Crosshair)) return;
+
 	if (bShowCrosshair)
 	{
 		Crosshair->SetVisibility(ESlateVisibility::Visible);
