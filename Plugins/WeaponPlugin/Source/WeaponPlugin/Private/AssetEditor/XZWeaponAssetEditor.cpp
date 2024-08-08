@@ -80,14 +80,7 @@ void FXZWeaponAssetEditor::Open(FString InAssetName)
 		->AddArea
 		(
 			FTabManager::NewPrimaryArea()->SetOrientation(Orient_Vertical)
-			//->Split // 위
-			//(
-			//	FTabManager::NewStack()
-			//	->SetSizeCoefficient(0.1f) // 10% 사용
-			//	//->AddTab(GetToolbarTabId(), ETabState::OpenedTab) // depreciated
-			//	->AddTab(GetEditingAssetTypeName(), ETabState::OpenedTab)
-			//)
-			->Split // 아래
+			->Split
 			(
 				FTabManager::NewSplitter()->SetOrientation(Orient_Horizontal)
 				->Split

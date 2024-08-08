@@ -22,7 +22,6 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	TObjectPtr<AXZCharacter> GetXZCharacter();
 	TObjectPtr<AXZPlayerController> GetXZPlayerController();
-	TObjectPtr<AXZHUD> GetXZHUD();
 	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
 
 	UFUNCTION(Server, Reliable)
@@ -50,14 +49,14 @@ public:
 	void Multicast_Reload(const FGameplayTag& InTag, const FTransform& SocketTransform);
 
 	void Aiming(bool bAiming);
+	UFUNCTION(Server, Reliable)
+	void Server_Aiming(bool bAiming);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
-	void SetHUDCrosshairs(float InDeltaTime);
-	void InterpFOV(float InDeltaTime);
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TMap<FGameplayTag, UXZDA_Weapon*> WeaponList; // 전체 무기 목록(에디터에서 등록)
@@ -74,30 +73,12 @@ private:
 	void OnRep_EquippedChanged();
 
 	TObjectPtr<AXZCharacter> OwnerCharacter;
+	TObjectPtr<AXZPlayerController> XZPlayerController;
 	FVector HitTarget; // 총알이 발사되서 충돌하게 될 지점
 
-	//***************************************************************
-	//** Crosshairs
-	TObjectPtr<AXZHUD> XZHUD;
-	TObjectPtr<AXZPlayerController> XZPlayerController;
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UTexture2D> CrosshairTexture2D;
-	//***************************************************************
 
 	//***************************************************************
 	//** Aiming
-	UPROPERTY(ReplicatedUsing = OnRep_Aiming)
-	bool bIsAiming = false;
-	UFUNCTION()
-	void OnRep_Aiming();
-
-	float CurrentFOV = 90.0f; // 현재 FOV 값
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
-	float ZoomedFOV = 30.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
-	float DefaultFOV = 90.0f;
-
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
 	float AimWalkSpeed = 200.0f;
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))

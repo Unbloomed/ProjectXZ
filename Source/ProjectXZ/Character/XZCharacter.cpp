@@ -56,7 +56,7 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	// Camera
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
 	CameraSpringArm->SetupAttachment(GetMesh());//Mesh �Ʒ� �׸����� ���δ�.
-	CameraSpringArm->TargetArmLength = 400.0f;
+	CameraSpringArm->TargetArmLength = 300.0f;
 	CameraSpringArm->bUsePawnControlRotation = true;//true: ���콺�� ������ �� controller�� ���� SpringArm�� ȸ����ų �� �ִ�
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));

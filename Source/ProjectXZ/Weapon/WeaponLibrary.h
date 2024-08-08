@@ -7,7 +7,9 @@
  * 
  */
 
+class UTimelineComponent;
 class AXZProjectile;
+
 USTRUCT()
 struct FEquipmentData
 {
@@ -31,6 +33,47 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FName WeaponSocketName;
+
+};
+
+USTRUCT()
+struct FCameraZoomData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere)
+	float TargetArmLength = 200.0f;
+
+	UPROPERTY(EditAnywhere)
+	FVector SocketOffset;
+
+	UPROPERTY(EditAnywhere)
+	float FieldOfView = 90.0f;
+
+	UPROPERTY(EditAnywhere)
+	bool bEnableCameraLag = true;
+};
+
+USTRUCT()
+struct FAimData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> CrosshairWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UCurveFloat> AimCurve;
+
+	UPROPERTY(EditDefaultsOnly)
+	FCameraZoomData BaseZoomData; // Zoom X
+
+	UPROPERTY(EditDefaultsOnly)
+	FCameraZoomData WeaponZoomData; // Zoom O
+
+	UPROPERTY(EditDefaultsOnly)
+	float AimingSpeed = 200.0f;
 };
 
 USTRUCT()

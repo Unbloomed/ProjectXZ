@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widget/XZUserWidget.h"
+#include "XZUserWidget.h"
 #include "XZHpBarWidget.generated.h"
 
 /**
@@ -15,7 +15,10 @@ class PROJECTXZ_API UXZHpBarWidget : public UXZUserWidget
 	GENERATED_BODY()
 
 public:
-		UXZHpBarWidget(const FObjectInitializer& ObjectInitializer);
+	UXZHpBarWidget(const FObjectInitializer& ObjectInitializer);
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UProgressBar> HpProgressBar;
 
 protected:
 	virtual void NativeConstruct() override;
@@ -24,8 +27,6 @@ public:
 	void UpdateHpBar(float NewCurrentHp);
 
 protected:
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<class UProgressBar> HpProgressBar;
 
 	UPROPERTY()
 	float MaxHp;

@@ -33,6 +33,7 @@ public:
 	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
 	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() { return StateComponent; }
 	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() { return InventoryComponent; }
+	FORCEINLINE TObjectPtr<USpringArmComponent> GetSpringArm() const { return CameraSpringArm; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
 
 protected:

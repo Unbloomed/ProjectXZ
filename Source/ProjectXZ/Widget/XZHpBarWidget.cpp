@@ -1,4 +1,4 @@
-#include "Widget/XZHpBarWidget.h"
+#include "XZHpBarWidget.h"
 #include "Components/ProgressBar.h"
 
 UXZHpBarWidget::UXZHpBarWidget(const FObjectInitializer& ObjectInitializer)

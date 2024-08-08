@@ -48,8 +48,8 @@ void UXZCombat::OnFireBullet(const FVector_NetQuantize& HitTargetLocation, const
 
     //*******************************************************************************
     //** 클라이언트에서만 재생되도되는 이펙트: 총구 이펙트, 발사 사운드, 탄피 배출
-    if (false == OwnerCharacter->HasAuthority())
-    {
+    if (false == OwnerCharacter->HasAuthority() && OwnerCharacter->IsLocallyControlled())
+	{
         // 총구 이펙트
         if (ActionDatas[Idx].MuzzleFlashEffect)
         {

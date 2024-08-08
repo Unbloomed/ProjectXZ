@@ -10,7 +10,7 @@ static const FName WeaponPluginTabName("WeaponPlugin");
 
 #define LOCTEXT_NAMESPACE "FWeaponModule"
 
-IMPLEMENT_MODULE(FWeaponModule, WeaponPlugin) // WeaponPlugin.uplugin�� ��� �̸��� ��ġ
+IMPLEMENT_MODULE(FWeaponModule, WeaponPlugin) // WeaponPlugin.uplugin�� ���?�̸��� ��ġ
 
 void FWeaponModule::StartupModule()
 {
@@ -67,7 +67,7 @@ void FWeaponModule::PluginButtonClicked()
 	FXZWeaponAssetEditor::OpenWindow();
 }
 
-// Toolbar에 등록
+// Toolbar???�록
 void FWeaponModule::RegisterMenus()
 {
 	// Owner will be used for cleanup in call to UToolMenus::UnregisterOwner

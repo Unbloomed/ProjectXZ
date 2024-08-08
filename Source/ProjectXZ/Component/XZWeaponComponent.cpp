@@ -14,13 +14,13 @@
 #include "ProjectXZ/Weapon/XZEquipment.h"
 #include "ProjectXZ/Weapon/XZWeaponData.h"
 #include "ProjectXZ/Weapon/Combat/XZCombat.h"
+#include "Weapon/Aim/XZAim.h"
 #include "Weapon/Attachment/XZAttachment.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
-	//SetIsReplicated(true);
 }
 
 void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -28,8 +28,6 @@ void UXZWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, EquippedWeaponTag, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UXZWeaponComponent, bIsAiming, COND_None, REPNOTIFY_Always);
-	//DOREPLIFETIME(UXZWeaponComponent, bIsAiming);
 }
 
 void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -41,9 +39,6 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 		FHitResult HitResult;
 		TraceUnderCrosshairs(HitResult); // Crosshair에서 LineTrace를 쏘고 HitResult 값을 업데이트한다.
 		HitTarget = HitResult.ImpactPoint;
-
-		SetHUDCrosshairs(DeltaTime);
-		InterpFOV(DeltaTime);
 	}
 }
 
@@ -63,13 +58,6 @@ TObjectPtr<AXZPlayerController> UXZWeaponComponent::GetXZPlayerController()
 	return XZPlayerController;
 }
 
-TObjectPtr<AXZHUD> UXZWeaponComponent::GetXZHUD()
-{
-	if (XZHUD) return XZHUD;
-
-	XZHUD = Cast<AXZHUD>(GetXZPlayerController()->GetHUD());
-	return XZHUD;
-}
 
 void UXZWeaponComponent::BeginPlay()
 {
@@ -148,8 +136,16 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
 	Server_EquipWeapon(InTag);
-}
 
+	if (InTag == EquippedWeaponTag)
+	{
+		Datas[InTag]->GetAim()->ShowCrosshair(false);
+	}
+	else
+	{
+		Datas[InTag]->GetAim()->ShowCrosshair(true);
+	}
+}
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
 {
@@ -299,13 +295,23 @@ void UXZWeaponComponent::Multicast_Reload_Implementation(const FGameplayTag& InT
 void UXZWeaponComponent::Aiming(bool bAiming)
 {
 	if (false == IsValid(GetXZCharacter())) return;
+	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return;
+	
+	if (bAiming)
+	{
+		Datas[EquippedWeaponTag]->GetAim()->StartAiming();
+	}
+	else
+	{
+		Datas[EquippedWeaponTag]->GetAim()->EndAiming();
+	}
 
-	bIsAiming = bAiming;
+	Server_Aiming(bAiming);
 }
 
-void UXZWeaponComponent::OnRep_Aiming()
+void UXZWeaponComponent::Server_Aiming_Implementation(bool bAiming)
 {
-	if (bIsAiming)
+	if (bAiming)
 	{
 		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Aim);
 		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = AimWalkSpeed;
@@ -314,38 +320,5 @@ void UXZWeaponComponent::OnRep_Aiming()
 	{
 		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Idle);
 		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
-	}
-}
-
-void UXZWeaponComponent::InterpFOV(float InDeltaTime)
-{
-	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return; // 무기 장착 중이 아니라면 return
-
-	if (bIsAiming)
-	{
-		CurrentFOV = FMath::FInterpTo(CurrentFOV, ZoomedFOV, InDeltaTime, 20.0f);
-	}
-	else
-	{
-		CurrentFOV = FMath::FInterpTo(CurrentFOV, DefaultFOV, InDeltaTime, 20.0f);
-	}
-
-	GetXZCharacter()->GetFollowCamera()->SetFieldOfView(CurrentFOV);
-}
-
-void UXZWeaponComponent::SetHUDCrosshairs(float InDeltaTime)
-{
-	if (false == IsValid(GetXZCharacter()) || false == IsValid(GetXZPlayerController())) return;
-	if (false == IsValid(GetXZHUD())) return;
-	
-	if (EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon")))))
-	{
-		// TODO: 무기 별 Crosshair 설정하기
-		GetXZHUD()->CrosshairTexture2D = CrosshairTexture2D;
-		GetXZHUD()->DrawHUD();
-	}
-	else
-	{
-		GetXZHUD()->CrosshairTexture2D = nullptr;
 	}
 }

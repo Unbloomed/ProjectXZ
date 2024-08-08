@@ -3,9 +3,10 @@
 #include "UObject/NoExportTypes.h"
 #include "XZWeaponData.generated.h"
 
-class UXZCombat;
 class AXZAttachment;
 class UXZEquipment;
+class UXZAim;
+class UXZCombat;
 
 /*  ∆—≈‰∏Æ ∆–≈œ
  *  
@@ -22,6 +23,7 @@ private:
 public:
 	FORCEINLINE AXZAttachment* GetAttachment() { return Attachment; }
 	FORCEINLINE UXZEquipment* GetEquipment() { return Equipment; }
+	FORCEINLINE UXZAim* GetAim() { return Aim; }
 	FORCEINLINE UXZCombat* GetCombat() { return Combat; }
 
 private:
@@ -30,6 +32,9 @@ private:
 
 	UPROPERTY()
 	UXZEquipment* Equipment;
+
+	UPROPERTY()
+	UXZAim* Aim;
 
 	UPROPERTY()
 	UXZCombat* Combat;
