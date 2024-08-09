@@ -1,13 +1,11 @@
-﻿#include "XZHUD.h"
+#include "XZHUD.h"
+#include "Character/XZCharacter.h"
 #include "Widget/XZHpBarWidget.h"
+#include "Widget/XZTimerWidget.h"
 
 AXZHUD::AXZHUD() 
 {
-	static ConstructorHelpers::FClassFinder<UXZHpBarWidget> HpBarWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/BP/Widget/BP_TestHPBar.BP_TestHPBar_C'"));
-	if (HpBarWidgetClassRef.Class)
-	{
-		HpBarWidgetClass = HpBarWidgetClassRef.Class;
-	}
+
 }
 
 void AXZHUD::DrawHUD()
@@ -20,10 +18,11 @@ void AXZHUD::DrawHUD()
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 		const FVector2D ViewportCenter(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f);
 
-		// Crosshair 洹몃━湲?
-		DrawCrosshair(CrosshairTexture2D, ViewportCenter, FLinearColor::White);
+		if (CrosshairTexture2D) 
+		{
+			DrawCrosshair(CrosshairTexture2D, ViewportCenter, FLinearColor::White);
+		}
 
-		// 罹먮┃???곹깭李?
 		APlayerController* PC = GetOwningPlayerController();
 		if (IsValid(PC) && CharacterOverlayWidgetClass)
 		{
@@ -42,37 +41,72 @@ void AXZHUD::BeginPlay()
 		CharacterOverlayWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 
+	if (PlayerOwner == nullptr)
+	{
+		return;
+	}
+
+	//////////////////////////////////// HP ////////////////////////////////////
 	// Create HpBarWidget
-	if (HpBarWidgetClass)
+	if (IsValid(HpBarWidgetClass))
 	{
 		HpBarWidget = CreateWidget<UXZHpBarWidget>(PlayerOwner, HpBarWidgetClass, TEXT("HpBarWidget"));
-		if (HpBarWidget)
+		if (IsValid(HpBarWidget))
 		{
 			HpBarWidget->AddToViewport();
 		}
 	}
+	////////////////////////////////////////////////////////////////////////////
+
+	//////////////////////////////// RespawnTimer ////////////////////////// 
+	// Create HpBarWidget
+	if (IsValid(RespawnTimerWidgetClass))
+	{
+		RespawnTimerWidget = CreateWidget<UXZTimerWidget>(PlayerOwner, RespawnTimerWidgetClass, TEXT("ReapwnTimerWidget"));
+		if (IsValid(RespawnTimerWidget))
+		{
+			RespawnTimerWidget->AddToViewport();
+			RespawnTimerWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////
+
+	////////////////////////////////// Binding Delegate 
+	if (AXZCharacter* Character = Cast<AXZCharacter>(PlayerOwner->GetPawn()))
+	{
+		Character->SetUpWidget(this);
+	}
+	////////////////////////////////////////////////////////////////////////////
 }
 
 
 void AXZHUD::DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLinearColor CrosshairColor)
 {
-	const float TextureWidth = InTexture->GetSizeX();  // Texture ?덈퉬
-	const float TextureHeight = InTexture->GetSizeY(); // Texture ?믪씠
+	const float TextureWidth = InTexture->GetSizeX();  // Texture ?�비
+	const float TextureHeight = InTexture->GetSizeY(); // Texture ?�이
 
-	// Texture 洹몃━湲??꾩튂 ?ㅼ젙
+	// Texture 그리�??�치 ?�정
 	const FVector2D TextureDrawPoint(
 		ViewportCenter.X - (TextureWidth / 2.0f),
 		ViewportCenter.Y - (TextureHeight / 2.0f)
 	);
 
-	// Texture 洹몃━湲?
+	// Texture 그리�?
 	DrawTexture(InTexture, TextureDrawPoint.X, TextureDrawPoint.Y, TextureWidth, TextureHeight, 0.0f, 0.0f, 1.0f, 1.0f, CrosshairColor);
 }
 
 
-void AXZHUD::UpdateHPBarWidget(float MaxHP, float CurrentHP)
+void AXZHUD::UpdateHPBarWidget(float CurrentHP, float MaxHP)
 {
 	const float NewPercent = FMath::Clamp((CurrentHP / MaxHP), 0.0f, 1.0f);
 	HpBarWidget->UpdateHpBar(NewPercent);
 }
+
+// void AXZHUD::StartRespawnTimer(float RespawnDelayTime)
+// {
+// 	if (RespawnTimerWidget) 
+// 	{
+// 		RespawnTimerWidget->StartTimer(RespawnDelayTime);
+// 	}
+// }
 

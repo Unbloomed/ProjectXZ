@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "GenericTeamAgentInterface.h"
 #include "XZCharacter.generated.h"
 
 class UXZInventoryComponent;
@@ -23,17 +24,22 @@ enum class EXZCharacterType : uint8
 };
 
 UCLASS()
-class PROJECTXZ_API AXZCharacter : public ACharacter
+class PROJECTXZ_API AXZCharacter : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
 	AXZCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() { return WeaponComponent; }
-	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() { return StateComponent; }
-	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() { return InventoryComponent; }
+	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() const { return WeaponComponent; }
+	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() const { return StateComponent; }
+	FORCEINLINE TObjectPtr<UXZStatComponent> GetStatComponent() const { return StatComponent; }
+	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() const { return InventoryComponent; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
+
+	void SetUpWidget(class AXZHUD* XZHUD);
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	virtual FGenericTeamId GetGenericTeamId() const override { return TeamID; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -48,7 +54,6 @@ protected:
 	void EnablePlayerInput();
 	void SetDead();
 	void EndDeadEvent();
-	// void UpdateRespawnTime();
 	void RespawnPlayer();
 	void ResetCharacterData();
 
@@ -77,10 +82,8 @@ private:
 	UPROPERTY()
 	APlayerController* PlayerController;
 
-	float RemainingRespawnTime;
-	float RespawnTime;
 	FTimerHandle RespawnTimerHandle;
-
+	FGenericTeamId TeamID = 0;
 
 	//*****************************************************
 	//** 디버깅용. 캐릭터 머리 위에 상태 띄우기.
