@@ -25,11 +25,11 @@ public:
 	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
 	bool IsValidWeapon(const FGameplayTag& InTag);
 
+	void AddNewWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_AddNewWeapon(const FGameplayTag& InTag);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AddNewWeapon(const FGameplayTag& InTag);
-	void AddNewWeapon(const FGameplayTag& InTag);
 
 	void EquipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
