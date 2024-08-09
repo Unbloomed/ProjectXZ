@@ -14,7 +14,7 @@ class PROJECTXZ_API UXZEquipment : public UObject
 public:
 	void Init(class AXZAttachment* InWeapon, ACharacter* InOwner, const FEquipmentData& InData);
 
-	bool Equip();
+	void Equip();
 	void Unequip();
 	void EquipChangeSocket();
 	void UnequipChangeSocket();

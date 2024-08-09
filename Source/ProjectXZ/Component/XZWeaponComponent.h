@@ -37,6 +37,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EquipWeapon(const FGameplayTag& InTag);
 
+	void UnequipWeapon(const FGameplayTag& InTag);
+	UFUNCTION(Server, Reliable)
+	void Server_UnequipWeapon(const FGameplayTag& InTag);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UnequipWeapon(const FGameplayTag& InTag);
+
 	void Fire();
 	UFUNCTION(Server, Reliable)
 	void Server_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
@@ -58,6 +64,7 @@ protected:
 
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+	void ShowCrosshair(const FGameplayTag& InTag, bool bShow);
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TMap<FGameplayTag, UXZDA_Weapon*> WeaponList; // 전체 무기 목록(에디터에서 등록)

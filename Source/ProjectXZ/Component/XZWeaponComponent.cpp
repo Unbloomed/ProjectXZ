@@ -145,25 +145,34 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			TraceHitResult.ImpactPoint = End; // 충돌하는게 없다면 End 값을 ImpactPoint값으로 설정.
 		}
-		
+
 	}
+}
+
+void UXZWeaponComponent::ShowCrosshair(const FGameplayTag& InTag, bool bShow)
+{
+	Datas[InTag]->GetAim()->ShowCrosshair(bShow);
 }
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	Server_EquipWeapon(InTag);
-
-	// 현재 가지고 있는 무기들 중 하나라면
 	if (false == IsValidWeapon(InTag)) return;
+	// 현재 장착 중인 무기를 Equip하라고 명령하면 Unequip
+	if (EquippedWeaponTag == InTag)
+	{
+		ShowCrosshair(InTag, false);
+		UnequipWeapon(InTag);
+		return;
+	}
+	// 다른 무기를 장착 중이라면
+	if (EquippedWeaponTag != InTag && EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon")))))
+	{
+		ShowCrosshair(EquippedWeaponTag, false);
+		UnequipWeapon(EquippedWeaponTag); // 현재 무기 Unequip
+	}
 
-	if (InTag == EquippedWeaponTag)
-	{
-		Datas[InTag]->GetAim()->ShowCrosshair(false);
-	}
-	else
-	{
-		Datas[InTag]->GetAim()->ShowCrosshair(true);
-	}
+	ShowCrosshair(InTag, true);
+	Server_EquipWeapon(InTag);
 }
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
@@ -174,25 +183,30 @@ void UXZWeaponComponent::OnRep_EquippedChanged()
 void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
 	EquippedWeaponTag = InTag;
+
 	Multicast_EquipWeapon(InTag);
 }
 
 void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
-	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
-	if (false == IsValidWeapon(InTag)) return;
-	
-	if (Datas[InTag]->GetEquipment()->Equip()) // 무기장착 O
-	{
-
-	}
-	else // 무기장착 X (= Unequip 수행한 경우)
-	{
-		Datas[InTag]->GetEquipment()->Unequip();
-		EquippedWeaponTag = FXZTags::GetXZTags().Fist;
-	}
+	Datas[InTag]->GetEquipment()->Equip(); // 무기 장착
 }
 
+void UXZWeaponComponent::UnequipWeapon(const FGameplayTag& InTag)
+{
+	Server_UnequipWeapon(InTag);
+}
+
+void UXZWeaponComponent::Server_UnequipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Multicast_UnequipWeapon(InTag);
+	EquippedWeaponTag = FXZTags::GetXZTags().Fist;
+}
+
+void UXZWeaponComponent::Multicast_UnequipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Datas[InTag]->GetEquipment()->Unequip();
+}
 
 void UXZWeaponComponent::Fire()
 {
