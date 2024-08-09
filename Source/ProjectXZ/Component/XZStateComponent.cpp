@@ -40,7 +40,7 @@ void UXZStateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(UXZStateComponent, CurrentState);
 }
 
-void UXZStateComponent::SetState(FGameplayTag NewState)
+void UXZStateComponent::SetState(const FGameplayTag& NewState)
 {
 	CurrentState = NewState;
 	OnChangeState();

@@ -21,6 +21,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Texture")
 	TObjectPtr<UTexture2D> CrosshairTexture2D;
 
+	// Test
+	void UpdateHPBarWidget(float CurrentHP, float MaxHP);
+	FORCEINLINE TObjectPtr<class UXZTimerWidget> GetRespawnTimerWidget() const { return RespawnTimerWidget; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -28,9 +31,6 @@ protected:
 
 private:
 	void DrawCrosshair(UTexture2D* InTexture, FVector2D ViewportCenter, FLinearColor CrosshairColor);
-
-	// Test
-	void UpdateHPBarWidget(float MaxHP, float CurrentHP);
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Widget", meta = (AllowPrivateAccess = true))
 	TSubclassOf<UUserWidget> CharacterOverlayWidgetClass;
@@ -41,4 +41,9 @@ private:
 	TSubclassOf<class UXZHpBarWidget> HpBarWidgetClass;
 	UPROPERTY()
 	TObjectPtr<class UXZHpBarWidget> HpBarWidget;
+
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Widget", meta = (AllowPrivateAccess = true))
+	TSubclassOf<class UXZTimerWidget> RespawnTimerWidgetClass;
+	UPROPERTY()
+	TObjectPtr<class UXZTimerWidget> RespawnTimerWidget;
 };
