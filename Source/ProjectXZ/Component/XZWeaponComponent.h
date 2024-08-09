@@ -23,18 +23,25 @@ public:
 	TObjectPtr<AXZCharacter> GetXZCharacter();
 	TObjectPtr<AXZPlayerController> GetXZPlayerController();
 	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
+	bool IsValidWeapon(const FGameplayTag& InTag);
 
+	void AddNewWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_AddNewWeapon(const FGameplayTag& InTag);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AddNewWeapon(const FGameplayTag& InTag);
-	void AddNewWeapon(const FGameplayTag& InTag);
 
 	void EquipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EquipWeapon(const FGameplayTag& InTag);
+
+	void UnequipWeapon(const FGameplayTag& InTag);
+	UFUNCTION(Server, Reliable)
+	void Server_UnequipWeapon(const FGameplayTag& InTag);
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_UnequipWeapon(const FGameplayTag& InTag);
 
 	void Fire();
 	UFUNCTION(Server, Reliable)
@@ -57,6 +64,7 @@ protected:
 
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
+	void ShowCrosshair(const FGameplayTag& InTag, bool bShow);
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TMap<FGameplayTag, UXZDA_Weapon*> WeaponList; // 전체 무기 목록(에디터에서 등록)

@@ -58,6 +58,22 @@ TObjectPtr<AXZPlayerController> UXZWeaponComponent::GetXZPlayerController()
 	return XZPlayerController;
 }
 
+bool UXZWeaponComponent::IsValidWeapon(const FGameplayTag& InTag)
+{
+	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	{
+		if (*FoundData)
+		{
+			return true;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
+		return false;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Weapon is not found. Check UXZWeaponComponent::EquipWeapon"));
+	return false;
+}
 
 void UXZWeaponComponent::BeginPlay()
 {
@@ -129,29 +145,34 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			TraceHitResult.ImpactPoint = End; // 충돌하는게 없다면 End 값을 ImpactPoint값으로 설정.
 		}
-		
+
 	}
+}
+
+void UXZWeaponComponent::ShowCrosshair(const FGameplayTag& InTag, bool bShow)
+{
+	Datas[InTag]->GetAim()->ShowCrosshair(bShow);
 }
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	Server_EquipWeapon(InTag);
-
-	// 현재 가지고 있는 무기들 중 하나라면
-	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	if (false == IsValidWeapon(InTag)) return;
+	// 현재 장착 중인 무기를 Equip하라고 명령하면 Unequip
+	if (EquippedWeaponTag == InTag)
 	{
-		if (*FoundData)
-		{
-			if (InTag == EquippedWeaponTag)
-			{
-				Datas[InTag]->GetAim()->ShowCrosshair(false);
-			}
-			else
-			{
-				Datas[InTag]->GetAim()->ShowCrosshair(true);
-			}
-		}
+		ShowCrosshair(InTag, false);
+		UnequipWeapon(InTag);
+		return;
 	}
+	// 다른 무기를 장착 중이라면
+	if (EquippedWeaponTag != InTag && EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon")))))
+	{
+		ShowCrosshair(EquippedWeaponTag, false);
+		UnequipWeapon(EquippedWeaponTag); // 현재 무기 Unequip
+	}
+
+	ShowCrosshair(InTag, true);
+	Server_EquipWeapon(InTag);
 }
 
 void UXZWeaponComponent::OnRep_EquippedChanged()
@@ -162,51 +183,46 @@ void UXZWeaponComponent::OnRep_EquippedChanged()
 void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
 	EquippedWeaponTag = InTag;
+
 	Multicast_EquipWeapon(InTag);
 }
 
 void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
-	// 슬롯에 등록된 무기의 GameplayTag를 InTag로 가져옴
-	
-	if (UXZWeaponData** FoundData = Datas.Find(InTag))
-	{
-		if (*FoundData)
-		{
-			if (Datas[InTag]->GetEquipment()->Equip()) // 무기장착 O
-			{
-
-			}
-			else // 무기장착 X (= Unequip 수행한 경우)
-			{
-				Datas[InTag]->GetEquipment()->Unequip();
-				EquippedWeaponTag = FXZTags::GetXZTags().Fist;
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon is not found. Check UXZWeaponComponent::EquipWeapon"));
-	}
+	Datas[InTag]->GetEquipment()->Equip(); // 무기 장착
 }
 
+void UXZWeaponComponent::UnequipWeapon(const FGameplayTag& InTag)
+{
+	Server_UnequipWeapon(InTag);
+}
+
+void UXZWeaponComponent::Server_UnequipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Multicast_UnequipWeapon(InTag);
+	EquippedWeaponTag = FXZTags::GetXZTags().Fist;
+}
+
+void UXZWeaponComponent::Multicast_UnequipWeapon_Implementation(const FGameplayTag& InTag)
+{
+	Datas[InTag]->GetEquipment()->Unequip();
+}
 
 void UXZWeaponComponent::Fire()
 {
 	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return; // 무기 장착 중이 아니라면 return
-
-	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
+	if (false == IsValidWeapon(EquippedWeaponTag)) return;
+	if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
 	{
-		const USkeletalMeshSocket* MuzzleFlashSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
-			Datas[EquippedWeaponTag]->GetCombat()->GetActionData()[0].MuzzleSocketName);
-		FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
-			
-		Server_Fire(HitTarget, SocketTransform);
+		Reload(EquippedWeaponTag); // 재장전
+		return;
 	}
+
+	const USkeletalMeshSocket* MuzzleFlashSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
+		Datas[EquippedWeaponTag]->GetCombat()->GetActionData()[0].MuzzleSocketName);
+	FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
+		
+	Server_Fire(HitTarget, SocketTransform);
 }
 
 void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
@@ -216,38 +232,24 @@ void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& H
 
 void UXZWeaponComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
 {
-	if (UXZWeaponData** FoundData = Datas.Find(EquippedWeaponTag))
-	{
-		if (*FoundData)
-		{
-			if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
-			{
-				Reload(EquippedWeaponTag); // 재장전
-				return;
-			}
-			
-			UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo);
-			Datas[EquippedWeaponTag]->GetCombat()->FireAction(HitLocation, SocketTransform);
-			Datas[EquippedWeaponTag]->GetCombat()->ConsumeAmmo();
+	// 발사
+	Datas[EquippedWeaponTag]->GetCombat()->FireAction(HitLocation, SocketTransform);
 
-			if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
-			{
-				Reload(EquippedWeaponTag); // 재장전
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
-		}
-	}
-	else
+	// 총알 소모
+	if (GetXZCharacter() && false == GetXZCharacter()->HasAuthority() && GetXZCharacter()->IsLocallyControlled())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GameplayTag is not found in Datas"));
+		Datas[EquippedWeaponTag]->GetCombat()->ConsumeAmmo();
+	}
+	if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // 총알이 없다면
+	{
+		Reload(EquippedWeaponTag); // 재장전
 	}
 }
 
 void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 {
+	if (false == IsValidWeapon(InTag)) return;
+
 	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Run out of Bullets"));
@@ -261,31 +263,17 @@ void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 
 	Server_Reload(InTag, SocketTransform);
 
-
-	if (UXZWeaponData** FoundData = Datas.Find(InTag))
+	
+	// 총알 채우기
+	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo >= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity)
 	{
-		if (*FoundData)
-		{
-			// 총알 채우기
-			if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo >= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity)
-			{
-				Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().MagCapacity;
-				Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo -= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity;
-			}
-			else
-			{
-				Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo;
-				Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo = 0;
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
-		}
+		Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo -= (Datas[InTag]->GetCombat()->GetBulletData().MagCapacity - Datas[InTag]->GetCombat()->GetBulletData().Ammo);
+		Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().MagCapacity;
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("GameplayTag is not found in Datas"));
+		Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo;
+		Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo = 0;
 	}
 }
 

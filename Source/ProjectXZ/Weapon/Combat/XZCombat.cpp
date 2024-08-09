@@ -15,6 +15,13 @@ void UXZCombat::Init(AXZAttachment* InAttachment, ACharacter* InOwner, const TAr
     BulletData = InBulletData;
 }
 
+void UXZCombat::ConsumeAmmo()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Ammo = %d"), BulletData.Ammo);
+    UE_LOG(LogTemp, Warning, TEXT("Total Ammo = %d"), BulletData.TotalAmmo);
+    BulletData.Ammo--;
+}
+
 void UXZCombat::FireAction(const FVector_NetQuantize& HitTarget, const FTransform& SocketTransform)
 {
     if (false == IsValid(OwnerCharacter)) return;

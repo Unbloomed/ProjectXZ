@@ -19,7 +19,8 @@ public:
 
 	FORCEINLINE const TArray<FActionData>& GetActionData() { return ActionDatas; }
 	FORCEINLINE FBulletData& GetBulletData() { return BulletData; }
-	FORCEINLINE void ConsumeAmmo() { BulletData.Ammo--; }
+
+	void ConsumeAmmo();
 
 	void FireAction(const FVector_NetQuantize& HitTaget, const FTransform& SocketTransform);
 	void ReloadAction(const FTransform& SocketTransform);
