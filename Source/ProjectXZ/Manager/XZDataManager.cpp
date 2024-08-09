@@ -5,6 +5,12 @@
 
 UXZDataManager::UXZDataManager()
 {
+    // BossAttackDataArray
+    static ConstructorHelpers::FObjectFinder<UDataTable> CharacterStatDataTableRef(TEXT("/Game/BP/DataTable/DT_CharacterStat.DT_CharacterStat"));
+    if (CharacterStatDataTableRef.Succeeded())
+    {
+        CharacterStatDataTable = CharacterStatDataTableRef.Object;
+    }
 }
 
 void UXZDataManager::Initialize(FSubsystemCollectionBase& Collection)
