@@ -21,7 +21,7 @@
 AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UXZCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-	// TODO: Ä³¸¯ÅÍ ¸Ó¸® À§ µğ¹ö±ë¿ë ÅØ½ºÆ® ¶§¹®¿¡ Æ½ ´ç ºÁ¾ßÇØ¼­ true¼³Á¤. ÃßÈÄ¿¡ false·Î º¯°æ.
+	// TODO: TextRenderCompnet X -> then, change bCanEverTick to false 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -59,9 +59,9 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	
 	// Camera
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	CameraSpringArm->SetupAttachment(GetMesh());//Mesh ï¿½Æ·ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î´ï¿½.
+	CameraSpringArm->SetupAttachment(GetMesh());//Mesh ?ì¢ë–ï§Œê¾©ì‚• ?ì¢ë™ï§ëš¯ì‚•?ì¢ë£?ì‡¿ëœ?ìˆˆì‚• ?ì¢ë£?ì‡¿ëœ?ëªƒë™‹??
 	CameraSpringArm->TargetArmLength = 300.0f;
-	CameraSpringArm->bUsePawnControlRotation = true;//true: ï¿½ï¿½ï¿½ì½ºï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ controllerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ SpringArmï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½Å³ ï¿½ï¿½ ï¿½Ö´ï¿½
+	CameraSpringArm->bUsePawnControlRotation = true;//true: ?ì¢ë£?ì‡¿ëœ?ëš¯ë’ª?ì¢ë£???ì¢ë£?ì‡¿ëœ?ìˆˆì‚•?ì¢ë£???ì¢ë£??controller?ì¢ë£???ì¢ë£?ì‡¿ëœ?ìˆˆì‚• SpringArm?ì¢ë£???ëš¦ëœ?ìˆˆì‚•?ì¢ë£?ìˆ‰ê¶— ?ì¢ë£???ì¢ë™‡?ë¨¯ì‚•
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraSpringArm);
@@ -88,7 +88,7 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 
 
 	//***********************************************************************************
-	//** µğ¹ö±ë¿ë. Ä³¸¯ÅÍ ¸Ó¸® À§¿¡ »óÅÂ ¶ç¿ì±â.
+	//** TextRenderComponent
 	TextRender_State = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_State"));
 	TextRender_State->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	TextRender_State->SetRelativeLocation(FVector(0.0f, 0.0f, 110.0f));
@@ -136,7 +136,7 @@ void AXZCharacter::SetDead()
 	UE_LOG(LogTemp, Log, TEXT("SetDead"));
 	StateComponent->SetState(FXZTags::GetXZTags().StateTag_Dead);
 
-	// ¿¬»ç½Ã ¿¬»ç°¡ ÁßÁöµÇ¾î¾ß ÇÑ´Ù.
+	// ?ê³—ê¶—???ê³—ê¶—åª›Â€ ä»¥ë¬’??ì„ë¼±???ì’•ë–.
 	// if (WeaponComponent)
 	// {
 	// 	WeaponComponent->EndFire();
@@ -144,7 +144,7 @@ void AXZCharacter::SetDead()
 
 	DisablePlayerInput();
 
-	// DeadAnimation Montage Notify·Î ÇÔ¼ö È£ÃâºÎºĞ ¿Å±â±â 
+	// DeadAnimation Montage Notifyæ¿¡??â‘¥ë‹” ?ëª„í…§éºÂ€éº???ë¦°æ¹²?
 	EndDeadEvent();
 }
 
@@ -158,7 +158,7 @@ void AXZCharacter::EndDeadEvent()
 	UE_LOG(LogTemp, Log, TEXT("EndDeadEvent"));
 	GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Respawn);
 
-	// ¹«±â, ÀÎº¥Åä¸® Clear
+	// è‡¾ë‹¿ë¦°, ?ëªƒê¹½?ì¢Šâ” Clear
 	// WeaponComponent->RemoveAllWeapon();
 	// InventoryComponent->Reset();
 
@@ -192,7 +192,7 @@ void AXZCharacter::RespawnPlayer()
 
 	SetActorHiddenInGame(false);
 
-	// Weapon ?ˆë³´?´ë„ë¡?
+	// Weapon ??ëˆê¶–??Â€çŒ·ê¾£ì—?
 	// GetInventoryComponent()->ClearAll();
 
 	ResetCharacterData();
@@ -242,7 +242,7 @@ void AXZCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// µğ¹ö±ë¿ë.
+	// ?ë¶¾ì¾­æºë‚†ìŠœ.
 	TextRender_State->SetVisibility(true);
 	TextRender_Weapon->SetVisibility(true);
 
@@ -256,7 +256,7 @@ void AXZCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// µğ¹ö±ë¿ë.
+	// ?ë¶¾ì¾­æºë‚†ìŠœ.
 	CurrentCharacterState = GetStateComponent()->GetState().ToString();
 	TextRender_State->SetText(FText::FromString(CurrentCharacterState));
 

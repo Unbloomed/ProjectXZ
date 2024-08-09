@@ -89,7 +89,7 @@ private:
 	FGenericTeamId TeamID = 0;
 
 	//*****************************************************
-	//** 디버깅용. 캐릭터 머리 위에 상태 띄우기.
+	//** TextRenderComponent
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UTextRenderComponent> TextRender_State;
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))
