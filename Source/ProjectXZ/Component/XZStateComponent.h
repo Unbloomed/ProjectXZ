@@ -17,7 +17,7 @@ class PROJECTXZ_API UXZStateComponent : public UActorComponent
 
 public:	
 	UXZStateComponent();
-	void SetState(FGameplayTag NewState);
+	void SetState(const FGameplayTag& NewState);
 	FORCEINLINE FGameplayTag GetState() const { return CurrentState; }
 
 protected:
