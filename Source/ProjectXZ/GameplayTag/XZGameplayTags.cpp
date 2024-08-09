@@ -50,6 +50,12 @@ void FXZTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Weapon_Aim = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Weapon_Aim"), FString("조준 버튼 Input Tag"));
 	GameplayTags.InputTag_Weapon_StopAiming = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("InputTag.Weapon_StopAiming"), FString("조준X Input Tag"));
 
+	//********************************************************
+	// Game Team
+	GameplayTags.GameTeamTag_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameTeamTag.None"), FString("팀 None Game Tag"));
+	GameplayTags.GameTeamTag_Red = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameTeamTag.Red"), FString("팀 Red Game Tag"));
+	GameplayTags.GameTeamTag_Blue = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameTeamTag.Blue"), FString("팀 Blue Game Tag"));
+
 
 	// Input 상태: Pressed, Held, Released
 	//GameplayTags.BlockTag_InputPressed = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("BlockTag.InputPressed"), FString("Block: Input Pressed 상태"));

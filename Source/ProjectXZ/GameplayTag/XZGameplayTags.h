@@ -57,6 +57,12 @@ public:
 	FGameplayTag StateTag_Respawn;
 	FGameplayTag StateTag_Dead;
 
+	//********************************************************
+	// Game Team
+	FGameplayTag GameTeamTag_None;
+	FGameplayTag GameTeamTag_Red;
+	FGameplayTag GameTeamTag_Blue;
+
 
 	// Input ����: Pressed, Held, Released
 	//FGameplayTag BlockTag_InputPressed;
