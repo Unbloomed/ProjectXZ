@@ -23,6 +23,7 @@ public:
 	TObjectPtr<AXZCharacter> GetXZCharacter();
 	TObjectPtr<AXZPlayerController> GetXZPlayerController();
 	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
+	bool IsValidWeapon(const FGameplayTag& InTag);
 
 	UFUNCTION(Server, Reliable)
 	void Server_AddNewWeapon(const FGameplayTag& InTag);
