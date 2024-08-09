@@ -35,6 +35,7 @@ public:
 	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() const { return StateComponent; }
 	FORCEINLINE TObjectPtr<UXZStatComponent> GetStatComponent() const { return StatComponent; }
 	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() const { return InventoryComponent; }
+	FORCEINLINE TObjectPtr<USpringArmComponent> GetSpringArm() const { return CameraSpringArm; }
 	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
 
 	void SetUpWidget(class AXZHUD* XZHUD);
@@ -83,10 +84,12 @@ private:
 	APlayerController* PlayerController;
 
 	FTimerHandle RespawnTimerHandle;
+
+	UPROPERTY(EditAnywhere, Category = "XZ|Team", Meta = ( AllowPrivateAccess = "true" ))
 	FGenericTeamId TeamID = 0;
 
 	//*****************************************************
-	//** µğ¹ö±ë¿ë. Ä³¸¯ÅÍ ¸Ó¸® À§¿¡ »óÅÂ ¶ç¿ì±â.
+	//** ë””ë²„ê¹…ìš©. ìºë¦­í„° ë¨¸ë¦¬ ìœ„ì— ìƒíƒœ ë„ìš°ê¸°.
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UTextRenderComponent> TextRender_State;
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))

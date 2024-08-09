@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/HUD.h"
@@ -16,8 +16,7 @@ class PROJECTXZ_API AXZHUD : public AHUD
 public:
 	AXZHUD();
 	virtual void DrawHUD() override;
-
-	// TODO: CrosshairTexture2D 쨘짱쩌철?짠횆징 ?횑쨉쩔
+	
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Texture")
 	TObjectPtr<UTexture2D> CrosshairTexture2D;
 
