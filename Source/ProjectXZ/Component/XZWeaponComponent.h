@@ -2,9 +2,11 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "Interface/ICombat.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 #include "XZWeaponComponent.generated.h"
 
+class UXZCombatHandler;
 class UXZWeaponData;
 class UXZDA_Weapon;
 class AXZCharacter;
@@ -12,7 +14,7 @@ class AXZPlayerController;
 class AXZHUD;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROJECTXZ_API UXZWeaponComponent : public UActorComponent
+class PROJECTXZ_API UXZWeaponComponent : public UActorComponent, public IICombat
 {
 	GENERATED_BODY()
 
@@ -20,11 +22,20 @@ public:
 	UXZWeaponComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+protected:
+	virtual void BeginPlay() override;
+
+//====== Get, Set Function ====================================================
+public:
 	TObjectPtr<AXZCharacter> GetXZCharacter();
 	TObjectPtr<AXZPlayerController> GetXZPlayerController();
 	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
-	bool IsValidWeapon(const FGameplayTag& InTag);
 
+//====== Get, Set Function ====================================================
+
+//====== Class Functions ======================================================
+public:
 	void AddNewWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_AddNewWeapon(const FGameplayTag& InTag);
@@ -34,8 +45,6 @@ public:
 	void EquipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeapon(const FGameplayTag& InTag);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_EquipWeapon(const FGameplayTag& InTag);
 
 	void UnequipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
@@ -59,30 +68,29 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_Aiming(bool bAiming);
 
-protected:
-	virtual void BeginPlay() override;
-
 private:
 	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 	void ShowCrosshair(const FGameplayTag& InTag, bool bShow);
+	
+//====== Class Functions ======================================================
+
+//====== Class Variables ======================================================
+private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
-	TMap<FGameplayTag, UXZDA_Weapon*> WeaponList; // ÀüÃ¼ ¹«±â ¸ñ·Ï(¿¡µğÅÍ¿¡¼­ µî·Ï)
+	TObjectPtr<UDataTable> WeaponDataTable; // Overall Weapon List
 
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
-	TArray<FGameplayTag> Init_WeaponTags; // ½ÃÀÛ ½Ã °¡Áö°í ÀÖ´Â ¹«±â
+	TArray<FGameplayTag> Init_WeaponTags; // Initial weapons start with
 
-	UPROPERTY()
-	TMap<FGameplayTag, UXZWeaponData*> Datas; // ÇöÀç °¡Áö°í ÀÖ´Â ¹«±âµé µ¥ÀÌÅÍ
-
-	UPROPERTY(ReplicatedUsing = OnRep_EquippedChanged)
-	FGameplayTag EquippedWeaponTag = FXZTags::GetXZTags().Fist; // ÇöÀç ÀåÂø ÁßÀÎ ¹«±â
+	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeaponTag)
+	FGameplayTag EquippedWeaponTag = FXZTags::GetXZTags().Fist; // ?è¢â‘¹ì‚º ?é—œåª›?é¤“Î»ìµ???ì–œë–¯ç”±?
 	UFUNCTION()
-	void OnRep_EquippedChanged();
+	void OnRep_EquippedWeaponTag();
 
 	TObjectPtr<AXZCharacter> OwnerCharacter;
 	TObjectPtr<AXZPlayerController> XZPlayerController;
-	FVector HitTarget; // ÃÑ¾ËÀÌ ¹ß»çµÇ¼­ Ãæµ¹ÇÏ°Ô µÉ ÁöÁ¡
+	FVector HitTarget; // ?Î¼ë¹˜é‡‰??ç„ì†ë®‡æ²…??ë¤¾í£ ?ê²¸ë«–çŒ·??ë¿ì“º ??ç­Œì™–Â€??
 
 
 	//***************************************************************
@@ -93,4 +101,15 @@ private:
 	float MaxWalkSpeed = 600.0f;
 	//***************************************************************
 
+	
+
+	//====== ICombat ==============================================================
+public:
+	void Init();
+	virtual UXZCombatHandler* CreateCombatHandler() override;
+
+private:
+	UPROPERTY()
+	UXZCombatHandler* CombatHandler;
+	//====== ICombat ==============================================================
 };

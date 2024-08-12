@@ -1,14 +1,29 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "GameplayTagContainer.h"
 #include "WeaponLibrary.generated.h"
 
 /**
  * 
  */
 
+class UXZDA_Weapon;
 class UTimelineComponent;
 class AXZProjectile;
+
+USTRUCT()
+struct FWeaponListData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag WeaponTag;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UXZDA_Weapon> WeaponDataAsset;
+};
 
 USTRUCT()
 struct FEquipmentData
@@ -83,7 +98,7 @@ struct FActionData
 
 public:
 	UPROPERTY(EditDefaultsOnly)
-	UAnimMontage* ActionMontage; // ÀüÅõ ¸ùÅ¸ÁÖ(¹ß»ç, ´Ü°Ë °ø°İ µî)
+	UAnimMontage* ActionMontage; // ?ê¾ªë‹¾ ï§ì€?äºŒ?è«›ì’–ê¶—, ?â‘£? æ€¨ë“¦êº½ ??
 
 	UPROPERTY(EditDefaultsOnly)
 	float Action_FrameTime = 0.0f;
@@ -142,13 +157,13 @@ public:
 	TSubclassOf<AActor> MagazineClass;
 
 	UPROPERTY(EditDefaultsOnly)
-	uint32 Ammo = 10; // ÇöÀç ¹ß»çÇÒ ¼ö ÀÖ´Â ÃÑ¾Ë ¼ö
+	uint32 Ammo = 10; // ?ê¾©ì˜± è«›ì’–ê¶—?????ëˆë’— ç¥ì•¹ë¸£ ??
 
 	UPROPERTY(EditDefaultsOnly)
-	uint32 MagCapacity = 10; // ÇÑ ÅºÃ¢¿¡ ´ãÀ» ¼ö ÀÖ´Â ÃÖ´ë ÃÑ¾Ë ¼ö
+	uint32 MagCapacity = 10; // ???ê¾©ê°¹???ëŒì“£ ???ëˆë’— ï§¤ì’•? ç¥ì•¹ë¸£ ??
 
 	UPROPERTY(EditDefaultsOnly)
-	uint32 TotalAmmo = 30; // (ÇöÀç ¹ß»ç °¡´ÉÇÑ ÃÑ¾ËÀ» Á¦¿ÜÇÑ) ÀüÃ¼ ÃÑ¾Ë ¼ö
+	uint32 TotalAmmo = 30; // (?ê¾©ì˜± è«›ì’–ê¶— åª›Â€?Î½ë¸³ ç¥ì•¹ë¸£???ì’–ì‡…?? ?ê¾©ê»œ ç¥ì•¹ë¸£ ??
 
 	UPROPERTY(EditDefaultsOnly)
 	float Damage = 10.0f;
@@ -161,17 +176,17 @@ struct FProjectileData
 
 public:
 	UPROPERTY(EditDefaultsOnly)
-	float InitialSpeed = 15000.0f; // ProjectileBullet(=ÃÑ¾Ë) ¼Óµµ
+	float InitialSpeed = 15000.0f; // ProjectileBullet(=ç¥ì•¹ë¸£) ?ë¾ë£„
 
 	UPROPERTY(EditDefaultsOnly)
 	float GravityScale = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UParticleSystem> ImpactBlood; // Ãæµ¹ ÈÄ ÇÇ Æ¢±è
+	TObjectPtr<UParticleSystem> ImpactBlood; // ç•°â‘¸ë£ ?????Â€æºÂ€
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UParticleSystem> ImpactParticles; // Ãæµ¹ ÈÄ ÆÄÆ¼Å¬
+	TObjectPtr<UParticleSystem> ImpactParticles; // ç•°â‘¸ë£ ???ëš°ë–š??
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<USoundBase> ImpactSound;  // Ãæµ¹ ÈÄ »ç¿îµå
+	TObjectPtr<USoundBase> ImpactSound;  // ç•°â‘¸ë£ ???ÑŠìŠ«??
 };
