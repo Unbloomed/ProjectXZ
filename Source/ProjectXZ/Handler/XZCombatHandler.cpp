@@ -1,5 +1,4 @@
 #include "Handler/XZCombatHandler.h"
-
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Character/XZCharacter.h"
@@ -8,57 +7,51 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapon/XZDA_Weapon.h"
 #include "Weapon/Attachment/XZAttachment.h"
-#include "Interface/ICombat.h"
 
 bool UXZCombatHandler::IsValidWeapon(const FGameplayTag& InTag)
 {
-	if ( UXZDA_Weapon** FoundData = DA_Weapons.Find(InTag) )
+	AXZAttachment** FoundData = Attachments.Find(InTag);
+	if ( nullptr == *FoundData )
 	{
-		if ( *FoundData )
-		{
-			return true;
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
 		return false;
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Weapon is not found. Check UXZWeaponComponent::EquipWeapon"));
-	return false;
+	
+	return true;
 }
 
-void UXZCombatHandler::AddNewWeapon(const FGameplayTag& InTag, UXZDA_Weapon* DA_Weapon, ACharacter* InOwner)
+void UXZCombatHandler::AddNewWeapon(const FGameplayTag& InTag, ACharacter* InOwner)
 {
-	if (IsValidWeapon(InTag)) return;
+	//if (IsValidWeapon(InTag))
+	{
+	//	return;
+	}
 
 	OwnerCharacter = InOwner;
 
-	DA_Weapons.Add({ InTag, DA_Weapon });
+	AXZAttachment* Weapon = OwnerCharacter->GetWorld()->SpawnActor<AXZAttachment>(Attachments[InTag]->DA_Weapon->AttachmentClass);
+	Attachments.Add({ InTag, Weapon });
 
-	AXZAttachment* Weapon = OwnerCharacter->GetWorld()->SpawnActor<AXZAttachment>(DA_Weapons[InTag]->AttachmentClass);
-	WeaponActors.Add({ InTag, Weapon });
-
-	if ( DA_Weapons[InTag]->EquipmentData.HolsterSocketName.IsValid() )
+	if ( Attachments[InTag]->DA_Weapon->EquipmentData.HolsterSocketName.IsValid() )
 	{
-		WeaponActors[InTag]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), DA_Weapons[InTag]->EquipmentData.HolsterSocketName);
+		Attachments[InTag]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), Attachments[InTag]->DA_Weapon->EquipmentData.HolsterSocketName);
 	}
 
 	// Create Crosshair
-	if ( IsValid(DA_Weapons[InTag]->AimData.AimCurve) && IsValid(Timeline) )
+	if ( IsValid(Attachments[InTag]->DA_Weapon->AimData.AimCurve) && IsValid(Timeline) )
 	{
 		FOnTimelineFloat TimelineFloat;
 		TimelineFloat.BindUFunction(this, "OnAiming");
 
-		Timeline->AddInterpFloat(DA_Weapons[InTag]->AimData.AimCurve, TimelineFloat);
+		Timeline->AddInterpFloat(Attachments[InTag]->DA_Weapon->AimData.AimCurve, TimelineFloat);
 		Timeline->SetLooping(false);
-		Timeline->SetPlayRate(DA_Weapons[InTag]->AimData.AimingSpeed);
+		Timeline->SetPlayRate(Attachments[InTag]->DA_Weapon->AimData.AimingSpeed);
 	}
 
-	if ( DA_Weapons[InTag]->AimData.CrosshairWidgetClass )
+	if ( Attachments[InTag]->DA_Weapon->AimData.CrosshairWidgetClass )
 	{
 		APlayerController* PC = Cast<APlayerController>(OwnerCharacter->GetController());
 
-		Crosshair = CreateWidget<UUserWidget>(PC, DA_Weapons[InTag]->AimData.CrosshairWidgetClass);
+		Crosshair = CreateWidget<UUserWidget>(PC, Attachments[InTag]->DA_Weapon->AimData.CrosshairWidgetClass);
 		if ( Crosshair )
 		{
 			Crosshair->AddToViewport();
@@ -81,17 +74,17 @@ void UXZCombatHandler::Equip(const FGameplayTag& InTag)
 		return;
 	}
 
-	if ( IsValid(DA_Weapons[InTag]->EquipmentData.EquipMontage) )
+	if ( IsValid(Attachments[InTag]->DA_Weapon->EquipmentData.EquipMontage) )
 	{
 		// Play Equip Montange Animation
-		OwnerCharacter->PlayAnimMontage(DA_Weapons[InTag]->EquipmentData.EquipMontage);
+		OwnerCharacter->PlayAnimMontage(Attachments[InTag]->DA_Weapon->EquipmentData.EquipMontage);
 
 		// Attach WeaponMesh to RightHand
 		FTimerHandle EquipTimerHandle;
 		FTimerDelegate EquipTimerDelegate = FTimerDelegate::CreateLambda([this, InTag]
 			{ this->ChangeSocket_Equip(InTag); }
 		);
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, DA_Weapons[InTag]->EquipmentData.Equip_FrameTime, false);
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, Attachments[InTag]->DA_Weapon->EquipmentData.Equip_FrameTime, false);
 
 		EquippedTag = InTag;
 		bEquipped = true;
@@ -100,17 +93,17 @@ void UXZCombatHandler::Equip(const FGameplayTag& InTag)
 
 void UXZCombatHandler::Unequip(const FGameplayTag& InTag)
 {
-	if ( IsValid(DA_Weapons[InTag]->EquipmentData.UnequipMontage) )
+	if ( IsValid(Attachments[InTag]->DA_Weapon->EquipmentData.UnequipMontage) )
 	{
 		// Play Equip Montange Animation
-		OwnerCharacter->PlayAnimMontage(DA_Weapons[InTag]->EquipmentData.UnequipMontage);
+		OwnerCharacter->PlayAnimMontage(Attachments[InTag]->DA_Weapon->EquipmentData.UnequipMontage);
 
 		// Attach WeaponMesh (from Holster Socket) to Hand Socket
 		FTimerHandle UnequipTimerHandle;
 		FTimerDelegate UnequipTimerDelegate = FTimerDelegate::CreateLambda([ this, InTag ]
 			{ this->ChangeSocket_Unequip(InTag); }
 		);
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UnequipTimerHandle, UnequipTimerDelegate, DA_Weapons[InTag]->EquipmentData.Unequip_FrameTime, false);
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(UnequipTimerHandle, UnequipTimerDelegate, Attachments[InTag]->DA_Weapon->EquipmentData.Unequip_FrameTime, false);
 
 		bEquipped = false;
 	}
@@ -118,9 +111,9 @@ void UXZCombatHandler::Unequip(const FGameplayTag& InTag)
 
 void UXZCombatHandler::ChangeSocket_Equip(const FGameplayTag& InTag)
 {
-	if ( DA_Weapons[InTag]->EquipmentData.WeaponSocketName.IsValid() )
+	if ( Attachments[InTag]->DA_Weapon->EquipmentData.WeaponSocketName.IsValid() )
 	{
-		WeaponActors[InTag]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), DA_Weapons[InTag]->EquipmentData.WeaponSocketName);
+		Attachments[InTag]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), Attachments[InTag]->DA_Weapon->EquipmentData.WeaponSocketName);
 	}
 }
 
@@ -161,25 +154,25 @@ void UXZCombatHandler::ShowCrosshair(bool bShowCrosshair)
 
 void UXZCombatHandler::StartAiming()
 {
-	if ( IsValid(DA_Weapons[EquippedTag]->AimData.AimCurve) )
+	if ( IsValid(Attachments[EquippedTag]->DA_Weapon->AimData.AimCurve) )
 	{
 		Timeline->PlayFromStart();
 
-		GetXZCharacterSpringArm()->TargetArmLength = DA_Weapons[EquippedTag]->AimData.WeaponZoomData.TargetArmLength;
-		GetXZCharacterSpringArm()->SocketOffset = DA_Weapons[EquippedTag]->AimData.WeaponZoomData.SocketOffset;
-		GetXZCharacterSpringArm()->bEnableCameraLag = DA_Weapons[EquippedTag]->AimData.WeaponZoomData.bEnableCameraLag;
+		GetXZCharacterSpringArm()->TargetArmLength = Attachments[EquippedTag]->DA_Weapon->AimData.WeaponZoomData.TargetArmLength;
+		GetXZCharacterSpringArm()->SocketOffset = Attachments[EquippedTag]->DA_Weapon->AimData.WeaponZoomData.SocketOffset;
+		GetXZCharacterSpringArm()->bEnableCameraLag = Attachments[EquippedTag]->DA_Weapon->AimData.WeaponZoomData.bEnableCameraLag;
 	}
 }
 
 void UXZCombatHandler::EndAiming()
 {
-	if ( IsValid(DA_Weapons[EquippedTag]->AimData.AimCurve) )
+	if ( IsValid(Attachments[EquippedTag]->DA_Weapon->AimData.AimCurve) )
 	{
 		Timeline->ReverseFromEnd();
 
-		GetXZCharacterSpringArm()->TargetArmLength = DA_Weapons[EquippedTag]->AimData.BaseZoomData.TargetArmLength;
-		GetXZCharacterSpringArm()->SocketOffset = DA_Weapons[EquippedTag]->AimData.BaseZoomData.SocketOffset;
-		GetXZCharacterSpringArm()->bEnableCameraLag = DA_Weapons[EquippedTag]->AimData.BaseZoomData.bEnableCameraLag;
+		GetXZCharacterSpringArm()->TargetArmLength = Attachments[EquippedTag]->DA_Weapon->AimData.BaseZoomData.TargetArmLength;
+		GetXZCharacterSpringArm()->SocketOffset = Attachments[EquippedTag]->DA_Weapon->AimData.BaseZoomData.SocketOffset;
+		GetXZCharacterSpringArm()->bEnableCameraLag = Attachments[EquippedTag]->DA_Weapon->AimData.BaseZoomData.bEnableCameraLag;
 	}
 }
 
@@ -188,12 +181,13 @@ void UXZCombatHandler::Fire(const FGameplayTag& InTag, const FVector_NetQuantize
 	Server_Fire(InTag, HitLocation);
 }
 
+
 void UXZCombatHandler::Server_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
 {
 	// Play Fire Montage
-	if (IsValid(DA_Weapons[InTag]->ActionData[0].ActionMontage))
+	if (IsValid(Attachments[InTag]->DA_Weapon->ActionData[0].ActionMontage))
 	{
-		OwnerCharacter->PlayAnimMontage(DA_Weapons[InTag]->ActionData[0].ActionMontage);
+		OwnerCharacter->PlayAnimMontage(Attachments[InTag]->DA_Weapon->ActionData[0].ActionMontage);
 	}
 	
 	Multicast_Fire(InTag, HitLocation);
@@ -201,19 +195,21 @@ void UXZCombatHandler::Server_Fire_Implementation(const FGameplayTag& InTag, con
 
 void UXZCombatHandler::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
 {
-	IICombat* CombatInterface = Cast<IICombat>(WeaponActors[InTag]);
-	if (CombatInterface)
-	{
-		FTimerHandle FireTimerHandle;
-		FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, InTag, HitLocation]()
-			{
-				WeaponActors[InTag]->Fire(HitLocation, DA_Weapons[InTag]->ActionData[0].MuzzleSocketName);
-			});
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FireTimerDelegate, DA_Weapons[InTag]->ActionData[0].Action_FrameTime, false);
-	}
+	FTimerHandle FireTimerHandle;
+	FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, InTag, HitLocation]()
+		{
+			this->OnFire(InTag, HitLocation);
+		});
+	OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FireTimerDelegate, Attachments[InTag]->DA_Weapon->ActionData[0].Action_FrameTime, false);
+}
+
+void UXZCombatHandler::OnFire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
+	//FTransform SocketTransform = GetWeaponMesh()->GetSocketByName(MuzzleSocketName)->GetSocketTransform(GetWeaponMesh());
+	
 }
 
 void UXZCombatHandler::OnAiming(float Output)
 {
-	GetFollowCamera()->FieldOfView = FMath::Lerp(DA_Weapons[EquippedTag]->AimData.WeaponZoomData.FieldOfView, DA_Weapons[EquippedTag]->AimData.BaseZoomData.FieldOfView, Output);
+	GetFollowCamera()->FieldOfView = FMath::Lerp(Attachments[EquippedTag]->DA_Weapon->AimData.WeaponZoomData.FieldOfView, Attachments[EquippedTag]->DA_Weapon->AimData.BaseZoomData.FieldOfView, Output);
 }

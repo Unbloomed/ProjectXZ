@@ -1,8 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Interface/ICombat.h"
-#include "UObject/NoExportTypes.h"
 #include "XZCombatHandler.generated.h"
 
 class UTimelineComponent;
@@ -21,15 +19,13 @@ class PROJECTXZ_API UXZCombatHandler : public UObject
 
 public:
 	bool IsValidWeapon(const FGameplayTag& InTag);
-	void AddNewWeapon(const FGameplayTag& InTag, UXZDA_Weapon* DA_Weapon, ACharacter* InOwner);
+	void AddNewWeapon(const FGameplayTag& InTag, ACharacter* InOwner);
 
 private:
-	TMap<FGameplayTag, UXZDA_Weapon*> DA_Weapons;
-
-	TMap<FGameplayTag, AXZAttachment*> WeaponActors;
+	TMap<FGameplayTag, AXZAttachment*> Attachments; // 4개
 
 	TObjectPtr<ACharacter> OwnerCharacter;
-
+	
 //====== Equip, Unequip ========================================================
 public:
 	void Equip(const FGameplayTag& InTag);
@@ -75,7 +71,9 @@ public:
 
 	UFUNCTION(Reliable, NetMulticast)
 	void Multicast_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
-	
+
+private:
+	void OnFire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
 //====== Fire =================================================================
 
 };

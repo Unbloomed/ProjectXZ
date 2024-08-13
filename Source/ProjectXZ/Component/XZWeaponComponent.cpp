@@ -10,12 +10,8 @@
 #include "ProjectXZ/Character/XZCharacter.h"
 #include "ProjectXZ/Character/XZPlayerController.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
-#include "ProjectXZ/HUD/XZHUD.h"
 #include "ProjectXZ/Weapon/XZDA_Weapon.h"
 #include "ProjectXZ/Weapon/XZEquipment.h"
-#include "ProjectXZ/Weapon/XZWeaponData.h"
-#include "ProjectXZ/Weapon/Combat/XZCombat.h"
-#include "Weapon/Aim/XZAim.h"
 #include "Weapon/Attachment/XZAttachment.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
@@ -43,7 +39,7 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	}
 }
 
-TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
+AXZCharacter* UXZWeaponComponent::GetXZCharacter()
 {
 	if (IsValid(OwnerCharacter)) return OwnerCharacter;
 
@@ -51,7 +47,7 @@ TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
 	return OwnerCharacter;
 }
 
-TObjectPtr<AXZPlayerController> UXZWeaponComponent::GetXZPlayerController()
+AXZPlayerController* UXZWeaponComponent::GetXZPlayerController()
 {
 	if (IsValid(XZPlayerController)) return XZPlayerController;
 
@@ -80,10 +76,10 @@ void UXZWeaponComponent::BeginPlay()
 		if ( FoundWeapon )
 		{
 			//UE_LOG(LogTemp, Log, TEXT("Found weapon with tag: %s"), *FoundWeapon->WeaponTag.ToString());
-			UXZDA_Weapon* WeaponToAdd = FoundWeapon->WeaponDataAsset;
+			AXZAttachment* WeaponToAdd = NewObject<AXZAttachment>(FoundWeapon->WeaponActor);
 			if ( WeaponToAdd )
 			{
-				CombatHandler->AddNewWeapon(Tag, WeaponToAdd, GetXZCharacter());
+				CombatHandler->AddNewWeapon(Tag, GetXZCharacter());
 			}
 			else
 			{
@@ -114,10 +110,10 @@ void UXZWeaponComponent::Multicast_AddNewWeapon_Implementation(const FGameplayTa
 
 	if ( FoundWeapon )
 	{
-		UXZDA_Weapon* WeaponToAdd = FoundWeapon->WeaponDataAsset;
+		AXZAttachment* WeaponToAdd = NewObject<AXZAttachment>(FoundWeapon->WeaponActor);
 		if ( WeaponToAdd )
 		{
-			CombatHandler->AddNewWeapon(InTag, WeaponToAdd, GetXZCharacter());
+			CombatHandler->AddNewWeapon(InTag, GetXZCharacter());
 		}
 	}
 }
@@ -153,7 +149,7 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 		FVector End = Start + CrosshairWorldDirection * 80000.0f; // TRACE_LENGTH 80000.0f
 
-		GetWorld()->LineTraceSingleByChannel(TraceHitResult, 	Start, End, ECollisionChannel::ECC_Visibility);
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult, Start, End, ECollisionChannel::ECC_Visibility);
 
 		if (TraceHitResult.bBlockingHit == false) 
 		{
@@ -190,6 +186,7 @@ void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
 	EquippedWeaponTag = InTag;
+
 	CombatHandler->Equip(EquippedWeaponTag);
 }
 
@@ -276,6 +273,21 @@ void UXZWeaponComponent::Server_Aiming_Implementation(bool bAiming)
 
 void UXZWeaponComponent::Init()
 {
-	CombatHandler = NewObject<UXZCombatHandler>(this, UXZCombatHandler::StaticClass());
+	CombatHandler = CreateCombatHandler();
 }
 
+UXZCombatHandler* UXZWeaponComponent::CreateCombatHandler()
+{
+	return NewObject<UXZCombatHandler>(this, UXZCombatHandler::StaticClass());;
+}
+
+UXZCombatHandler* UXZWeaponComponent::GetCombatHandler()
+{
+	if (IsValid(CombatHandler))
+	{
+		return CombatHandler;
+	}
+
+	CombatHandler = CreateCombatHandler();
+	return CombatHandler;
+}

@@ -54,7 +54,7 @@ void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* In
 	// TODO: 아래는 임시 코드. 추후에 DataTable 방식으로 교체
 	FString ItemName = InItem->GetItemName();
 
-	if (ItemName.Compare(FString("SMG"), ESearchCase::IgnoreCase))
+	if (ItemName == FString("SMG"))
 	{
 		EquipSlot3 = FXZTags::GetXZTags().Weapon_Projectile_SMG;
 

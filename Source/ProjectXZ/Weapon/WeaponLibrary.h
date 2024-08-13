@@ -8,7 +8,7 @@
  * 
  */
 
-class UXZDA_Weapon;
+class AXZAttachment;
 class UTimelineComponent;
 class AXZProjectile;
 
@@ -22,7 +22,7 @@ public:
 	FGameplayTag WeaponTag;
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UXZDA_Weapon> WeaponDataAsset;
+	TSubclassOf<AXZAttachment> WeaponActor;
 };
 
 USTRUCT()

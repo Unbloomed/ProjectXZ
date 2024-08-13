@@ -14,7 +14,7 @@ class AXZPlayerController;
 class AXZHUD;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROJECTXZ_API UXZWeaponComponent : public UActorComponent
+class PROJECTXZ_API UXZWeaponComponent : public UActorComponent, public IICombat
 {
 	GENERATED_BODY()
 
@@ -28,8 +28,8 @@ protected:
 
 //====== Get, Set Function ====================================================
 public:
-	TObjectPtr<AXZCharacter> GetXZCharacter();
-	TObjectPtr<AXZPlayerController> GetXZPlayerController();
+	AXZCharacter* GetXZCharacter();
+	AXZPlayerController* GetXZPlayerController();
 	const FGameplayTag& GetEquippedWeaponTag() { return EquippedWeaponTag; }
 
 //====== Get, Set Function ====================================================
@@ -78,6 +78,14 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TArray<FGameplayTag> Init_WeaponTags; // Initial weapons start with
 
+	//***************************************************************
+	//** Aiming
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
+	float AimWalkSpeed = 200.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
+	float MaxWalkSpeed = 600.0f;
+	//***************************************************************
+
 	UPROPERTY(ReplicatedUsing = OnRep_EquippedWeaponTag)
 	FGameplayTag EquippedWeaponTag = FXZTags::GetXZTags().Fist; // ?袁⑹삺 ?關媛?餓λ쵐???얜떯由?
 	UFUNCTION()
@@ -88,20 +96,15 @@ private:
 	FVector HitTarget; // ?μ빘釉??獄쏆뮇沅??뤾퐣 ?겸뫖猷??띿쓺 ??筌왖??
 
 
-	//***************************************************************
-	//** Aiming
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
-	float AimWalkSpeed = 200.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Aiming Data", meta = (AllowPrivateAccess = true))
-	float MaxWalkSpeed = 600.0f;
-	//***************************************************************
-
-	
-
+//====== ICombat ========================================================
 public:
 	void Init();
+	virtual UXZCombatHandler* CreateCombatHandler() override;
+	virtual UXZCombatHandler* GetCombatHandler() override;
 
 private:
 	UPROPERTY()
 	UXZCombatHandler* CombatHandler;
+//====== ICombat ========================================================
+	
 };

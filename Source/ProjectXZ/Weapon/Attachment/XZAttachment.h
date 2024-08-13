@@ -2,28 +2,26 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Item/XZItemBase.h"
-#include "Interface/ICombat.h"
 #include "XZAttachment.generated.h"
 
+class UXZDA_Weapon;
+
 UCLASS()
-class PROJECTXZ_API AXZAttachment : public AXZItemBase, public IICombat
+class PROJECTXZ_API AXZAttachment : public AXZItemBase
 {
 	GENERATED_BODY()
 	
 public:	
 	AXZAttachment();
-	TObjectPtr<USkeletalMeshComponent> GetWeaponMesh() { return ItemMesh; }
-
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Properties")
-	FGameplayTag WeaponNameTag;
+	USkeletalMeshComponent* GetWeaponMesh() { return ItemMesh; }
 
 protected:
 	virtual void BeginPlay() override;
 
 public:
-	virtual void Fire(const FVector_NetQuantize& HitLocation, const FName& MuzzleSocketName) override;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Properties")
+	FGameplayTag WeaponNameTag;
 	
-	UFUNCTION(Server, Reliable)
-	void Server_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
-	
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Data Asset")
+	TObjectPtr<UXZDA_Weapon> DA_Weapon;
 };
