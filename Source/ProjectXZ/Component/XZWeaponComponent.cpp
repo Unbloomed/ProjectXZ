@@ -164,7 +164,6 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 
 void UXZWeaponComponent::ShowCrosshair(const FGameplayTag& InTag, bool bShow)
 {
-	//Datas[InTag]->GetAim()->ShowCrosshair(bShow);
 	CombatHandler->ShowCrosshair(bShow);
 }
 
@@ -225,17 +224,7 @@ void UXZWeaponComponent::Multicast_UnequipWeapon_Implementation(const FGameplayT
 
 void UXZWeaponComponent::Fire()
 {
-
-}
-
-void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
-{
-	
-}
-
-void UXZWeaponComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
-{
-
+	CombatHandler->Fire(EquippedWeaponTag, HitTarget);
 }
 
 void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
@@ -285,13 +274,8 @@ void UXZWeaponComponent::Server_Aiming_Implementation(bool bAiming)
 }
 
 
-
 void UXZWeaponComponent::Init()
 {
-	CombatHandler = CreateCombatHandler();
+	CombatHandler = NewObject<UXZCombatHandler>(this, UXZCombatHandler::StaticClass());
 }
 
-UXZCombatHandler* UXZWeaponComponent::CreateCombatHandler()
-{
-	return NewObject<UXZCombatHandler>(this, UXZCombatHandler::StaticClass());
-}

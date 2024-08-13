@@ -2,10 +2,11 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Item/XZItemBase.h"
+#include "Interface/ICombat.h"
 #include "XZAttachment.generated.h"
 
 UCLASS()
-class PROJECTXZ_API AXZAttachment : public AXZItemBase
+class PROJECTXZ_API AXZAttachment : public AXZItemBase, public IICombat
 {
 	GENERATED_BODY()
 	
@@ -19,5 +20,10 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-
+public:
+	virtual void Fire(const FVector_NetQuantize& HitLocation, const FName& MuzzleSocketName) override;
+	
+	UFUNCTION(Server, Reliable)
+	void Server_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
+	
 };

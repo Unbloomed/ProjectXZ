@@ -14,7 +14,7 @@ class AXZPlayerController;
 class AXZHUD;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PROJECTXZ_API UXZWeaponComponent : public UActorComponent, public IICombat
+class PROJECTXZ_API UXZWeaponComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -53,10 +53,6 @@ public:
 	void Multicast_UnequipWeapon(const FGameplayTag& InTag);
 
 	void Fire();
-	UFUNCTION(Server, Reliable)
-	void Server_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_Fire(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform);
 
 	void Reload(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
@@ -76,7 +72,6 @@ private:
 
 //====== Class Variables ======================================================
 private:
-
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UDataTable> WeaponDataTable; // Overall Weapon List
 
@@ -103,13 +98,10 @@ private:
 
 	
 
-	//====== ICombat ==============================================================
 public:
 	void Init();
-	virtual UXZCombatHandler* CreateCombatHandler() override;
 
 private:
 	UPROPERTY()
 	UXZCombatHandler* CombatHandler;
-	//====== ICombat ==============================================================
 };

@@ -21,4 +21,6 @@ class PROJECTXZ_API IICombat
 
 public:
 	virtual UXZCombatHandler* CreateCombatHandler() = 0;
+
+	virtual void Fire(const FVector_NetQuantize& HitLocation, const FName& MuzzleSocketName) = 0;
 };

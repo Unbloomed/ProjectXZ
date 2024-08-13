@@ -24,7 +24,6 @@ public:
 	void AddNewWeapon(const FGameplayTag& InTag, UXZDA_Weapon* DA_Weapon, ACharacter* InOwner);
 
 private:
-	UPROPERTY(EditDefaultsOnly)
 	TMap<FGameplayTag, UXZDA_Weapon*> DA_Weapons;
 
 	TMap<FGameplayTag, AXZAttachment*> WeaponActors;
@@ -66,5 +65,17 @@ private:
 	UPROPERTY()
 	TObjectPtr<UTimelineComponent> Timeline;
 //====== Aim ==================================================================
+
+//====== Fire =================================================================
+public:
+	void Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+
+	UFUNCTION(Reliable, Server)
+	void Server_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+
+	UFUNCTION(Reliable, NetMulticast)
+	void Multicast_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
+	
+//====== Fire =================================================================
 
 };

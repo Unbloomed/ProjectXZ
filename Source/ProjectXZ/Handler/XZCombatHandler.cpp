@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapon/XZDA_Weapon.h"
 #include "Weapon/Attachment/XZAttachment.h"
+#include "Interface/ICombat.h"
 
 bool UXZCombatHandler::IsValidWeapon(const FGameplayTag& InTag)
 {
@@ -125,7 +126,7 @@ void UXZCombatHandler::ChangeSocket_Equip(const FGameplayTag& InTag)
 
 void UXZCombatHandler::ChangeSocket_Unequip(const FGameplayTag& InTag)
 {
-
+	
 }
 
 TObjectPtr<USpringArmComponent> UXZCombatHandler::GetXZCharacterSpringArm()
@@ -179,6 +180,36 @@ void UXZCombatHandler::EndAiming()
 		GetXZCharacterSpringArm()->TargetArmLength = DA_Weapons[EquippedTag]->AimData.BaseZoomData.TargetArmLength;
 		GetXZCharacterSpringArm()->SocketOffset = DA_Weapons[EquippedTag]->AimData.BaseZoomData.SocketOffset;
 		GetXZCharacterSpringArm()->bEnableCameraLag = DA_Weapons[EquippedTag]->AimData.BaseZoomData.bEnableCameraLag;
+	}
+}
+
+void UXZCombatHandler::Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
+	Server_Fire(InTag, HitLocation);
+}
+
+void UXZCombatHandler::Server_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
+	// Play Fire Montage
+	if (IsValid(DA_Weapons[InTag]->ActionData[0].ActionMontage))
+	{
+		OwnerCharacter->PlayAnimMontage(DA_Weapons[InTag]->ActionData[0].ActionMontage);
+	}
+	
+	Multicast_Fire(InTag, HitLocation);
+}
+
+void UXZCombatHandler::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
+{
+	IICombat* CombatInterface = Cast<IICombat>(WeaponActors[InTag]);
+	if (CombatInterface)
+	{
+		FTimerHandle FireTimerHandle;
+		FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, InTag, HitLocation]()
+			{
+				WeaponActors[InTag]->Fire(HitLocation, DA_Weapons[InTag]->ActionData[0].MuzzleSocketName);
+			});
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FireTimerDelegate, DA_Weapons[InTag]->ActionData[0].Action_FrameTime, false);
 	}
 }
 

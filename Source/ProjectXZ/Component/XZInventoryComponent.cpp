@@ -51,10 +51,10 @@ void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* In
 {
 	UE_LOG(LogTemp, Log, TEXT("Pickup and then Add to Inventory!  Client_AddtoInventory_Implementation"));
 
-	// TODO: ¾Æ·¡´Â ÀÓ½Ã ÄÚµå. ÃßÈÄ¿¡ DataTable ¹æ½ÄÀ¸·Î ±³Ã¼
+	// TODO: ì•„ë˜ëŠ” ì„ì‹œ ì½”ë“œ. ì¶”í›„ì— DataTable ë°©ì‹ìœ¼ë¡œ êµì²´
 	FString ItemName = InItem->GetItemName();
 
-	if (ItemName == FString("SMG"))
+	if (ItemName.Compare(FString("SMG"), ESearchCase::IgnoreCase))
 	{
 		EquipSlot3 = FXZTags::GetXZTags().Weapon_Projectile_SMG;
 
@@ -79,7 +79,7 @@ void UXZInventoryComponent::DestroyPickupItem(AXZItemBase* InItem)
 
 void UXZInventoryComponent::Server_DestroyPickupItem_Implementation(AXZItemBase* InItem)
 {
-	InItem->Destroy(); // ¾ÆÀÌÅÛ Á¦°Å
+	InItem->Destroy(); // ì•„ì´í…œ ì œê±°
 }
 
 void UXZInventoryComponent::BeginPlay()
