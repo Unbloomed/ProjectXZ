@@ -18,25 +18,45 @@ class PROJECTXZ_API UXZCombatHandler : public UObject
 	GENERATED_BODY()
 
 public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	bool IsValidWeapon(const FGameplayTag& InTag);
-	void AddNewWeapon(const FGameplayTag& InTag, ACharacter* InOwner);
-
+	
+	template<typename T>
+	T* GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag);
+	
 private:
+	UPROPERTY()
 	TMap<FGameplayTag, AXZAttachment*> Attachments; // 4개
 
 	TObjectPtr<ACharacter> OwnerCharacter;
+
+//====== Add New Weapon ========================================================
+public:
+	void AddNewWeapon(const FGameplayTag& InTag, ACharacter* InOwner);
+	UFUNCTION(Server, Reliable)
+	void Server_AddNewWeapon(const FGameplayTag& InTag);
+	UFUNCTION(Client, Reliable)
+	void Client_AddNewWeapon(const FGameplayTag& InTag);
+
+private:
+	TObjectPtr<UDataTable> WeaponDataTable;
+//====== Add New Weapon ========================================================
 	
 //====== Equip, Unequip ========================================================
 public:
 	void Equip(const FGameplayTag& InTag);
 	void Unequip(const FGameplayTag& InTag);
 
-private:
 	void ChangeSocket_Equip(const FGameplayTag& InTag);
 	void ChangeSocket_Unequip(const FGameplayTag& InTag);
-
+	
+private:
+	UPROPERTY(ReplicatedUsing = OnRep_bEquipped)
 	bool bEquipped = false;
-
+	
+	UFUNCTION()
+	void OnRep_bEquipped();
+	
 	FGameplayTag EquippedTag;
 
 //====== Equip, Unequip ========================================================
@@ -66,14 +86,14 @@ private:
 public:
 	void Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
 
-	UFUNCTION(Reliable, Server)
-	void Server_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
-
-	UFUNCTION(Reliable, NetMulticast)
-	void Multicast_Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
-
 private:
 	void OnFire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation);
 //====== Fire =================================================================
 
 };
+
+template <typename T>
+T* UXZCombatHandler::GetDataTableRowByTag(UDataTable* DataTable, const FGameplayTag& Tag)
+{
+	return DataTable->FindRow<T>(Tag.GetTagName(), TEXT(""));
+}

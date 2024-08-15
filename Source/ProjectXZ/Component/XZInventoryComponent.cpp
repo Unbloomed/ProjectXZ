@@ -44,13 +44,6 @@ void UXZInventoryComponent::Server_PickupItem_Implementation()
 
 void UXZInventoryComponent::AddtoInventory(AXZItemBase* InItem)
 {
-	Client_AddtoInventory(InItem);
-}
-
-void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* InItem)
-{
-	UE_LOG(LogTemp, Log, TEXT("Pickup and then Add to Inventory!  Client_AddtoInventory_Implementation"));
-
 	// TODO: 아래는 임시 코드. 추후에 DataTable 방식으로 교체
 	FString ItemName = InItem->GetItemName();
 
@@ -59,15 +52,29 @@ void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* In
 		EquipSlot3 = FXZTags::GetXZTags().Weapon_Projectile_SMG;
 
 		AXZCharacter* XZCharacter = Cast<AXZCharacter>(GetOwner());
-		XZCharacter->GetWeaponComponent()->AddNewWeapon(EquipSlot3);
+		if (XZCharacter->HasAuthority())
+		{
+			XZCharacter->GetWeaponComponent()->AddNewWeapon(EquipSlot3);
+		}
+		DestroyPickupItem(InItem);
 	}
-	if (ItemName == FString("Shotgun"))
+	else if (ItemName == FString("Shotgun"))
 	{
 		EquipSlot4 = FXZTags::GetXZTags().Weapon_Hitscan_Shotgun;
 		
 		AXZCharacter* XZCharacter = Cast<AXZCharacter>(GetOwner());
 		XZCharacter->GetWeaponComponent()->AddNewWeapon(EquipSlot4);
+		DestroyPickupItem(InItem);
 	}
+	else
+	{
+		Client_AddtoInventory(InItem);
+	}
+}
+
+void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* InItem)
+{
+	UE_LOG(LogTemp, Log, TEXT("Pickup and then Add to Inventory!  Client_AddtoInventory_Implementation"));
 
 	DestroyPickupItem(InItem);
 }

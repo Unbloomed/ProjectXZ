@@ -6,6 +6,7 @@
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
 #include "XZWeaponComponent.generated.h"
 
+class AXZAttachment;
 class UXZCombatHandler;
 class UXZWeaponData;
 class UXZDA_Weapon;
@@ -34,13 +35,22 @@ public:
 
 //====== Get, Set Function ====================================================
 
+//====== ICombat ==============================================================
+public:
+	void Init();
+	virtual UXZCombatHandler* CreateCombatHandler() override;
+	virtual UXZCombatHandler* GetCombatHandler() override;
+
+private:
+	UPROPERTY()
+	UXZCombatHandler* CombatHandler;
+//====== ICombat ==============================================================
+	
 //====== Class Functions ======================================================
 public:
 	void AddNewWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_AddNewWeapon(const FGameplayTag& InTag);
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_AddNewWeapon(const FGameplayTag& InTag);
 
 	void EquipWeapon(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
@@ -53,7 +63,9 @@ public:
 	void Multicast_UnequipWeapon(const FGameplayTag& InTag);
 
 	void Fire();
-
+	UFUNCTION(Server, Reliable)
+	void Server_Fire();
+	
 	void Reload(const FGameplayTag& InTag);
 	UFUNCTION(Server, Reliable)
 	void Server_Reload(const FGameplayTag& InTag, const FTransform& SocketTransform);
@@ -73,9 +85,6 @@ private:
 //====== Class Variables ======================================================
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
-	TObjectPtr<UDataTable> WeaponDataTable; // Overall Weapon List
-
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
 	TArray<FGameplayTag> Init_WeaponTags; // Initial weapons start with
 
 	//***************************************************************
@@ -94,17 +103,6 @@ private:
 	TObjectPtr<AXZCharacter> OwnerCharacter;
 	TObjectPtr<AXZPlayerController> XZPlayerController;
 	FVector HitTarget; // ?μ빘釉??獄쏆뮇沅??뤾퐣 ?겸뫖猷??띿쓺 ??筌왖??
-
-
-//====== ICombat ========================================================
-public:
-	void Init();
-	virtual UXZCombatHandler* CreateCombatHandler() override;
-	virtual UXZCombatHandler* GetCombatHandler() override;
-
-private:
-	UPROPERTY()
-	UXZCombatHandler* CombatHandler;
-//====== ICombat ========================================================
+//====== Class Variables ======================================================
 	
 };

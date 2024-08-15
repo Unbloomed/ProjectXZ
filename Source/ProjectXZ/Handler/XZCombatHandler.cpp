@@ -1,12 +1,21 @@
 #include "Handler/XZCombatHandler.h"
+#include "Net/UnrealNetwork.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Character/XZCharacter.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Manager/XZDataManager.h"
 #include "Weapon/XZDA_Weapon.h"
 #include "Weapon/Attachment/XZAttachment.h"
+
+void UXZCombatHandler::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	UObject::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION_NOTIFY(UXZCombatHandler, bEquipped, COND_None, REPNOTIFY_Always);
+}
 
 bool UXZCombatHandler::IsValidWeapon(const FGameplayTag& InTag)
 {
@@ -21,21 +30,79 @@ bool UXZCombatHandler::IsValidWeapon(const FGameplayTag& InTag)
 
 void UXZCombatHandler::AddNewWeapon(const FGameplayTag& InTag, ACharacter* InOwner)
 {
-	//if (IsValidWeapon(InTag))
-	{
-	//	return;
-	}
+	//if (IsValidWeapon(InTag)) { return; }
 
 	OwnerCharacter = InOwner;
+	
+	WeaponDataTable = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance())->GetWeaponDataTable();
+	checkf(WeaponDataTable, TEXT("No Weapon DataTable. Check UXZWeaponComponent::AddNewWeapon"));
 
-	AXZAttachment* Weapon = OwnerCharacter->GetWorld()->SpawnActor<AXZAttachment>(Attachments[InTag]->DA_Weapon->AttachmentClass);
-	Attachments.Add({ InTag, Weapon });
-
-	if ( Attachments[InTag]->DA_Weapon->EquipmentData.HolsterSocketName.IsValid() )
+	FWeaponListData* FoundWeapon = GetDataTableRowByTag<FWeaponListData>(WeaponDataTable, InTag);
+	if ( FoundWeapon && FoundWeapon->WeaponActor )
 	{
-		Attachments[InTag]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), Attachments[InTag]->DA_Weapon->EquipmentData.HolsterSocketName);
+		FActorSpawnParameters Params;
+		Params.Owner = OwnerCharacter;
+		AXZAttachment* WeaponToAdd = OwnerCharacter->GetWorld()->SpawnActor<AXZAttachment>(FoundWeapon->WeaponActor, Params);
+		
+		// Add New Weapon to TMap list
+		Attachments.Add({ InTag, WeaponToAdd });
+		ChangeSocket_Unequip(InTag);
 	}
 
+	for (const auto& iter : Attachments)
+	{
+		UE_LOG(LogTemp, Log, TEXT("%s, %s"), *(OwnerCharacter->GetName()), *(iter.Value->GetName()));
+	}
+}
+
+void UXZCombatHandler::Server_AddNewWeapon_Implementation(const FGameplayTag& InTag)
+{
+	
+}
+
+void UXZCombatHandler::Client_AddNewWeapon_Implementation(const FGameplayTag& InTag)
+{
+	
+}
+
+void UXZCombatHandler::Equip(const FGameplayTag& InTag)
+{
+	if ( false == IsValid(OwnerCharacter) ) { return; }
+	
+	if ( bEquipped )
+	{
+		Unequip(InTag);
+		return;
+	}
+	
+	if ( IsValid(Attachments[InTag]->DA_Weapon->EquipmentData.EquipMontage) )
+	{
+		// Play Equip Montange Animation
+		OwnerCharacter->PlayAnimMontage(Attachments[InTag]->DA_Weapon->EquipmentData.EquipMontage);
+
+		// Attach WeaponMesh to RightHand
+		FTimerHandle EquipTimerHandle;
+		FTimerDelegate EquipTimerDelegate = FTimerDelegate::CreateLambda([this, InTag]
+			{ this->ChangeSocket_Equip(InTag); }
+		);
+		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, Attachments[InTag]->DA_Weapon->EquipmentData.Equip_FrameTime, false);
+
+		if (Attachments[InTag]->DA_Weapon)
+		{
+			UE_LOG(LogTemp, Log, TEXT("%s %f"), *(Attachments[InTag]->DA_Weapon->GetName()), Attachments[InTag]->DA_Weapon->EquipmentData.Equip_FrameTime);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("No DA_Weapon Data"));
+		}
+		
+		EquippedTag = InTag;
+		bEquipped = true;
+	}
+
+	
+	/*
+	 
 	// Create Crosshair
 	if ( IsValid(Attachments[InTag]->DA_Weapon->AimData.AimCurve) && IsValid(Timeline) )
 	{
@@ -62,37 +129,14 @@ void UXZCombatHandler::AddNewWeapon(const FGameplayTag& InTag, ACharacter* InOwn
 			UE_LOG(LogTemp, Error, TEXT("Failed to create Crosshair widget."));
 		}
 	}
-}
-
-void UXZCombatHandler::Equip(const FGameplayTag& InTag)
-{
-	if ( false == IsValid(OwnerCharacter) ) return;
-
-	if ( bEquipped )
-	{
-		Unequip(InTag);
-		return;
-	}
-
-	if ( IsValid(Attachments[InTag]->DA_Weapon->EquipmentData.EquipMontage) )
-	{
-		// Play Equip Montange Animation
-		OwnerCharacter->PlayAnimMontage(Attachments[InTag]->DA_Weapon->EquipmentData.EquipMontage);
-
-		// Attach WeaponMesh to RightHand
-		FTimerHandle EquipTimerHandle;
-		FTimerDelegate EquipTimerDelegate = FTimerDelegate::CreateLambda([this, InTag]
-			{ this->ChangeSocket_Equip(InTag); }
-		);
-		OwnerCharacter->GetWorld()->GetTimerManager().SetTimer(EquipTimerHandle, EquipTimerDelegate, Attachments[InTag]->DA_Weapon->EquipmentData.Equip_FrameTime, false);
-
-		EquippedTag = InTag;
-		bEquipped = true;
-	}
+	
+	*/
 }
 
 void UXZCombatHandler::Unequip(const FGameplayTag& InTag)
 {
+	if ( false == IsValid(OwnerCharacter) ) { return; }
+	
 	if ( IsValid(Attachments[InTag]->DA_Weapon->EquipmentData.UnequipMontage) )
 	{
 		// Play Equip Montange Animation
@@ -119,7 +163,15 @@ void UXZCombatHandler::ChangeSocket_Equip(const FGameplayTag& InTag)
 
 void UXZCombatHandler::ChangeSocket_Unequip(const FGameplayTag& InTag)
 {
-	
+	if ( Attachments[InTag]->DA_Weapon->EquipmentData.HolsterSocketName.IsValid() )
+	{
+		Attachments[InTag]->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), Attachments[InTag]->DA_Weapon->EquipmentData.HolsterSocketName);
+	}
+}
+
+void UXZCombatHandler::OnRep_bEquipped()
+{
+	UE_LOG(LogTemp, Log, TEXT("bEquipped = %c"), bEquipped);
 }
 
 TObjectPtr<USpringArmComponent> UXZCombatHandler::GetXZCharacterSpringArm()
@@ -178,23 +230,15 @@ void UXZCombatHandler::EndAiming()
 
 void UXZCombatHandler::Fire(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
 {
-	Server_Fire(InTag, HitLocation);
-}
-
-
-void UXZCombatHandler::Server_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
-{
+	if (false == InTag.IsValid()) { return; }
+	
 	// Play Fire Montage
 	if (IsValid(Attachments[InTag]->DA_Weapon->ActionData[0].ActionMontage))
 	{
 		OwnerCharacter->PlayAnimMontage(Attachments[InTag]->DA_Weapon->ActionData[0].ActionMontage);
 	}
 	
-	Multicast_Fire(InTag, HitLocation);
-}
-
-void UXZCombatHandler::Multicast_Fire_Implementation(const FGameplayTag& InTag, const FVector_NetQuantize& HitLocation)
-{
+	// Fire - Spawn Projectile 
 	FTimerHandle FireTimerHandle;
 	FTimerDelegate FireTimerDelegate = FTimerDelegate::CreateLambda([this, InTag, HitLocation]()
 		{

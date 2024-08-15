@@ -1,8 +1,5 @@
 #include "XZWeaponComponent.h"
-
 #include "XZStateComponent.h"
-#include "Camera/CameraComponent.h"
-#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Handler/XZCombatHandler.h"
 #include "Kismet/GameplayStatics.h"
@@ -10,9 +7,6 @@
 #include "ProjectXZ/Character/XZCharacter.h"
 #include "ProjectXZ/Character/XZPlayerController.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
-#include "ProjectXZ/Weapon/XZDA_Weapon.h"
-#include "ProjectXZ/Weapon/XZEquipment.h"
-#include "Weapon/Attachment/XZAttachment.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
 {
@@ -41,16 +35,20 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 
 AXZCharacter* UXZWeaponComponent::GetXZCharacter()
 {
-	if (IsValid(OwnerCharacter)) return OwnerCharacter;
-
+	if (IsValid(OwnerCharacter))
+	{
+		return OwnerCharacter;
+	}
 	OwnerCharacter = Cast<AXZCharacter>(GetOwner());
 	return OwnerCharacter;
 }
 
 AXZPlayerController* UXZWeaponComponent::GetXZPlayerController()
 {
-	if (IsValid(XZPlayerController)) return XZPlayerController;
-
+	if (IsValid(XZPlayerController))
+	{
+		return XZPlayerController;
+	}
 	XZPlayerController = Cast<AXZPlayerController>(GetXZCharacter()->GetController());
 	return XZPlayerController;
 }
@@ -61,34 +59,12 @@ void UXZWeaponComponent::BeginPlay()
 
 	Init();
 
-
-	if ( false == IsValid(WeaponDataTable) ) return;
-
 	// Create Weapon
-	for ( const FGameplayTag& Tag : Init_WeaponTags )
+	if (GetXZCharacter()->HasAuthority())
 	{
-		// Use the GameplayTag's name directly as the Row ID
-		FName RowName = FName(*Tag.ToString());
-		//UE_LOG(LogTemp, Log, TEXT("Attempting to find row with ID: %s"), *RowName.ToString());
-
-		FWeaponListData* FoundWeapon = WeaponDataTable->FindRow<FWeaponListData>(RowName, TEXT("Looking for weapon"), true);
-
-		if ( FoundWeapon )
+		for ( const FGameplayTag& WeaponTag : Init_WeaponTags )
 		{
-			//UE_LOG(LogTemp, Log, TEXT("Found weapon with tag: %s"), *FoundWeapon->WeaponTag.ToString());
-			AXZAttachment* WeaponToAdd = NewObject<AXZAttachment>(FoundWeapon->WeaponActor);
-			if ( WeaponToAdd )
-			{
-				CombatHandler->AddNewWeapon(Tag, GetXZCharacter());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("WeaponDataAsset is null for tag: %s"), *Tag.ToString());
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("No weapon found for row ID: %s"), *RowName.ToString());
+			AddNewWeapon(WeaponTag);
 		}
 	}
 }
@@ -100,22 +76,7 @@ void UXZWeaponComponent::AddNewWeapon(const FGameplayTag& InTag)
 
 void UXZWeaponComponent::Server_AddNewWeapon_Implementation(const FGameplayTag& InTag)
 {
-	Multicast_AddNewWeapon(InTag);
-}
-
-void UXZWeaponComponent::Multicast_AddNewWeapon_Implementation(const FGameplayTag& InTag)
-{
-	FName RowName = FName(*InTag.ToString());
-	FWeaponListData* FoundWeapon = WeaponDataTable->FindRow<FWeaponListData>(RowName, TEXT("Looking for weapon"), true);
-
-	if ( FoundWeapon )
-	{
-		AXZAttachment* WeaponToAdd = NewObject<AXZAttachment>(FoundWeapon->WeaponActor);
-		if ( WeaponToAdd )
-		{
-			CombatHandler->AddNewWeapon(InTag, GetXZCharacter());
-		}
-	}
+	CombatHandler->AddNewWeapon(InTag, GetXZCharacter());
 }
 
 void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -220,6 +181,11 @@ void UXZWeaponComponent::Multicast_UnequipWeapon_Implementation(const FGameplayT
 }
 
 void UXZWeaponComponent::Fire()
+{
+	Server_Fire();
+}
+
+void UXZWeaponComponent::Server_Fire_Implementation()
 {
 	CombatHandler->Fire(EquippedWeaponTag, HitTarget);
 }

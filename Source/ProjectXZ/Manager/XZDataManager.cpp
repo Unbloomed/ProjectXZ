@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "XZDataManager.h"
 
 UXZDataManager::UXZDataManager()
@@ -10,6 +7,21 @@ UXZDataManager::UXZDataManager()
     if (CharacterStatDataTableRef.Succeeded())
     {
         CharacterStatDataTable = CharacterStatDataTableRef.Object;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No Character Stat DataTable. Check UXZDataManager::UXZDataManager"));
+    }
+    
+    // Weapon List
+    static ConstructorHelpers::FObjectFinder<UDataTable> WeaponDataTableDataTableRef(TEXT("/Game/BP/DataTable/DT_WeaponList.DT_WeaponList"));
+    if (WeaponDataTableDataTableRef.Succeeded())
+    {
+        WeaponDataTable = WeaponDataTableDataTableRef.Object;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No Weapon DataTable. Check UXZDataManager::UXZDataManager"));
     }
 }
 

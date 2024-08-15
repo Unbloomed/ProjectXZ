@@ -1,7 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
-
 #include "CoreMinimal.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "Character/XZCharacter.h"
@@ -22,11 +19,15 @@ public:
 		
 		FORCEINLINE FXZCharacterStat GetCharacterStat(EXZCharacterType InCharacterType) const { return CharacterStatDataMap[InCharacterType]; }
 		FORCEINLINE bool  IsCharacterStatDataValid() const { return CharacterStatDataMap.IsEmpty() ? false : true; }
-
+		FORCEINLINE UDataTable* GetWeaponDataTable() { return  WeaponDataTable; }
+	
 private:
 		UPROPERTY()
 		TMap<EXZCharacterType, struct FXZCharacterStat> CharacterStatDataMap;
 
 		UPROPERTY(EditDefaultsOnly)
 		TObjectPtr<UDataTable> CharacterStatDataTable;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Data", meta = (AllowPrivateAccess = true))
+	TObjectPtr<UDataTable> WeaponDataTable; // Overall Weapon List
 };
