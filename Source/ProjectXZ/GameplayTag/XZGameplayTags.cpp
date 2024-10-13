@@ -1,4 +1,4 @@
-﻿#include "XZGameplayTags.h"
+#include "XZGameplayTags.h"
 #include "GameplayTagsManager.h"
 
 FXZTags FXZTags::GameplayTags; // static GamplayTags instance
@@ -56,6 +56,52 @@ void FXZTags::InitializeNativeGameplayTags()
 	GameplayTags.GameTeamTag_Red = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameTeamTag.Red"), FString("팀 Red Game Tag"));
 	GameplayTags.GameTeamTag_Blue = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("GameTeamTag.Blue"), FString("팀 Blue Game Tag"));
 
+
+	//************************************************************************************************
+	// Parts :: Muzzle
+	GameplayTags.Part_Muzzle_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Muzzle.None"), FString("파츠 Muzzle 없음 Tag"));
+	GameplayTags.Part_Muzzle_Suppressor = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Muzzle.Suppressor"), FString("파츠 소음기 Tag"));
+	GameplayTags.Part_Muzzle_FlashHider = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Muzzle.FlashHider"), FString("파츠 소염기 Tag"));
+	GameplayTags.Part_Muzzle_Compensator = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Muzzle.Compensator"), FString("파츠 보정기 Tag"));
+		
+	// Parts :: Magazine
+	GameplayTags.Part_Magazine_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Magazine.None"), FString("파츠 탄창 없음 Tag"));
+	GameplayTags.Part_Magazine_ExtendedMagazine = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Magazine.ExtendedMagazine"), FString("파츠 대용량 탄창 Tag"));
+	GameplayTags.Part_Magazine_QuickdrawMagazine = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Magazine.QuickdrawMagazine"), FString("파츠 퀵드로우 탄창 Tag"));
+
+	// Parts :: Stock
+	GameplayTags.Part_Stock_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Stock.None"), FString("파츠 개머리판 없음 Tag"));
+	GameplayTags.Part_Stock_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Stock.Buttstock"), FString("파츠 개머리판 개머리판 Tag"));
+	GameplayTags.Part_Muzzle_Compensator = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Stock.CheekPad"), FString("파츠 개머리판 칙패드 Tag"));
+
+	// Parts :: Scope
+	GameplayTags.Part_Scope_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Scope.None"), FString("파츠 배율 없음 Tag"));
+	GameplayTags.Part_Scope_RedDotSight = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Scope.RedDotSight"), FString("파츠 배율 레드도트 사이트 Tag"));
+	GameplayTags.Part_Scope_2xScope = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Scope.2xScope"), FString("파츠 배율 2배율 스코프 Tag"));
+	GameplayTags.Part_Scope_4xScope = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Scope.4xScope"), FString("파츠 배율 4배율 스코프 Tag"));
+	GameplayTags.Part_Scope_8xScope = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Scope.8xScope"), FString("파츠 배율 8배율 스코프 Tag"));
+	GameplayTags.Part_Scope_15xScope = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Part.Scope.15xScope"), FString("파츠 배율 15배율 스코프 Tag"));
+
+	// Item
+	GameplayTags.Consumable_Medical_FirstAidKit = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Consumable.Medical.FirstAidKit"), FString("아이템 구급상자 Tag"));
+	GameplayTags.Consumable_Medical_MedKit = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Consumable.Medical.MedKit"), FString("아이템 의료용 키트 Tag"));
+
+	GameplayTags.Consumable_Booster_Painkiller = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Consumable.Booster.Painkiller"), FString("아이템 진통제 Tag"));
+	GameplayTags.Consumable_Booster_AdrenalineSyringe = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Consumable.Booster.AdrenalineSyringe"), FString("아이템 아드레날린 주사 Tag"));
+	GameplayTags.Consumable_Booster_EnergyDrink = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Consumable.Booster.EnergyDrink"), FString("아이템 에너지 드링크 Tag"));
+
+	// Equipment
+	GameplayTags.Equipment_Supply_Backpack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Equipment.Supply.Backpack"), FString("장착 아이템 가방 Tag"));
+	GameplayTags.Equipment_Armor_Vest = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Equipment.Armor.Vest"), FString("장착 아이템 조끼 Tag"));
+	GameplayTags.Equipment_Armor_Helmet = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Equipment.Armor.Helmet"), FString("장착 아이템 헬멧 Tag"));
+
+	//********************************************************
+ // Widgets
+	GameplayTags.Widget_Layer_FullUI = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.FullUI"), FString("아이템 구급상자"));
+	GameplayTags.Widget_Layer_PopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.PopUpType"), FString("아이템 구급상자"));
+	GameplayTags.Widget_Layer_SubPopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.SubPopUpType"), FString("아이템 구급상자"));
+	GameplayTags.Widget_Layer_TutorialType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.TutorialType"), FString("아이템 구급상자"));
+	GameplayTags.Widget_Layer_NoticeType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.NoticeType"), FString("아이템 구급상자"));
 
 	// Input 상태: Pressed, Held, Released
 	//GameplayTags.BlockTag_InputPressed = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("BlockTag.InputPressed"), FString("Block: Input Pressed 상태"));

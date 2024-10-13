@@ -2,6 +2,7 @@
 #include "Components/ProgressBar.h"
 
 UXZHpBarWidget::UXZHpBarWidget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
 }
 

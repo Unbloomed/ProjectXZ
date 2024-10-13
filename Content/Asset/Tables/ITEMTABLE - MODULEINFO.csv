@@ -1,0 +1,10 @@
+RowName,ID,ModuleType,Tag,Obtainable,ColumnIndex,RowIndex
+Backpack,3001,Backpack,Equipment.Supply.Backpack,1,,
+Vest,3002,Vest,Equipment.Armor.Vest,1,,
+Helmet,3003,Helmet,Equipment.Armor.Helmet,1,,
+Heads,3005,Heads,,0,0,0
+Hands,3006,Hands,,0,1,0
+Body,3007,Body,,0,0,1
+Belt,3008,Belt,,0,1,1
+Pants,3009,Pants,,0,1,2
+Foots,3010,Foots,,0,0,2

@@ -11,6 +11,7 @@
 #include "Component/XZStateComponent.h"
 #include "Component/XZStatComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Component/XZModularComponent.h"
 #include "GameplayTag/XZGameplayTags.h"
 #include "Manager/XZDataManager.h"
 #include "Manager/XZSpawnManager.h"
@@ -59,9 +60,9 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	
 	// Camera
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	CameraSpringArm->SetupAttachment(GetMesh());//Mesh ?좎떍琉꾩삕 ?좎뙎紐뚯삕?좎룞?쇿뜝?숈삕 ?좎룞?쇿뜝?몃뙋??
+	CameraSpringArm->SetupAttachment(GetMesh());
 	CameraSpringArm->TargetArmLength = 300.0f;
-	CameraSpringArm->bUsePawnControlRotation = true;//true: ?좎룞?쇿뜝?뚯뒪?좎룞???좎룞?쇿뜝?숈삕?좎룞???좎룞??controller?좎룞???좎룞?쇿뜝?숈삕 SpringArm?좎룞???뚦뜝?숈삕?좎룞?숉궗 ?좎룞???좎뙇?먯삕
+	CameraSpringArm->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraSpringArm);
@@ -73,6 +74,19 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 
 	BaseEyeHeight = 80.0f;
 	CrouchedEyeHeight = 50.0f;
+
+	// ModualrComponent
+	ModularComponent = CreateDefaultSubobject<UXZModularComponent>(TEXT("ModularComponent"));
+
+	// SkeletalMeshComponent
+	HeadMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadsMeshComponent"));
+	HandsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandsMeshComponent"));
+	BeltMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BeltMeshComponent"));
+	PantsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PantsMeshComponent"));
+	FootsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FootsMeshComponent"));
+	BackpackMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BackpackMeshComponent"));
+	VestMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VestMeshComponent"));
+	HelmetMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HelmetMeshComponent"));
 
 	// WeaponComponent
 	WeaponComponent = CreateDefaultSubobject<UXZWeaponComponent>(TEXT("WeaponComponent"));
@@ -86,14 +100,13 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	// InventoryComponent
 	InventoryComponent = CreateDefaultSubobject<UXZInventoryComponent>(TEXT("InventoryComponent"));
 
-
 	//***********************************************************************************
 	//** TextRenderComponent
 	TextRender_State = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_State"));
 	TextRender_State->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	TextRender_State->SetRelativeLocation(FVector(0.0f, 0.0f, 110.0f));
 	TextRender_State->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-
+	
 	TextRender_Weapon = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_Weapon"));
 	TextRender_Weapon->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	TextRender_Weapon->SetRelativeLocation(FVector(0.0f, 0.0f, 90.0f));
@@ -136,7 +149,6 @@ void AXZCharacter::SetDead()
 	UE_LOG(LogTemp, Log, TEXT("SetDead"));
 	StateComponent->SetState(FXZTags::GetXZTags().StateTag_Dead);
 
-	// ?곗궗???곗궗媛 以묒??섏뼱???쒕떎.
 	// if (WeaponComponent)
 	// {
 	// 	WeaponComponent->EndFire();
@@ -144,7 +156,7 @@ void AXZCharacter::SetDead()
 
 	DisablePlayerInput();
 
-	// DeadAnimation Montage Notify濡??⑥닔 ?몄텧遺遺???린湲?
+	// DeadAnimation Montage Notify?????????轅붽틓?????????뼿??????嚥싲갭횧????
 	EndDeadEvent();
 }
 
@@ -158,7 +170,6 @@ void AXZCharacter::EndDeadEvent()
 	UE_LOG(LogTemp, Log, TEXT("EndDeadEvent"));
 	GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Respawn);
 
-	// 臾닿린, ?몃깽?좊━ Clear
 	// WeaponComponent->RemoveAllWeapon();
 	// InventoryComponent->Reset();
 
@@ -166,18 +177,16 @@ void AXZCharacter::EndDeadEvent()
 
 	if (UXZDataManager* DataManager = UGameInstance::GetSubsystem< UXZDataManager>(GetWorld()->GetGameInstance()))
 	{
-		if (true == DataManager->IsCharacterStatDataValid())
+		if ( FXZCharacterStat* CharacterStatData = DataManager->TryGetCharacterStat(CharacterTypeName))
 		{
-			FXZCharacterStat CharacterStatData = DataManager->GetCharacterStat(EXZCharacterType::eDefault);
-	
 			// Respawn Timer
-			GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AXZCharacter::RespawnPlayer, CharacterStatData.RespawnTime, false);
+			GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AXZCharacter::RespawnPlayer, CharacterStatData->RespawnTime, false);
 
 			if (APlayerController* PC = Cast<APlayerController>(GetController()) )
 			{
 				if (AXZHUD* XZHUD = Cast<AXZHUD>(PC->GetHUD())) 
 				{
-					XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData.RespawnTime);
+					XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData->RespawnTime);
 				}
 			}
 		}
@@ -192,7 +201,7 @@ void AXZCharacter::RespawnPlayer()
 
 	SetActorHiddenInGame(false);
 
-	// Weapon ??덈궖??猷꾣에?
+	// Weapon ????????궰??????猷고?影瑜곸떴??
 	// GetInventoryComponent()->ClearAll();
 
 	ResetCharacterData();
@@ -242,7 +251,6 @@ void AXZCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ?붾쾭源낆슜.
 	TextRender_State->SetVisibility(true);
 	TextRender_Weapon->SetVisibility(true);
 
@@ -250,13 +258,13 @@ void AXZCharacter::BeginPlay()
 
 	// Test
 	SetGenericTeamId(0);
+
 }
 
 void AXZCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// ?붾쾭源낆슜.
 	CurrentCharacterState = GetStateComponent()->GetState().ToString();
 	TextRender_State->SetText(FText::FromString(CurrentCharacterState));
 

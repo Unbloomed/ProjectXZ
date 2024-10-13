@@ -15,7 +15,7 @@
 DEFINE_LOG_CATEGORY(LogXZCheat);
 
 /*
-	GetTarget�� ī�޶� ��ġ, ȸ������ LineTraceSingleByChannel�� ���� Trace�Ǵ� Actor�� return �մϴ�.
+	GetTarget은 카메라 위치, 회전에서 LineTraceSingleByChannel를 쏴서 Trace되는 Actor를 return 합니다.
 */
 
 namespace XZCheat
@@ -47,7 +47,7 @@ void UXZCheatManager::InitCheatManager()
 #if WITH_EDITOR
 	if (GIsEditor)
 	{
-		// �ڵ� ġƮ ���� ���
+		// 자동 치트 실행 기능
 		// APlayerController* PC = GetOuterAPlayerController();
 		// for (const FXZCheatToRun& CheatRow : GetDefault<UXZDeveloperSettings>()->CheatsToRun)
 		// {
@@ -74,37 +74,44 @@ void UXZCheatManager::CheatOutputText(const FString& TextToOutput)
 #endif // USING_CHEAT_MANAGER
 }
 
+// 치트 명령어를 처리하는 함수
 void UXZCheatManager::Cheat(const FString& Msg)
 {
 	if (AXZPlayerController* XZPC = Cast<AXZPlayerController>(GetOuterAPlayerController()))
 	{
+		// 서버에 치트 명령어를 전송
 		XZPC->ServerCheat(Msg.Left(128));
 	}
 }
 
+// 모든 플레이어에게 치트 명령어를 전송하는 함수
 void UXZCheatManager::CheatAll(const FString& Msg)
 {
 	if (AXZPlayerController* XZPC = Cast<AXZPlayerController>(GetOuterAPlayerController()))
 	{
+		// 서버에 모든 플레이어에게 치트 명령어를 전송한다.
 		XZPC->ServerCheatAll(Msg.Left(128));
 	}
 }
 
+// 자기 자신에게 피해를 주는 함수
 void UXZCheatManager::DamageSelf(float DamageAmount)
 {
 	if (UXZStatComponent* StatComponent = GetStatComponent(GetOuterAPlayerController()))
 	{
+		// 체력을 감소
 		StatComponent->DecreaseHealth(DamageAmount);
 	}
 }
 
+// 타겟에게 피해를 주는 함수
 void UXZCheatManager::DamageTarget(float DamageAmount)
 {
 	if (AXZPlayerController* XZPC = Cast<AXZPlayerController>(GetOuterAPlayerController()))
 	{
 		if (XZPC->GetNetMode() == NM_Client)
 		{
-			// Automatically send cheat to server for convenience.
+			// 클라이언트일 경우 자동으로 서버에 치트 명령어를 전송
 			XZPC->ServerCheat(FString::Printf(TEXT("DamageTarget %.2f"), DamageAmount));
 			return;
 		}
@@ -116,6 +123,7 @@ void UXZCheatManager::DamageTarget(float DamageAmount)
 			{
 				if (UXZStatComponent* StatComponent = GetStatComponent(TargetCharacter))
 				{
+					// 타겟의 체력을 감소
 					StatComponent->DecreaseHealth(DamageAmount);
 				}
 			}
@@ -123,14 +131,17 @@ void UXZCheatManager::DamageTarget(float DamageAmount)
 	}
 }
 
+// 자기 자신을 치유하는 함수
 void UXZCheatManager::HealSelf(float HealAmount)
 {
 	if (UXZStatComponent* StatComponent = GetStatComponent(GetOuterAPlayerController()))
 	{
+		// 체력을 회복
 		StatComponent->IncreaseHealth(HealAmount);
 	}
 }
 
+// 타겟을 치유하는 함수
 void UXZCheatManager::HealTarget(float HealAmount)
 {
 	if (AXZPlayerController* XZPC = Cast<AXZPlayerController>(GetOuterAPlayerController()))
@@ -143,6 +154,7 @@ void UXZCheatManager::HealTarget(float HealAmount)
 			{
 				if (UXZStatComponent* StatComponent = GetStatComponent(TargetCharacter))
 				{
+					// 타겟의 체력을 회복
 					StatComponent->IncreaseHealth(HealAmount);
 				}
 			}
@@ -152,23 +164,7 @@ void UXZCheatManager::HealTarget(float HealAmount)
 
 void UXZCheatManager::UnlimitedHealth(int32 Enabled)
 {
-	// if (ULyraAbilitySystemComponent* LyraASC = GetPlayerAbilitySystemComponent())
-	// {
-	// 	const FGameplayTag Tag = LyraGameplayTags::Cheat_UnlimitedHealth;
-	// 	const bool bHasTag = LyraASC->HasMatchingGameplayTag(Tag);
-	// 
-	// 	if ((Enabled == -1) || ((Enabled > 0) && !bHasTag) || ((Enabled == 0) && bHasTag))
-	// 	{
-	// 		if (bHasTag)
-	// 		{
-	// 			LyraASC->RemoveDynamicTagGameplayEffect(Tag);
-	// 		}
-	// 		else
-	// 		{
-	// 			LyraASC->AddDynamicTagGameplayEffect(Tag);
-	// 		}
-	// 	}
-	// }
+
 }
 
 void UXZCheatManager::CheatTest()
@@ -176,16 +172,20 @@ void UXZCheatManager::CheatTest()
 	UE_LOG(LogTemp, Warning, TEXT("Custom Cheat Activated!"));
 }
 
+// 캐릭터에서 StatComponent를 가져오는 함수
 UXZStatComponent* UXZCheatManager::GetStatComponent(const AXZCharacter* Character) const 
 {
 	if (Character) 
 	{
+		// 캐릭터에서 StatComponent를 반환
 		return Character->GetStatComponent();
 	}
 
+	// 캐릭터가 없을 경우 nullptr을 반환
 	return nullptr;
 }
 
+// 플레이어 컨트롤러에서 StatComponent를 가져오는 함수
 UXZStatComponent* UXZCheatManager::GetStatComponent(APlayerController* PC) const
 {
 	if (PC) 
@@ -194,10 +194,12 @@ UXZStatComponent* UXZCheatManager::GetStatComponent(APlayerController* PC) const
 		{
 			if (AXZCharacter* XZCharacter = Cast<AXZCharacter>(XZPC->GetPawn()))
 			{
+				// 플레이어 컨트롤러의 포운에서 StatComponent를 반환
 				return XZCharacter->GetStatComponent();
 			}
 		}
 	}
 	
+	// 플레이어 컨트롤러가 없거나 StatComponent를 찾을 수 없을 경우 nullptr을 반환
 	return nullptr;
 }
