@@ -8,6 +8,8 @@ UXZStatComponent::UXZStatComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
 
+	// 블루프린트에서 안들어감
+	CharacterTypeName = TEXT("DefaultCharacter");
 	// TeamTag = FXZTags::GetXZTags().GameTeamTag_None;
 }
 
@@ -16,16 +18,13 @@ void UXZStatComponent::InitializeComponent()
 	Super::InitializeComponent();
 	
 	SetIsReplicated(true);
+
 	// DataManger
 	if (UXZDataManager* DataManager = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance()))
 	{
-		if (DataManager->IsCharacterStatDataValid()) 
+		if ( FXZCharacterStat* CharacterStatData = DataManager->TryGetCharacterStat(CharacterTypeName))
 		{
-			FXZCharacterStat CharacterStatData = DataManager->GetCharacterStat(EXZCharacterType::eDefault);
-			CharacterStat = CharacterStatData;
-
-			SetHP(CharacterStatData.MaxHp);
-			UE_LOG(LogTemp, Log, TEXT("CharacterStatData.MaxHp : [%f]"), CharacterStatData.MaxHp);
+			MaxHp = CharacterStatData->MaxHp;
 		}
 	}
 	
@@ -34,7 +33,7 @@ void UXZStatComponent::InitializeComponent()
 
 void UXZStatComponent::Reset()
 {
-	SetHP(CharacterStat.MaxHp);
+	SetHP(MaxHp);
 }
 
 void UXZStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -42,7 +41,12 @@ void UXZStatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UXZStatComponent, CurrentHp);
-	DOREPLIFETIME_CONDITION(UXZStatComponent, CharacterStat, COND_OwnerOnly);
+}
+
+void UXZStatComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
 }
 
 float UXZStatComponent::ApplyDamage(float InDamage)
@@ -66,7 +70,7 @@ float UXZStatComponent::ApplyDamage(float InDamage)
 
 void UXZStatComponent::SetHP(float NewHp)
 {
-	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, CharacterStat.MaxHp);
+	CurrentHp = FMath::Clamp<float>(NewHp, 0.f, MaxHp);
 	if (NewHp == 0) 
 	{
 		bool bk = false;
@@ -76,7 +80,7 @@ void UXZStatComponent::SetHP(float NewHp)
 
 	if (OnHpChanged.IsBound())
 	{
-		OnHpChanged.Broadcast(NewHp, CharacterStat.MaxHp);
+		OnHpChanged.Broadcast(NewHp, MaxHp);
 	}
 }
 
@@ -94,18 +98,10 @@ void UXZStatComponent::OnRep_CurrentHp()
 {
 	if (OnHpChanged.IsBound())
 	{
-		OnHpChanged.Broadcast(CurrentHp, CharacterStat.MaxHp);
+		OnHpChanged.Broadcast(CurrentHp, MaxHp);
 	}
 	if (CurrentHp <= 0.0f)
 	{
 		OnHpZero.Broadcast();
-	}
-}
-
-void UXZStatComponent::OnRep_CharacterStat()
-{
-	if (OnStatChanged.IsBound())
-	{
-		OnStatChanged.Broadcast(CharacterStat);
 	}
 }

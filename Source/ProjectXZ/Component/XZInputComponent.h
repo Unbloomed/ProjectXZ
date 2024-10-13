@@ -9,7 +9,7 @@ class UInputAction;
 class UObject;
 
 /** class: UXZInputComponent 
- *	XZDA_InputConfig¸¦ »ç¿ëÇØ¼­ inputÀ» ¸ÊÇÎÇÏ´Â ÄÄÆ÷³ÍÆ® Å¬·¡½º
+ *	XZDA_InputConfigë¥¼ ì‚¬ìš©í•´ì„œ inputì„ ë§µí•‘í•˜ëŠ” ì»´í¬ë„ŒíŠ¸ í´ë˜ìŠ¤
  */
 
 UCLASS()

@@ -1,15 +1,15 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h" // GameplayTag Ÿ�� ����
+#include "GameplayTagContainer.h" // GameplayTag 타占쏙옙 占쏙옙占쏙옙
 
-/** native GamplayTags�� ������ Singleton
- *  �ڵ��?�����Ϳ� TDGameplayTags ���?
+/** native GamplayTags占쏙옙 占쏙옙占쏙옙占쏙옙 Singleton
+ *  占쌘듸옙占?占쏙옙占쏙옙占싶울옙 TDGameplayTags 占쏙옙占?
  */
 struct FXZTags
 {
 public:
 	static const FXZTags& GetXZTags() { return GameplayTags; }
-	static void InitializeNativeGameplayTags(); // GameplayTags ���?
+	static void InitializeNativeGameplayTags(); // GameplayTags 占쏙옙占?
 
 	// State
 	FGameplayTag State_Unequipped;
@@ -64,10 +64,54 @@ public:
 	FGameplayTag GameTeamTag_Blue;
 
 
-	// Input ����: Pressed, Held, Released
+	// Input 占쏙옙占쏙옙: Pressed, Held, Released
 	//FGameplayTag BlockTag_InputPressed;
 	//FGameplayTag BlockTag_InputHeld;
 	//FGameplayTag BlockTag_InputReleased;
+
+
+	// Parts
+	FGameplayTag Part_Muzzle_None;
+	FGameplayTag Part_Muzzle_Suppressor;
+	FGameplayTag Part_Muzzle_FlashHider;
+	FGameplayTag Part_Muzzle_Compensator;
+	
+	FGameplayTag Part_Magazine_None;
+	FGameplayTag Part_Magazine_ExtendedMagazine;
+	FGameplayTag Part_Magazine_QuickdrawMagazine;
+	
+	FGameplayTag Part_Stock_None;
+	FGameplayTag Part_Stock_Stock;
+	FGameplayTag Part_Stock_CheekPad;
+
+	FGameplayTag Part_Scope_None;
+	FGameplayTag Part_Scope_RedDotSight;
+	FGameplayTag Part_Scope_2xScope;
+	FGameplayTag Part_Scope_4xScope;
+	FGameplayTag Part_Scope_8xScope;
+	FGameplayTag Part_Scope_15xScope;
+
+	// Item
+	FGameplayTag Consumable_Medical_FirstAidKit;
+	FGameplayTag Consumable_Medical_MedKit;
+	FGameplayTag Consumable_Booster_Painkiller;
+	FGameplayTag Consumable_Booster_AdrenalineSyringe;
+	FGameplayTag Consumable_Booster_EnergyDrink;
+
+	// Equipment
+	FGameplayTag Equipment_Supply_Backpack;
+	FGameplayTag Equipment_Armor_Vest;
+	FGameplayTag Equipment_Armor_Helmet;
+	 
+	 
+	//********************************************************
+	 // Widgets
+	FGameplayTag Widget_Layer_FullUI;
+	FGameplayTag Widget_Layer_PopUpType;
+	FGameplayTag Widget_Layer_SubPopUpType;
+	FGameplayTag Widget_Layer_TutorialType;
+	FGameplayTag Widget_Layer_NoticeType;
+	 
 	//********************************************************
 
 private:

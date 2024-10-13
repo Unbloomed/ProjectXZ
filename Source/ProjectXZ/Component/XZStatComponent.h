@@ -45,11 +45,10 @@ public:
 	UXZStatComponent();
 
 public:
-	FORCEINLINE const FXZCharacterStat& GetCharacterStat() const { return CharacterStat; }
-	FORCEINLINE void SetCharacterStat(FXZCharacterStat InCharacterStat) { CharacterStat = InCharacterStat; }
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
-	// FORCEINLINE FGameplayTag GetTeamTag() const { return TeamTag; }
 	
+	void SetCharacterTypeName(const FName NewCharacterTypeName) { CharacterTypeName = NewCharacterTypeName; }
+
 	float ApplyDamage(float InDamage);
 	void IncreaseHealth(float Amount);
 	void DecreaseHealth(float Amount);
@@ -58,6 +57,7 @@ public:
 protected:
 	void InitializeComponent() override;
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
 
 public:
 	FOnHpZeroDelegate OnHpZero;
@@ -66,20 +66,17 @@ public:
 
 private:
 	void SetHP(float NewHp);
+
 	UFUNCTION()
 	void OnRep_CurrentHp();
 
-	UFUNCTION()
-	void OnRep_CharacterStat();
-
 protected:
+	UPROPERTY(Transient, BlueprintReadWrite, Category = "XZ|CharacterTypeName", Meta = ( AllowPrivateAccess = "true" ))
+	FName CharacterTypeName;
+
 	UPROPERTY(ReplicatedUsing = OnRep_CurrentHp, Transient, VisibleInstanceOnly, Category = Stat)
 	float CurrentHp;
 
-	UPROPERTY(Transient, ReplicatedUsing = OnRep_CharacterStat, VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
-	FXZCharacterStat CharacterStat;
-
-// private:
-// 	FGameplayTag TeamTag;
-
+	UPROPERTY(Transient,  VisibleInstanceOnly, Category = Stat, Meta = (AllowPrivateAccess = "true"))
+	float MaxHp = 0.f;
 };

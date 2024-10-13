@@ -32,4 +32,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Item Properties")
 	FString ItemName;
 
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Item Properties")
+	int32 ItemID;
 };
