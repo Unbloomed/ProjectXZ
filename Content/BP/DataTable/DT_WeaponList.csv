@@ -1,0 +1,5 @@
+ID,WeaponTag,WeaponActor
+Weapon.Projectile.Rifle,Weapon.Projectile.Rifle,/Script/Engine.Blueprint'/Game/BP/Item/Weapon/Gun/BP_XZAttachment_Rifle.BP_XZAttachment_Rifle'
+Weapon.Projectile.Pistol,Weapon.Projectile.Pistol,/Script/Engine.Blueprint'/Game/BP/Item/Weapon/Gun/BP_XZAttachment_Pistol.BP_XZAttachment_Pistol'
+Weapon.Projectile.SMG,Weapon.Projectile.SMG,/Script/Engine.Blueprint'/Game/BP/Item/Weapon/Gun/BP_XZAttachment_SMG.BP_XZAttachment_SMG'
+Weapon.Hitscan.Shotgun,Weapon.Hitscan.Shotgun,/Script/Engine.Blueprint'/Game/BP/Item/Weapon/Gun/BP_XZAttachment_Shotgun.BP_XZAttachment_Shotgun'

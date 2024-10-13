@@ -64,6 +64,7 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	CameraSpringArm->TargetArmLength = 300.0f;
 	CameraSpringArm->bUsePawnControlRotation = true;
 
+
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraSpringArm);
 	FollowCamera->bUsePawnControlRotation = false;
@@ -156,7 +157,7 @@ void AXZCharacter::SetDead()
 
 	DisablePlayerInput();
 
-	// DeadAnimation Montage Notify?????????轅붽틓?????????뼿??????嚥싲갭횧????
+	// DeadAnimation Montage Notify????縕???嶺뚮ㅎ????딅텑??????源껉펾??
 	EndDeadEvent();
 }
 
@@ -201,7 +202,7 @@ void AXZCharacter::RespawnPlayer()
 
 	SetActorHiddenInGame(false);
 
-	// Weapon ????????궰??????猷고?影瑜곸떴??
+	// Weapon ?????숇?????룰퀣留??
 	// GetInventoryComponent()->ClearAll();
 
 	ResetCharacterData();

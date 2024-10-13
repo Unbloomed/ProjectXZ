@@ -1,4 +1,3 @@
-
 #include "XZDataManager.h"
 
 UXZDataManager::UXZDataManager()
@@ -9,13 +8,6 @@ UXZDataManager::UXZDataManager()
     {
         CharacterStatDataTable = CharacterStatDataTableRef.Object;
     }
-
-    // CharacterModuleDataAsset
-   // static ConstructorHelpers::FObjectFinder<UDataAsset> ModuleDataAssetRef(TEXT("/Game/BP/DataAsset/DA_ModularMesh.DA_ModularMesh"));
-   // if ( ModuleDataAssetRef.Succeeded() )
-   // {
-   //     ModuleDataAsset = ModuleDataAssetRef.Object;
-   // }
 
     // ItemTable - MainInfo
     static ConstructorHelpers::FObjectFinder<UDataTable> ItemMainInfoTableRef(TEXT("/Game/BP/DataTable/DT_ItemTable_MainInfo.DT_ItemTable_MainInfo"));
@@ -57,6 +49,17 @@ UXZDataManager::UXZDataManager()
     if ( ModuleAssetTableRef.Succeeded() )
     {
         ModuleAssetTable = ModuleAssetTableRef.Object;
+    }
+    
+    // Weapon List
+    static ConstructorHelpers::FObjectFinder<UDataTable> WeaponDataTableDataTableRef(TEXT("/Game/BP/DataTable/DT_WeaponList.DT_WeaponList"));
+    if (WeaponDataTableDataTableRef.Succeeded())
+    {
+        WeaponDataTable = WeaponDataTableDataTableRef.Object;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("No Weapon DataTable. Check UXZDataManager::UXZDataManager"));
     }
 }
 
