@@ -11,17 +11,23 @@ AXZHUD::AXZHUD()
 void AXZHUD::DrawHUD()
 {
 	Super::DrawHUD();
-
-	APlayerController* PC = GetOwningPlayerController();
-	if (IsValid(PC) && CharacterOverlayWidgetClass)
-	{
-		CharacterOverlayWidget = CreateWidget<UUserWidget>(PC, CharacterOverlayWidgetClass);
-	}
+	// 여기 있었는데 BeginPlay로 옮김
+	// APlayerController* PC = GetOwningPlayerController();
+	// if ( IsValid(PC) && CharacterOverlayWidgetClass )
+	// {
+	// 	CharacterOverlayWidget = CreateWidget<UUserWidget>(PC, CharacterOverlayWidgetClass);
+	// }
 }
 
 void AXZHUD::BeginPlay()
 {
 	Super::BeginPlay();
+
+	APlayerController* PC = GetOwningPlayerController();
+	if ( IsValid(PC) && CharacterOverlayWidgetClass )
+	{
+		CharacterOverlayWidget = CreateWidget<UUserWidget>(PC, CharacterOverlayWidgetClass);
+	}
 
 	if (IsValid(CharacterOverlayWidget))
 	{

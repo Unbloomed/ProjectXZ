@@ -16,6 +16,8 @@ class UTextRenderComponent;
 class UObject;
 struct FFrame;
 class UXZStateComponent;
+class UXZModularComponent;
+class USkeletalMeshComponent;
 
 UENUM()
 enum class EXZCharacterType : uint8
@@ -31,12 +33,13 @@ class PROJECTXZ_API AXZCharacter : public ACharacter, public IGenericTeamAgentIn
 public:
 	AXZCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	FORCEINLINE TObjectPtr<UXZWeaponComponent> GetWeaponComponent() const { return WeaponComponent; }
-	FORCEINLINE TObjectPtr<UXZStateComponent> GetStateComponent() const { return StateComponent; }
-	FORCEINLINE TObjectPtr<UXZStatComponent> GetStatComponent() const { return StatComponent; }
-	FORCEINLINE TObjectPtr<UXZInventoryComponent> GetInventoryComponent() const { return InventoryComponent; }
-	FORCEINLINE TObjectPtr<USpringArmComponent> GetSpringArm() const { return CameraSpringArm; }
-	FORCEINLINE TObjectPtr<UCameraComponent> GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE UXZWeaponComponent* GetWeaponComponent() const { return WeaponComponent; }
+	FORCEINLINE UXZStateComponent* GetStateComponent() const { return StateComponent; }
+	FORCEINLINE UXZStatComponent* GetStatComponent() const { return StatComponent; }
+	FORCEINLINE UXZInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+	FORCEINLINE USpringArmComponent* GetSpringArm() const { return CameraSpringArm; }
+	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE UXZModularComponent* GetModularComponent() const { return ModularComponent; }
 
 	void SetUpWidget(class AXZHUD* XZHUD);
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
@@ -59,6 +62,9 @@ protected:
 	void ResetCharacterData();
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|CharacterTypeName", Meta = ( AllowPrivateAccess = "true" ))
+	FName CharacterTypeName;
+
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UXZPawnExtensionComponent> PawnExtComponent;
 
@@ -80,8 +86,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Camera", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UCameraComponent> FollowCamera;
 
-	UPROPERTY()
-	APlayerController* PlayerController;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|PlayerController", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<APlayerController> PlayerController;
+
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<UXZModularComponent> ModularComponent;
 
 	FTimerHandle RespawnTimerHandle;
 
@@ -89,7 +98,27 @@ private:
 	FGenericTeamId TeamID = 0;
 
 	//*****************************************************
-	//** 디버깅용. 캐릭터 머리 위에 상태 띄우기.
+	// SkeletalMeshComponent
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> HeadMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> HandsMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> BeltMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> PantsMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> FootsMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> BackpackMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> VestMeshComponent;
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
+	TObjectPtr<USkeletalMeshComponent> HelmetMeshComponent;
+
+	
+	//*****************************************************
+	//** TextRenderComponent
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))
 	TObjectPtr<UTextRenderComponent> TextRender_State;
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Debugging", meta = (AllowPrivateAccess = true))

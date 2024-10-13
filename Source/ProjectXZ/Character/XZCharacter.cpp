@@ -11,6 +11,7 @@
 #include "Component/XZStateComponent.h"
 #include "Component/XZStatComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Component/XZModularComponent.h"
 #include "GameplayTag/XZGameplayTags.h"
 #include "Manager/XZDataManager.h"
 #include "Manager/XZSpawnManager.h"
@@ -21,7 +22,7 @@
 AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UXZCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
 {
-	// TODO: Ä³¸¯ÅÍ ¸Ó¸® À§ µð¹ö±ë¿ë ÅØ½ºÆ® ¶§¹®¿¡ Æ½ ´ç ºÁ¾ßÇØ¼­ true¼³Á¤. ÃßÈÄ¿¡ false·Î º¯°æ.
+	// TODO: TextRenderCompnet X -> then, change bCanEverTick to false 
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
@@ -59,9 +60,9 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	
 	// Camera
 	CameraSpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraSpringArm"));
-	CameraSpringArm->SetupAttachment(GetMesh());//Mesh ï¿½Æ·ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Î´ï¿½.
+	CameraSpringArm->SetupAttachment(GetMesh());
 	CameraSpringArm->TargetArmLength = 300.0f;
-	CameraSpringArm->bUsePawnControlRotation = true;//true: ï¿½ï¿½ï¿½ì½ºï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ controllerï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ SpringArmï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½Å³ ï¿½ï¿½ ï¿½Ö´ï¿½
+	CameraSpringArm->bUsePawnControlRotation = true;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraSpringArm);
@@ -73,6 +74,19 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 
 	BaseEyeHeight = 80.0f;
 	CrouchedEyeHeight = 50.0f;
+
+	// ModualrComponent
+	ModularComponent = CreateDefaultSubobject<UXZModularComponent>(TEXT("ModularComponent"));
+
+	// SkeletalMeshComponent
+	HeadMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadsMeshComponent"));
+	HandsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandsMeshComponent"));
+	BeltMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BeltMeshComponent"));
+	PantsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PantsMeshComponent"));
+	FootsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FootsMeshComponent"));
+	BackpackMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BackpackMeshComponent"));
+	VestMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VestMeshComponent"));
+	HelmetMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HelmetMeshComponent"));
 
 	// WeaponComponent
 	WeaponComponent = CreateDefaultSubobject<UXZWeaponComponent>(TEXT("WeaponComponent"));
@@ -86,14 +100,13 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	// InventoryComponent
 	InventoryComponent = CreateDefaultSubobject<UXZInventoryComponent>(TEXT("InventoryComponent"));
 
-
 	//***********************************************************************************
-	//** µð¹ö±ë¿ë. Ä³¸¯ÅÍ ¸Ó¸® À§¿¡ »óÅÂ ¶ç¿ì±â.
+	//** TextRenderComponent
 	TextRender_State = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_State"));
 	TextRender_State->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	TextRender_State->SetRelativeLocation(FVector(0.0f, 0.0f, 110.0f));
 	TextRender_State->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-
+	
 	TextRender_Weapon = CreateDefaultSubobject<UTextRenderComponent>(TEXT("TextRender_Weapon"));
 	TextRender_Weapon->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
 	TextRender_Weapon->SetRelativeLocation(FVector(0.0f, 0.0f, 90.0f));
@@ -136,7 +149,6 @@ void AXZCharacter::SetDead()
 	UE_LOG(LogTemp, Log, TEXT("SetDead"));
 	StateComponent->SetState(FXZTags::GetXZTags().StateTag_Dead);
 
-	// ¿¬»ç½Ã ¿¬»ç°¡ ÁßÁöµÇ¾î¾ß ÇÑ´Ù.
 	// if (WeaponComponent)
 	// {
 	// 	WeaponComponent->EndFire();
@@ -144,7 +156,7 @@ void AXZCharacter::SetDead()
 
 	DisablePlayerInput();
 
-	// DeadAnimation Montage Notify·Î ÇÔ¼ö È£ÃâºÎºÐ ¿Å±â±â 
+	// DeadAnimation Montage Notify?????????è½…ë¶½í‹“?????????ë¼¿Â€??????åš¥ì‹²ê°­íš§????
 	EndDeadEvent();
 }
 
@@ -158,7 +170,6 @@ void AXZCharacter::EndDeadEvent()
 	UE_LOG(LogTemp, Log, TEXT("EndDeadEvent"));
 	GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Respawn);
 
-	// ¹«±â, ÀÎº¥Åä¸® Clear
 	// WeaponComponent->RemoveAllWeapon();
 	// InventoryComponent->Reset();
 
@@ -166,18 +177,16 @@ void AXZCharacter::EndDeadEvent()
 
 	if (UXZDataManager* DataManager = UGameInstance::GetSubsystem< UXZDataManager>(GetWorld()->GetGameInstance()))
 	{
-		if (true == DataManager->IsCharacterStatDataValid())
+		if ( FXZCharacterStat* CharacterStatData = DataManager->TryGetCharacterStat(CharacterTypeName))
 		{
-			FXZCharacterStat CharacterStatData = DataManager->GetCharacterStat(EXZCharacterType::eDefault);
-	
 			// Respawn Timer
-			GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AXZCharacter::RespawnPlayer, CharacterStatData.RespawnTime, false);
+			GetWorld()->GetTimerManager().SetTimer(RespawnTimerHandle, this, &AXZCharacter::RespawnPlayer, CharacterStatData->RespawnTime, false);
 
 			if (APlayerController* PC = Cast<APlayerController>(GetController()) )
 			{
 				if (AXZHUD* XZHUD = Cast<AXZHUD>(PC->GetHUD())) 
 				{
-					XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData.RespawnTime);
+					XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData->RespawnTime);
 				}
 			}
 		}
@@ -192,7 +201,7 @@ void AXZCharacter::RespawnPlayer()
 
 	SetActorHiddenInGame(false);
 
-	// Weapon ?ˆë³´?´ë„ë¡?
+	// Weapon ????????ê¶°Â€??????çŒ·ê³ Â€?å½±Â€ç‘œê³¸ë–´??
 	// GetInventoryComponent()->ClearAll();
 
 	ResetCharacterData();
@@ -242,7 +251,6 @@ void AXZCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// µð¹ö±ë¿ë.
 	TextRender_State->SetVisibility(true);
 	TextRender_Weapon->SetVisibility(true);
 
@@ -250,13 +258,13 @@ void AXZCharacter::BeginPlay()
 
 	// Test
 	SetGenericTeamId(0);
+
 }
 
 void AXZCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// µð¹ö±ë¿ë.
 	CurrentCharacterState = GetStateComponent()->GetState().ToString();
 	TextRender_State->SetText(FText::FromString(CurrentCharacterState));
 
