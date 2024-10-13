@@ -9,18 +9,19 @@
 UXZDA_Weapon::UXZDA_Weapon()
 {
 	AttachmentClass = AXZAttachment::StaticClass();
+	Attachment = Cast<AXZAttachment>(AttachmentClass);
 	EquipmentClass = UXZEquipment::StaticClass();
 	AimClass = UXZAim::StaticClass();
 	CombatClass = UXZCombat::StaticClass();
 }
 
-// °´Ã¼¸¦ »ı¼ºÇØ¼­ ¸®ÅÏÇÑ´Ù. »ı¼º ¸®ÅÏÀÌ±â ¶§¹®¿¡ ÀÌÂ÷ Æ÷ÀÎÅÍ¸¦ »ç¿ë
+// ê°ì²´ë¥¼ ìƒì„±í•´ì„œ ë¦¬í„´í•œë‹¤. ìƒì„± ë¦¬í„´ì´ê¸° ë•Œë¬¸ì— ì´ì°¨ í¬ì¸í„°ë¥¼ ì‚¬ìš©
 void UXZDA_Weapon::CreateInstance(ACharacter* InOwner, UXZWeaponData** OutWeaponData)
 {
-	//XZWeaponData.h·Î º¯¼öµéÀÌ ÀÌµ¿ÇÏ¿´±â XZAttachment, XZEquipment °´Ã¼ °¢°¢ »ı¼º.
+	//XZWeaponData.hë¡œ ë³€ìˆ˜ë“¤ì´ ì´ë™í•˜ì˜€ê¸° XZAttachment, XZEquipment ê°ì²´ ê°ê° ìƒì„±.
 
 	AXZAttachment* XZAttachment = nullptr;
-	if (IsValid(AttachmentClass))//AttachmentClass°¡ ¼±ÅÃµÇ¾î ÀÖ´Ù¸é
+	if (IsValid(AttachmentClass))//AttachmentClassê°€ ì„ íƒë˜ì–´ ìˆë‹¤ë©´
 	{
 		FActorSpawnParameters Params;
 		Params.Owner = InOwner;
@@ -56,11 +57,11 @@ void UXZDA_Weapon::CreateInstance(ACharacter* InOwner, UXZWeaponData** OutWeapon
 	(*OutWeaponData)->Combat = XZCombat;
 }
 
-#if WITH_EDITOR //Editor ³»¿¡¼­¸¸ ¼öÇà
+#if WITH_EDITOR //Editor ë‚´ì—ì„œë§Œ ìˆ˜í–‰
 void UXZDA_Weapon::PostEditChangeChainProperty(FPropertyChangedChainEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeChainProperty(PropertyChangedEvent);
-	if (FApp::IsGame()) return; // °ÔÀÓÀÌ ½ÇÇàÁßÀÌ¸é return
+	if (FApp::IsGame()) return; // ê²Œì„ì´ ì‹¤í–‰ì¤‘ì´ë©´ return
 	
 }
 #endif

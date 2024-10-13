@@ -1,21 +1,12 @@
 #include "XZWeaponComponent.h"
-
 #include "XZStateComponent.h"
-#include "Camera/CameraComponent.h"
-#include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Handler/XZCombatHandler.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "ProjectXZ/Character/XZCharacter.h"
 #include "ProjectXZ/Character/XZPlayerController.h"
 #include "ProjectXZ/GameplayTag/XZGameplayTags.h"
-#include "ProjectXZ/HUD/XZHUD.h"
-#include "ProjectXZ/Weapon/XZDA_Weapon.h"
-#include "ProjectXZ/Weapon/XZEquipment.h"
-#include "ProjectXZ/Weapon/XZWeaponData.h"
-#include "ProjectXZ/Weapon/Combat/XZCombat.h"
-#include "Weapon/Aim/XZAim.h"
-#include "Weapon/Attachment/XZAttachment.h"
 
 UXZWeaponComponent::UXZWeaponComponent()
 {
@@ -37,59 +28,44 @@ void UXZWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAc
 	if (GetXZCharacter() && GetXZCharacter()->IsLocallyControlled())
 	{
 		FHitResult HitResult;
-		TraceUnderCrosshairs(HitResult); // Crosshairø°º≠ LineTrace∏¶ ΩÓ∞Ì HitResult ∞™¿ª æ˜µ•¿Ã∆Æ«—¥Ÿ.
+		TraceUnderCrosshairs(HitResult); // Crosshair?Áôí?Ìê£ LineTrace????ÎûÅ¬Ä?HitResult Êè∂ÏèÖ?????ÎÇÖÏëì??Íæ®Î±ú??Î∫£ÎºÑ.
 		HitTarget = HitResult.ImpactPoint;
 	}
 }
 
-TObjectPtr<AXZCharacter> UXZWeaponComponent::GetXZCharacter()
+AXZCharacter* UXZWeaponComponent::GetXZCharacter()
 {
-	if (IsValid(OwnerCharacter)) return OwnerCharacter;
-
+	if (IsValid(OwnerCharacter))
+	{
+		return OwnerCharacter;
+	}
 	OwnerCharacter = Cast<AXZCharacter>(GetOwner());
 	return OwnerCharacter;
 }
 
-TObjectPtr<AXZPlayerController> UXZWeaponComponent::GetXZPlayerController()
+AXZPlayerController* UXZWeaponComponent::GetXZPlayerController()
 {
-	if (IsValid(XZPlayerController)) return XZPlayerController;
-
+	if (IsValid(XZPlayerController))
+	{
+		return XZPlayerController;
+	}
 	XZPlayerController = Cast<AXZPlayerController>(GetXZCharacter()->GetController());
 	return XZPlayerController;
-}
-
-bool UXZWeaponComponent::IsValidWeapon(const FGameplayTag& InTag)
-{
-	if (UXZWeaponData** FoundData = Datas.Find(InTag))
-	{
-		if (*FoundData)
-		{
-			return true;
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("FoundData(=XZWeaponData) is nullptr"));
-		return false;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Weapon is not found. Check UXZWeaponComponent::EquipWeapon"));
-	return false;
 }
 
 void UXZWeaponComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// π´±‚ ∏Ò∑œ
-	for (const TTuple<FGameplayTag, UXZDA_Weapon*>& Weapon : WeaponList)
-	{
-		UXZWeaponData* Temp = NewObject<UXZWeaponData>(this);
-		Datas.Add(Weapon.Key, Temp);
-	}
+	Init();
 
-	// Ω√¿€ π´±‚ ª˝º∫
-	for (const FGameplayTag& Tag : Init_WeaponTags)
+	// Create Weapon
+	if (GetXZCharacter()->HasAuthority())
 	{
-		WeaponList[Tag]->CreateInstance(GetXZCharacter(), &Datas[Tag]);
+		for ( const FGameplayTag& WeaponTag : Init_WeaponTags )
+		{
+			AddNewWeapon(WeaponTag);
+		}
 	}
 }
 
@@ -100,12 +76,7 @@ void UXZWeaponComponent::AddNewWeapon(const FGameplayTag& InTag)
 
 void UXZWeaponComponent::Server_AddNewWeapon_Implementation(const FGameplayTag& InTag)
 {
-	Multicast_AddNewWeapon(InTag);
-}
-
-void UXZWeaponComponent::Multicast_AddNewWeapon_Implementation(const FGameplayTag& InTag)
-{
-	WeaponList[InTag]->CreateInstance(GetXZCharacter(), &Datas[InTag]);
+	CombatHandler->AddNewWeapon(InTag, GetXZCharacter());
 }
 
 void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
@@ -116,7 +87,7 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
 
-	FVector2D CrosshairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f); // »≠∏È ¡ﬂæ”
+	FVector2D CrosshairLocation(ViewportSize.X / 2.0f, ViewportSize.Y / 2.0f); // Center of Screen
 	FVector CrosshairWorldPosition;
 	FVector CrosshairWorldDirection;
 	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
@@ -124,7 +95,7 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		CrosshairLocation,
 		CrosshairWorldPosition,
 		CrosshairWorldDirection
-	); // DeprojectScreenToWorld º∫∞¯«œ∏È true, Ω«∆–«œ∏È false
+	); // DeprojectScreenToWorld ?Ê∫êÍªäÍ∂ó??Î°¢Îä∫ true, ??ÏéàÏÜ≠??Î°¢Îä∫ false
 
 	if (bScreenToWorld)
 	{
@@ -134,62 +105,55 @@ void UXZWeaponComponent::TraceUnderCrosshairs(FHitResult& TraceHitResult)
 		{
 			float DistanceToCharacter = (GetXZCharacter()->GetActorLocation() - Start).Size();
 			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.0f);
-			//DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // µπˆ±ÎøÎ
+			//DrawDebugSphere(GetWorld(), Start, 4.0f, 12, FColor::Blue, false); // just for Debugging purpose. To Be Deleted
 		}
 
 		FVector End = Start + CrosshairWorldDirection * 80000.0f; // TRACE_LENGTH 80000.0f
 
-		GetWorld()->LineTraceSingleByChannel(TraceHitResult, 	Start, End, ECollisionChannel::ECC_Visibility);
+		GetWorld()->LineTraceSingleByChannel(TraceHitResult, Start, End, ECollisionChannel::ECC_Visibility);
 
-		if (TraceHitResult.bBlockingHit == false) // «œ¥√ ∞∞¿Ã √Êµπ«“∞‘ æ¯¥¬∞˜ø° ΩÓ¥¬ ∞ÊøÏ
+		if (TraceHitResult.bBlockingHit == false) 
 		{
-			TraceHitResult.ImpactPoint = End; // √Êµπ«œ¥¬∞‘ æ¯¥Ÿ∏È End ∞™¿ª ImpactPoint∞™¿∏∑Œ º≥¡§.
+			TraceHitResult.ImpactPoint = End; 
 		}
-
 	}
 }
 
 void UXZWeaponComponent::ShowCrosshair(const FGameplayTag& InTag, bool bShow)
 {
-	Datas[InTag]->GetAim()->ShowCrosshair(bShow);
+	CombatHandler->ShowCrosshair(bShow);
 }
 
 void UXZWeaponComponent::EquipWeapon(const FGameplayTag& InTag)
 {
-	if (false == IsValidWeapon(InTag)) return;
-	// «ˆ¿Á ¿Â¬¯ ¡ﬂ¿Œ π´±‚∏¶ Equip«œ∂Û∞Ì ∏Ì∑…«œ∏È Unequip
+	// If InTag weapon is an equipped weapon, then unequip the equipped weapon and return
 	if (EquippedWeaponTag == InTag)
 	{
 		ShowCrosshair(InTag, false);
 		UnequipWeapon(InTag);
 		return;
 	}
-	// ¥Ÿ∏• π´±‚∏¶ ¿Â¬¯ ¡ﬂ¿Ã∂Û∏È
+
 	if (EquippedWeaponTag != InTag && EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon")))))
 	{
 		ShowCrosshair(EquippedWeaponTag, false);
-		UnequipWeapon(EquippedWeaponTag); // «ˆ¿Á π´±‚ Unequip
+		UnequipWeapon(EquippedWeaponTag); // Unequip current(=Equipped) weapon
 	}
 
 	ShowCrosshair(InTag, true);
 	Server_EquipWeapon(InTag);
 }
 
-void UXZWeaponComponent::OnRep_EquippedChanged()
-{
-
-}
-
 void UXZWeaponComponent::Server_EquipWeapon_Implementation(const FGameplayTag& InTag)
 {
 	EquippedWeaponTag = InTag;
 
-	Multicast_EquipWeapon(InTag);
+	CombatHandler->Equip(EquippedWeaponTag);
 }
 
-void UXZWeaponComponent::Multicast_EquipWeapon_Implementation(const FGameplayTag& InTag)
+void UXZWeaponComponent::OnRep_EquippedWeaponTag()
 {
-	Datas[InTag]->GetEquipment()->Equip(); // π´±‚ ¿Â¬¯
+	CombatHandler->Equip(EquippedWeaponTag);
 }
 
 void UXZWeaponComponent::UnequipWeapon(const FGameplayTag& InTag)
@@ -199,92 +163,46 @@ void UXZWeaponComponent::UnequipWeapon(const FGameplayTag& InTag)
 
 void UXZWeaponComponent::Server_UnequipWeapon_Implementation(const FGameplayTag& InTag)
 {
-	Multicast_UnequipWeapon(InTag);
-	EquippedWeaponTag = FXZTags::GetXZTags().Fist;
+	if (EquippedWeaponTag == InTag)
+	{
+		EquippedWeaponTag = FXZTags::GetXZTags().Fist;
+	}
+	else
+	{
+		EquippedWeaponTag = InTag;
+	}
+
+	CombatHandler->Unequip(EquippedWeaponTag);
 }
 
 void UXZWeaponComponent::Multicast_UnequipWeapon_Implementation(const FGameplayTag& InTag)
 {
-	Datas[InTag]->GetEquipment()->Unequip();
+	
 }
 
 void UXZWeaponComponent::Fire()
 {
-	if (false == EquippedWeaponTag.MatchesTag(FGameplayTag::RequestGameplayTag(FName(TEXT("Weapon"))))) return; // π´±‚ ¿Â¬¯ ¡ﬂ¿Ã æ∆¥œ∂Û∏È return
-	if (false == IsValidWeapon(EquippedWeaponTag)) return;
-	if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // √—æÀ¿Ã æ¯¥Ÿ∏È
-	{
-		Reload(EquippedWeaponTag); // ¿Á¿Â¿¸
-		return;
-	}
-
-	const USkeletalMeshSocket* MuzzleFlashSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
-		Datas[EquippedWeaponTag]->GetCombat()->GetActionData()[0].MuzzleSocketName);
-	FTransform SocketTransform = MuzzleFlashSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
-		
-	Server_Fire(HitTarget, SocketTransform);
+	Server_Fire();
 }
 
-void UXZWeaponComponent::Server_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
+void UXZWeaponComponent::Server_Fire_Implementation()
 {
-	Multicast_Fire(HitLocation, SocketTransform);
-}
-
-void UXZWeaponComponent::Multicast_Fire_Implementation(const FVector_NetQuantize& HitLocation, const FTransform& SocketTransform)
-{
-	// πﬂªÁ
-	Datas[EquippedWeaponTag]->GetCombat()->FireAction(HitLocation, SocketTransform);
-
-	// √—æÀ º“∏
-	if (GetXZCharacter() && false == GetXZCharacter()->HasAuthority() && GetXZCharacter()->IsLocallyControlled())
-	{
-		Datas[EquippedWeaponTag]->GetCombat()->ConsumeAmmo();
-	}
-	if (Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().Ammo <= 0) // √—æÀ¿Ã æ¯¥Ÿ∏È
-	{
-		Reload(EquippedWeaponTag); // ¿Á¿Â¿¸
-	}
+	CombatHandler->Fire(EquippedWeaponTag, HitTarget);
 }
 
 void UXZWeaponComponent::Reload(const FGameplayTag& InTag)
 {
-	if (false == IsValidWeapon(InTag)) return;
 
-	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo <= 0) 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Run out of Bullets"));
-		return; // √—æÀ æ¯¥¬ ∞ÊøÏ return
-	}
-
-	const USkeletalMeshSocket* MagazineSocket = Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh()->GetSocketByName(
-		Datas[EquippedWeaponTag]->GetCombat()->GetBulletData().CasingSocketName);
-	FTransform SocketTransform = MagazineSocket->GetSocketTransform(Datas[EquippedWeaponTag]->GetAttachment()->GetWeaponMesh());
-
-
-	Server_Reload(InTag, SocketTransform);
-
-	
-	// √—æÀ √§øÏ±‚
-	if (Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo >= Datas[InTag]->GetCombat()->GetBulletData().MagCapacity)
-	{
-		Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo -= (Datas[InTag]->GetCombat()->GetBulletData().MagCapacity - Datas[InTag]->GetCombat()->GetBulletData().Ammo);
-		Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().MagCapacity;
-	}
-	else
-	{
-		Datas[InTag]->GetCombat()->GetBulletData().Ammo = Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo;
-		Datas[InTag]->GetCombat()->GetBulletData().TotalAmmo = 0;
-	}
 }
 
 void UXZWeaponComponent::Server_Reload_Implementation(const FGameplayTag& InTag, const FTransform& SocketTransform)
 {
-	Multicast_Reload(InTag, SocketTransform);
+	
 }
 
 void UXZWeaponComponent::Multicast_Reload_Implementation(const FGameplayTag& InTag, const FTransform& SocketTransform)
 {
-	Datas[InTag]->GetCombat()->ReloadAction(SocketTransform);
+	
 }
 
 void UXZWeaponComponent::Aiming(bool bAiming)
@@ -294,11 +212,11 @@ void UXZWeaponComponent::Aiming(bool bAiming)
 	
 	if (bAiming)
 	{
-		Datas[EquippedWeaponTag]->GetAim()->StartAiming();
+		CombatHandler->StartAiming();
 	}
 	else
 	{
-		Datas[EquippedWeaponTag]->GetAim()->EndAiming();
+		CombatHandler->EndAiming();
 	}
 
 	Server_Aiming(bAiming);
@@ -316,4 +234,26 @@ void UXZWeaponComponent::Server_Aiming_Implementation(bool bAiming)
 		GetXZCharacter()->GetStateComponent()->SetState(FXZTags::GetXZTags().StateTag_Alive_Equip_Idle);
 		GetXZCharacter()->GetCharacterMovement()->MaxWalkSpeed = MaxWalkSpeed;
 	}
+}
+
+
+void UXZWeaponComponent::Init()
+{
+	CombatHandler = CreateCombatHandler();
+}
+
+UXZCombatHandler* UXZWeaponComponent::CreateCombatHandler()
+{
+	return NewObject<UXZCombatHandler>(this, UXZCombatHandler::StaticClass());;
+}
+
+UXZCombatHandler* UXZWeaponComponent::GetCombatHandler()
+{
+	if (IsValid(CombatHandler))
+	{
+		return CombatHandler;
+	}
+
+	CombatHandler = CreateCombatHandler();
+	return CombatHandler;
 }

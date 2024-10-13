@@ -10,7 +10,7 @@ class UXZEquipment;
 class UXZAim;
 class UXZCombat;
 
-/** ¹«±â °ü·Ã Á¤º¸¸¦ ±â·ÏÇÏ´Â DataAsset Å¬·¡½º
+/** ë¬´ê¸° ê´€ë ¨ ì •ë³´ë¥¼ ê¸°ë¡í•˜ëŠ” DataAsset í´ë˜ìŠ¤
  * 
  */
 
@@ -24,15 +24,16 @@ public:
 	void CreateInstance(ACharacter* InOwner, UXZWeaponData** OutWeaponData);
 
 
-#if WITH_EDITOR //Editor ³»¿¡¼­¸¸ ¼öÇà
+#if WITH_EDITOR //Editor ë‚´ì—ì„œë§Œ ìˆ˜í–‰
 	void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
 #endif
 
-
-private:
+	
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AXZAttachment> AttachmentClass;
-	
+	UPROPERTY()
+	TObjectPtr<AXZAttachment> Attachment;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UXZEquipment> EquipmentClass;
 	UPROPERTY(EditAnywhere)

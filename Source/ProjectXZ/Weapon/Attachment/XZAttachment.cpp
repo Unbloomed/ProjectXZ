@@ -5,8 +5,6 @@ AXZAttachment::AXZAttachment()
 {
 	//PrimaryActorTick.bCanEverTick = false;
 	SetReplicateMovement(true);
-
-
 }
 
 void AXZAttachment::BeginPlay()

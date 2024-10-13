@@ -4,6 +4,8 @@
 #include "Item/XZItemBase.h"
 #include "XZAttachment.generated.h"
 
+class UXZDA_Weapon;
+
 UCLASS()
 class PROJECTXZ_API AXZAttachment : public AXZItemBase
 {
@@ -11,13 +13,15 @@ class PROJECTXZ_API AXZAttachment : public AXZItemBase
 	
 public:	
 	AXZAttachment();
-	TObjectPtr<USkeletalMeshComponent> GetWeaponMesh() { return ItemMesh; }
-
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Properties")
-	FGameplayTag WeaponNameTag;
+	USkeletalMeshComponent* GetWeaponMesh() { return ItemMesh; }
 
 protected:
 	virtual void BeginPlay() override;
 
-
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Weapon Properties")
+	FGameplayTag WeaponNameTag;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "XZ|Data Asset")
+	TObjectPtr<UXZDA_Weapon> DA_Weapon;
 };

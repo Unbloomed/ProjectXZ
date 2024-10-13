@@ -3,12 +3,13 @@
 #include "UObject/NoExportTypes.h"
 #include "XZWeaponData.generated.h"
 
+class UXZCombatHandler;
 class AXZAttachment;
 class UXZEquipment;
 class UXZAim;
 class UXZCombat;
 
-/*  ÆÑÅä¸® ÆÐÅÏ
+/*  íŒ©í† ë¦¬ íŒ¨í„´
  *  
  */
 
@@ -38,12 +39,18 @@ private:
 
 	UPROPERTY()
 	UXZCombat* Combat;
+
+
+public:
+
+private:
+	UXZDA_Weapon* DA_Weapon;
 };
 
-/*  ºÎ¿¬¼³¸í
- *  XZDA_Weapon´Â »ó¼Ó°ü°è¿¡¼­ ºÐ¸®µÇ¾î ÀÖ´Ù.
- *  XZDA_WeaponÀ» friend Å¬·¡½º·Î ¼±¾ðÇÏ¿© XZDA_Weapon Å¬·¡½º¿¡¼­ XZWeaponData Å¬·¡½º¸¦ Á¢±ÙÇÒ ¼ö ÀÖ°Ô ÇØÁØ´Ù.
+/*  ë¶€ì—°ì„¤ëª…
+ *  XZDA_WeaponëŠ” ìƒì†ê´€ê³„ì—ì„œ ë¶„ë¦¬ë˜ì–´ ìžˆë‹¤.
+ *  XZDA_Weaponì„ friend í´ëž˜ìŠ¤ë¡œ ì„ ì–¸í•˜ì—¬ XZDA_Weapon í´ëž˜ìŠ¤ì—ì„œ XZWeaponData í´ëž˜ìŠ¤ë¥¼ ì ‘ê·¼í•  ìˆ˜ ìžˆê²Œ í•´ì¤€ë‹¤.
  *
- *	UPROPERTY¸¦ ºÙ¿© °¡ºñÁö ÄÝ·ºÅÍ°¡ Á¦°ÅÇÏ±â Àü±îÁö ¹°°í ÀÖ°Ô ¸¸µç´Ù.
-	UWeaponAssetÀº UObject·ÎºÎÅÍ »ó¼Ó¹Þ¾Æ ActorÀÇ »ý¼ºÁÖ±â¿¡ ¿µÇâÀ» ¹ÞÁö ¾Ê¾Æ °¡ºñÁö ÄÝ·ºÅÍ¿¡ ¿µÇâÀ» ¹Þ´Â´Ù.
+ *	UPROPERTYë¥¼ ë¶™ì—¬ ê°€ë¹„ì§€ ì½œë ‰í„°ê°€ ì œê±°í•˜ê¸° ì „ê¹Œì§€ ë¬¼ê³  ìžˆê²Œ ë§Œë“ ë‹¤.
+	UWeaponAssetì€ UObjectë¡œë¶€í„° ìƒì†ë°›ì•„ Actorì˜ ìƒì„±ì£¼ê¸°ì— ì˜í–¥ì„ ë°›ì§€ ì•Šì•„ ê°€ë¹„ì§€ ì½œë ‰í„°ì— ì˜í–¥ì„ ë°›ëŠ”ë‹¤.
  */

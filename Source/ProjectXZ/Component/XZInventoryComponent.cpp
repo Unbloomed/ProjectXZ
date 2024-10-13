@@ -44,14 +44,7 @@ void UXZInventoryComponent::Server_PickupItem_Implementation()
 
 void UXZInventoryComponent::AddtoInventory(AXZItemBase* InItem)
 {
-	Client_AddtoInventory(InItem);
-}
-
-void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* InItem)
-{
-	UE_LOG(LogTemp, Log, TEXT("Pickup and then Add to Inventory!  Client_AddtoInventory_Implementation"));
-
-	// TODO: æ∆∑°¥¬ ¿”Ω√ ƒ⁄µÂ. √ﬂ»ƒø° DataTable πÊΩƒ¿∏∑Œ ±≥√º
+	// TODO: ÏïÑÎûòÎäî ÏûÑÏãú ÏΩîÎìú. Ï∂îÌõÑÏóê DataTable Î∞©ÏãùÏúºÎ°ú ÍµêÏ≤¥
 	FString ItemName = InItem->GetItemName();
 
 	if (ItemName == FString("SMG"))
@@ -59,15 +52,29 @@ void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* In
 		EquipSlot3 = FXZTags::GetXZTags().Weapon_Projectile_SMG;
 
 		AXZCharacter* XZCharacter = Cast<AXZCharacter>(GetOwner());
-		XZCharacter->GetWeaponComponent()->AddNewWeapon(EquipSlot3);
+		if (XZCharacter->HasAuthority())
+		{
+			XZCharacter->GetWeaponComponent()->AddNewWeapon(EquipSlot3);
+		}
+		DestroyPickupItem(InItem);
 	}
-	if (ItemName == FString("Shotgun"))
+	else if (ItemName == FString("Shotgun"))
 	{
 		EquipSlot4 = FXZTags::GetXZTags().Weapon_Hitscan_Shotgun;
 		
 		AXZCharacter* XZCharacter = Cast<AXZCharacter>(GetOwner());
 		XZCharacter->GetWeaponComponent()->AddNewWeapon(EquipSlot4);
+		DestroyPickupItem(InItem);
 	}
+	else
+	{
+		Client_AddtoInventory(InItem);
+	}
+}
+
+void UXZInventoryComponent::Client_AddtoInventory_Implementation(AXZItemBase* InItem)
+{
+	UE_LOG(LogTemp, Log, TEXT("Pickup and then Add to Inventory!  Client_AddtoInventory_Implementation"));
 
 	DestroyPickupItem(InItem);
 }
@@ -79,7 +86,7 @@ void UXZInventoryComponent::DestroyPickupItem(AXZItemBase* InItem)
 
 void UXZInventoryComponent::Server_DestroyPickupItem_Implementation(AXZItemBase* InItem)
 {
-	InItem->Destroy(); // æ∆¿Ã≈€ ¡¶∞≈
+	InItem->Destroy(); // ÏïÑÏù¥ÌÖú Ï†úÍ±∞
 }
 
 void UXZInventoryComponent::BeginPlay()

@@ -8,7 +8,7 @@ void UXZEquipment::Init(AXZAttachment* InWeapon, ACharacter* InOwner, const FEqu
 	OwnerCharacter = InOwner;
 	EquipmentData = InData;
 
-	// °ÔÀÓ½ÃÀÛ ½Ã ¹«±â ÀåÂø
+	// ê²Œìž„ì‹œìž‘ ì‹œ ë¬´ê¸° ìž¥ì°©
 	if (InData.HolsterSocketName.IsValid())
 	{
 		InWeapon->AttachToComponent(OwnerCharacter->GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, true), InData.HolsterSocketName);
