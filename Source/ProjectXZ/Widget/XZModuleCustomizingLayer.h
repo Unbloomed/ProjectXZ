@@ -24,9 +24,6 @@ struct FXZModuleSelectSlotInfo
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UMaterialInstance> SlotMaterialInstance;
-
-	UPROPERTY(EditDefaultsOnly)
-	FString SubObjectNameStirng;
 };
 
 UCLASS()

@@ -15,7 +15,6 @@
 class UButton;
 class UImage;
 class UTextBlock;
-struct FXZModuleSelectSlotInfo;
 
 // Data
 UCLASS()
@@ -34,21 +33,24 @@ public:
     };
 
 public:
-    UXZModuleSelectSlotItem() {}
-    FORCEINLINE const FXZModuleSelectSlotInfo GetSlotInfo() const { return SlotInfo; }
-    FORCEINLINE const FModuleIndexInfo GetIndexInfo() const { return IndexInfo; }
-    FORCEINLINE void SetSlotInfo(const FXZModuleSelectSlotInfo NewSlotinfo)  { SlotInfo = NewSlotinfo;}
+    UXZModuleSelectSlotItem() {  }
 
-    void SetIndex();
+    void InitializeData(EModularMeshType NewModuleType);
+    
+    FORCEINLINE const FModuleIndexInfo GetIndexInfo() const { return IndexInfo; }
+    FORCEINLINE const EModularMeshType GetModuleType() const { return ModuleType; }
 
 private:
-    UPROPERTY(EditDefaultsOnly, Category = "XZ|Widget", meta = ( AllowPrivateAccess = true ))
-    FXZModuleSelectSlotInfo SlotInfo;
+    void OnInitialize();
+    // void OnUpdate();
+    // void OnDestroy();
+
+    void CalculateItemIndexRange();
+
     FModuleIndexInfo IndexInfo;
+    EModularMeshType ModuleType;
 };
 
-// DECLARE_MULTICAST_DELEGATE_OneParam(FOnModuleTypeChangedDelegate, const EModularMeshType NewModuleType);
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnSelectModuleChangedDelegate, const int32 itemID);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnModuleChangedDelegate, EModularMeshType ModuleType, const int32 itemID);
 
 UCLASS()
@@ -57,7 +59,8 @@ class PROJECTXZ_API UXZModuleSelectSlot : public UXZSlotBase, public IUserObject
 	GENERATED_BODY()
 public:
     UXZModuleSelectSlot(const FObjectInitializer& ObjectInitializer);
-   virtual void NativeConstruct() override;
+    virtual void NativeConstruct() override;
+    virtual void NativeDestruct() override;
 
 public:
     UFUNCTION()
@@ -65,22 +68,18 @@ public:
 
     UFUNCTION()
     void OnNextButtonClicked();
-
-    UFUNCTION()
-    void SetModuleType(const EModularMeshType NewModuleType);
-
-
-
 protected:
     virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
 private:
+    void OnUpdate();
     void SetModuleImage();
     void SetCurrentSelectItemID(const int32 itemID);
     void SetModuleText();
 
 public:
     FOnModuleChangedDelegate OnModuleChanged;
+
 private:
     // 구성 요소
     UPROPERTY(meta = ( BindWidget ))
@@ -106,4 +105,6 @@ private:
 
     UXZModuleSelectSlotItem::FModuleIndexInfo IndexInfo;
     int32 CurrentIndex = 0;
+
+    FDelegateHandle ModularComponentDelegateHandle;
 };

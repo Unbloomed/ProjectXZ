@@ -17,14 +17,6 @@ void ACameraEventTriggerBox::BeginPlay()
 
 	GetCollisionComponent()->SetSimulatePhysics(true);
 	GetCollisionComponent()->OnComponentBeginOverlap.AddDynamic(this, &ACameraEventTriggerBox::OnActorBeginOverlap);
-	if ( GetCollisionComponent()->OnComponentBeginOverlap.IsBound() ) 
-	{
-		UE_LOG(LogTemp, Log, TEXT("[ACameraEventTriggerBox] OnComponentBeginOverlap Is Bound"));
-	}
-	else 
-	{
-		UE_LOG(LogTemp, Log, TEXT("[ACameraEventTriggerBox] OnComponentBeginOverlap Is NOT Bound"));
-	}
 }
 
 void ACameraEventTriggerBox::OnActorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

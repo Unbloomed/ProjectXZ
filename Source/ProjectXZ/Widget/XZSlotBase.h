@@ -17,7 +17,7 @@ class PROJECTXZ_API UXZSlotBase : public UXZUserWidget
 public:
 	UXZSlotBase(const FObjectInitializer& ObjectInitializer);
 	void SetParentLayer(XZLayerBase* NewParentLayer);
+
 protected:
-	TObjectPtr< XZLayerBase> ParentLayer;
-	
+	TObjectPtr<XZLayerBase> ParentLayer;
 };

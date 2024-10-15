@@ -129,7 +129,7 @@ struct PROJECTXZ_API FItemTable_ModuleInfo : public FTableRowBase
 	public:
 		FItemTable_ModuleInfo() { }
 		FItemTable_ModuleInfo(int32 _ID, EModularMeshType _ModuleType, FGameplayTag _Tag)
-		: ID(_ID), ModuleType(_ModuleType), Tag(_Tag), Obtainable(false)
+		: ID(_ID), ModuleType(_ModuleType), Tag(_Tag), Obtainable(false), ColumnIndex(0),RowIndex(0), MaterialPath(TEXT(""))
 	{
 	}
 
@@ -145,6 +145,9 @@ struct PROJECTXZ_API FItemTable_ModuleInfo : public FTableRowBase
 	int32  ColumnIndex ;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Module)
 	int32  RowIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Module)
+	FString MaterialPath;
+
 };
 
 USTRUCT(BlueprintType)

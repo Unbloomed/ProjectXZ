@@ -3,6 +3,7 @@
 #include "Manager/XZDataManager.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "AssetManager/XZAssetManager.h"
 #include "Engine/World.h"
 
 UXZModularComponent::UXZModularComponent()
@@ -56,6 +57,7 @@ void UXZModularComponent::BeginPlay()
 
 void UXZModularComponent::Attach(EModularMeshType ModuleType, int32 ItemID)
 {
+    // ModuleType으로 해당하는 모듈의 SkeletalMesh를 가지고 온다.
     USkeletalMeshComponent* SkeletalMeshComponent = GetSkeletalMeshComponent(ModuleType);
 
     if ( false == IsValid(SkeletalMeshComponent) )
@@ -63,7 +65,7 @@ void UXZModularComponent::Attach(EModularMeshType ModuleType, int32 ItemID)
         return;
     }
 
-    // DataManager에서 ItemID의 값을 통해서 Asset 경로를 가지고 온다.
+    // ItemID의 값으로 DataManager에서 Asset 경로를 가지고 온다.
     if ( const UXZDataManager* DataManager = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance()) )
     {
         const FName ModuleIDName = FName(*FString::FromInt(ItemID));
@@ -74,21 +76,25 @@ void UXZModularComponent::Attach(EModularMeshType ModuleType, int32 ItemID)
             ensure(Character);
             ensure(Character->GetMesh());
 
-            // SkeletalMeshComponent에 SkeletalMesh를 넣어준다.
-            if ( USkeletalMesh* SkeletalMesh = LoadObject<USkeletalMesh>(nullptr, *ModuleAsset->ASSETPATH) )
+            UXZAssetManager& AssetManager = UXZAssetManager::GetXZAssetManager();
+            FSoftObjectPath AssetPath = ModuleAsset->ASSETPATH;
+
+            AssetManager.GetStreamableManager().RequestAsyncLoad(AssetPath, FStreamableDelegate::CreateLambda([this, SkeletalMeshComponent, AssetPath]()
             {
-                SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
-                if ( SkeletalMeshComponent == Character->GetMesh() ) 
+                if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(AssetPath.TryLoad()))
                 {
-                    return;
+                    SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+
+                    if (SkeletalMeshComponent != Character->GetMesh())
+                    {
+                        SkeletalMeshComponent->SetMasterPoseComponent(Character->GetMesh()); 
+                    }
                 }
-                SkeletalMeshComponent->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
-                SkeletalMeshComponent->SetMasterPoseComponent(Character->GetMesh());
-            }
-            else
-            {
-                UE_LOG(LogTemp, Error, TEXT("Failed to load SkeletalMesh at path: %s"), *ModuleAsset->ASSETPATH);
-            }
+                else
+                {
+                    UE_LOG(LogTemp, Error, TEXT("Failed to load SkeletalMesh from path: %s"), *AssetPath.ToString());
+                }
+            }));
         }
     }
 }
@@ -126,27 +132,7 @@ FName UXZModularComponent::GetModuleName(const EModularMeshType ModuleType)
     return ModuleTypeName;
 }
 
-USkeletalMeshComponent* UXZModularComponent::GetSkeletalMeshComponent(EModularMeshType ModuleType)
+USkeletalMeshComponent* UXZModularComponent::GetSkeletalMeshComponent(EModularMeshType ModuleType) const
 {
-    TArray<USkeletalMeshComponent*> SkeletalMeshComponents;
-    Character->GetComponents(SkeletalMeshComponents);
-
-    // 상체이면 Character의 기본 Mesh를 리턴한다.
-    if ( EModularMeshType::Body == ModuleType ) 
-    {
-        return Character->GetMesh();
-    }
-
-    // Component의 Name을 사용해서 해당하는 SkeletalMesh 를 찾는다.
-    for ( USkeletalMeshComponent* SkeletalMeshComponent : SkeletalMeshComponents)
-    {
-        const FString SkeletalMeshName = GetModuleName(ModuleType).ToString() + FString(TEXT("MeshComponent"));
-
-        if ( 0 == SkeletalMeshName.Compare(SkeletalMeshComponent->GetName()) )
-        {
-            return SkeletalMeshComponent;
-        }
-    }
-
-    return nullptr;
+    return Character->GetSkeletalMeshComponent(ModuleType);
 }

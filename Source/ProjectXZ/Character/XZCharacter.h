@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "GenericTeamAgentInterface.h"
+#include "Component/XZModularComponent.h"
 #include "XZCharacter.generated.h"
 
 class UXZInventoryComponent;
@@ -17,7 +18,7 @@ class UObject;
 struct FFrame;
 class UXZStateComponent;
 class UXZModularComponent;
-class USkeletalMeshComponent;
+class UXZSkeletalMeshComponent;
 
 UENUM()
 enum class EXZCharacterType : uint8
@@ -40,6 +41,7 @@ public:
 	FORCEINLINE USpringArmComponent* GetSpringArm() const { return CameraSpringArm; }
 	FORCEINLINE UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 	FORCEINLINE UXZModularComponent* GetModularComponent() const { return ModularComponent; }
+	FORCEINLINE USkeletalMeshComponent* GetSkeletalMeshComponent(EModularMeshType ModuleType) const { return SkeletalMeshComponents[ModuleType]; }
 
 	void SetUpWidget(class AXZHUD* XZHUD);
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
@@ -51,9 +53,9 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_Owner() override;
 	virtual void OnRep_PlayerState() override;
-
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	
+private:
 	void DisablePlayerInput();
 	void EnablePlayerInput();
 	void SetDead();
@@ -100,21 +102,7 @@ private:
 	//*****************************************************
 	// SkeletalMeshComponent
 	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> HeadMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> HandsMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> BeltMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> PantsMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> FootsMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> BackpackMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> VestMeshComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "XZ|Character", Meta = ( AllowPrivateAccess = "true" ))
-	TObjectPtr<USkeletalMeshComponent> HelmetMeshComponent;
+	TMap<EModularMeshType, USkeletalMeshComponent*> SkeletalMeshComponents;
 
 	
 	//*****************************************************

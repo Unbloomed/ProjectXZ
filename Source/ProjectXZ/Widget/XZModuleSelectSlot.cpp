@@ -4,6 +4,7 @@
 #include "Components/Image.h"
 #include "Manager/XZDataManager.h"
 #include "Kismet/KismetMaterialLibrary.h"
+#include "AssetManager/XZAssetManager.h"
 
 // 인터페이스 사용하기
 #include "Character/XZCharacter.h"
@@ -30,6 +31,46 @@ void UXZModuleSelectSlot::NativeConstruct()
 	{
 		NextButton->OnClicked.AddDynamic(this, &UXZModuleSelectSlot::OnNextButtonClicked);
 	}
+
+	if ( AXZCharacter* Character = Cast< AXZCharacter>(GetOwningPlayerPawn()) )
+	{
+		if ( UXZModularComponent* ModularComponent = Character->GetModularComponent() )
+		{	
+			ModularComponentDelegateHandle = OnModuleChanged.AddUObject(ModularComponent, &UXZModularComponent::Attach);	// 함수 포인터
+		}
+	}
+
+	if ( UXZDataManager* DataManager = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance()) )
+	{
+		const UEnum* EnumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EModularMeshType"), true);
+		if ( false == IsValid(EnumPtr) )
+		{
+			return;
+		}
+	
+		const FName ModuleTypeName = FName(*EnumPtr->GetNameStringByIndex(static_cast< int32 >( ModuleType )));
+	
+		if ( FItemTable_ModuleInfo* ModuleInfo = DataManager->TryGetModuleInfo(ModuleTypeName) )
+		{
+			UXZAssetManager& AssetManager = UXZAssetManager::GetXZAssetManager();
+			FSoftObjectPath AssetPath = ModuleInfo->MaterialPath;
+
+			AssetManager.GetStreamableManager().RequestAsyncLoad(ModuleInfo->MaterialPath, FStreamableDelegate::CreateLambda([ this, AssetPath ] ()
+				{
+					SlotMaterialInstance = Cast<UMaterialInstance>(AssetPath.TryLoad());
+					SetModuleImage();
+				}));
+		}
+	}
+	SlotMaterialInstanceDynamic = UKismetMaterialLibrary::CreateDynamicMaterialInstance(GetWorld(), SlotMaterialInstance);
+}
+
+void UXZModuleSelectSlot::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	OnModuleChanged.Remove(ModularComponentDelegateHandle);
+
 }
 
 void UXZModuleSelectSlot::OnPrevButtonClicked()
@@ -39,7 +80,6 @@ void UXZModuleSelectSlot::OnPrevButtonClicked()
 		return;
 	}
 	SetCurrentSelectItemID(--CurrentIndex);
-	OnModuleChanged.Broadcast(ModuleType, CurrentIndex + IndexInfo.ItemBaseID );
 }
 
 void UXZModuleSelectSlot::OnNextButtonClicked()
@@ -49,7 +89,6 @@ void UXZModuleSelectSlot::OnNextButtonClicked()
 		return;
 	}
 	SetCurrentSelectItemID(++CurrentIndex);
-	OnModuleChanged.Broadcast(ModuleType, CurrentIndex + IndexInfo.ItemBaseID);
 }
 
 void UXZModuleSelectSlot::NativeOnListItemObjectSet(UObject* ListItemObject)
@@ -60,8 +99,7 @@ void UXZModuleSelectSlot::NativeOnListItemObjectSet(UObject* ListItemObject)
 	UXZModuleSelectSlotItem* SlotItem = Cast<UXZModuleSelectSlotItem>(ListItemObject);
 
 	IndexInfo = SlotItem->GetIndexInfo();
-	ModuleType = SlotItem->GetSlotInfo().ModuleType;
-	SlotMaterialInstance = SlotItem->GetSlotInfo().SlotMaterialInstance;
+	ModuleType = SlotItem->GetModuleType();
 
 	////////////////////////////////////////////// Debugging //////////////////////////////////////////////
 	/*
@@ -76,19 +114,12 @@ void UXZModuleSelectSlot::NativeOnListItemObjectSet(UObject* ListItemObject)
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	SetCurrentSelectItemID(0);
-
-	if ( AXZCharacter* Character = Cast< AXZCharacter>(GetOwningPlayerPawn()) ) 
-	{
-		if ( UXZModularComponent* ModularComponent = Character->GetModularComponent() ) 
-		{
-			OnModuleChanged.AddUObject(ModularComponent, &UXZModularComponent::Attach);
-		}
-	}
 }
 
-void UXZModuleSelectSlot::SetModuleType(const EModularMeshType NewModuleType)
+void UXZModuleSelectSlot::OnUpdate()
 {
-	ModuleType = NewModuleType;
+	SetModuleImage();
+	SetModuleText();
 }
 
 void UXZModuleSelectSlot::SetModuleImage()
@@ -112,8 +143,13 @@ void UXZModuleSelectSlot::SetModuleImage()
 		{
 			const int32 rowIndex = ModuleInfo->RowIndex;
 			const int32 columnIndex = ModuleInfo->ColumnIndex;
-
-			if ( SlotMaterialInstanceDynamic = UKismetMaterialLibrary::CreateDynamicMaterialInstance(GetWorld(), SlotMaterialInstance) )
+			
+			if(nullptr == SlotMaterialInstanceDynamic )
+			{
+				SlotMaterialInstanceDynamic = UKismetMaterialLibrary::CreateDynamicMaterialInstance(GetWorld(), SlotMaterialInstance);
+			}
+		
+			if ( SlotMaterialInstanceDynamic )
 			{
 				SlotMaterialInstanceDynamic->SetScalarParameterValue(FName("RowIndex"), rowIndex);
 				SlotMaterialInstanceDynamic->SetScalarParameterValue(FName("ColumnIndex"), columnIndex);
@@ -127,8 +163,12 @@ void UXZModuleSelectSlot::SetCurrentSelectItemID(const int32 NewCurrentIndex)
 {
 	CurrentIndex = NewCurrentIndex;
 
-	SetModuleImage();
-	SetModuleText();
+	if ( OnModuleChanged.IsBound() ) 
+	{
+		OnModuleChanged.Broadcast(ModuleType, CurrentIndex + IndexInfo.ItemBaseID);
+	}
+
+	OnUpdate();
 }
 
 void UXZModuleSelectSlot::SetModuleText()
@@ -145,7 +185,21 @@ void UXZModuleSelectSlot::SetModuleText()
 	ModuleName->SetText(FText::FromString(ModuleTypeName));
 }
 
-void UXZModuleSelectSlotItem::SetIndex()
+
+void UXZModuleSelectSlotItem::InitializeData(EModularMeshType NewModuleType)
+{
+	ModuleType = NewModuleType;
+	OnInitialize();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void UXZModuleSelectSlotItem::OnInitialize()
+{
+	CalculateItemIndexRange();
+}
+
+void UXZModuleSelectSlotItem::CalculateItemIndexRange()
 {
 	if ( UXZDataManager* DataManager = UGameInstance::GetSubsystem<UXZDataManager>(GetWorld()->GetGameInstance()) )
 	{
@@ -155,26 +209,26 @@ void UXZModuleSelectSlotItem::SetIndex()
 			return;
 		}
 
-		const FName ModuleTypeName = FName(*EnumPtr->GetNameStringByIndex(static_cast< int32 >( SlotInfo.ModuleType )));
+		const FName ModuleTypeName = FName(*EnumPtr->GetNameStringByIndex(static_cast< int32 >( ModuleType )));
 
 		if ( const FItemTable_ModuleInfo* ModuleInfo = DataManager->TryGetModuleInfo(ModuleTypeName) )
 		{
 			// 첫 번째 아이템의 ID 설정
 			IndexInfo.ItemBaseID = ( ModuleInfo->ID )*1000 + 1;
-
+			
 			const int32 MaxItemsToCheck = 50;
-
 			for ( int32 i = 1; i < MaxItemsToCheck; ++i )
 			{
 				int32 CurrentModuleID = IndexInfo.ItemBaseID + i;
 
+				// 내가 검사하고 있는 아이템 모듈이 다른 타입 모듈로 넘어갔는지 판정
+				if ( CurrentModuleID / 1000 != ModuleInfo->ID )
+				{
+					break;
+				}
+
 				if ( const FItemTable_Module* ModuleAsset = DataManager->TryGetModuleAsset(FName(*FString::FromInt(CurrentModuleID))))
 				{
-					if ( CurrentModuleID / 1000 > ModuleInfo->ID )
-					{
-						break;
-					}
-
 					IndexInfo.ItemLastID = CurrentModuleID;
 				}
 			}

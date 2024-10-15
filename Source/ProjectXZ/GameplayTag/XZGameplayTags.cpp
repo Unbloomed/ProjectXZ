@@ -96,7 +96,7 @@ void FXZTags::InitializeNativeGameplayTags()
 	GameplayTags.Equipment_Armor_Helmet = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Equipment.Armor.Helmet"), FString("장착 아이템 헬멧 Tag"));
 
 	//********************************************************
- // Widgets
+	// Widgets
 	GameplayTags.Widget_Layer_FullUI = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.FullUI"), FString("아이템 구급상자"));
 	GameplayTags.Widget_Layer_PopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.PopUpType"), FString("아이템 구급상자"));
 	GameplayTags.Widget_Layer_SubPopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.SubPopUpType"), FString("아이템 구급상자"));

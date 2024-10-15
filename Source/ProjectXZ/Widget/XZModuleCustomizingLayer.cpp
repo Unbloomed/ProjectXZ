@@ -20,8 +20,7 @@ void UXZModuleCustomizingLayer::NativeConstruct()
 	for ( int i = 0; i < ModuleNum; ++i )
 	{
 		UXZModuleSelectSlotItem* SlotItem = NewObject<UXZModuleSelectSlotItem>(this);
-		SlotItem->SetSlotInfo(SelectSlotsInfo[i]);
-		SlotItem->SetIndex();
+		SlotItem->InitializeData(SelectSlotsInfo[i].ModuleType);
 		SlotsArray.Add(SlotItem);
 	}
 

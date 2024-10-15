@@ -17,6 +17,7 @@
 #include "Manager/XZSpawnManager.h"
 #include "HUD/XZHUD.h"
 #include "Widget/XZTimerWidget.h"
+#include "SkeletalMeshComponent/XZSkeletalMeshComponent.h"
 #include "ProjectXZ.h"
 
 AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
@@ -79,15 +80,30 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	// ModualrComponent
 	ModularComponent = CreateDefaultSubobject<UXZModularComponent>(TEXT("ModularComponent"));
 
+
+
 	// SkeletalMeshComponent
-	HeadMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadsMeshComponent"));
-	HandsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandsMeshComponent"));
-	BeltMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BeltMeshComponent"));
-	PantsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PantsMeshComponent"));
-	FootsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FootsMeshComponent"));
-	BackpackMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BackpackMeshComponent"));
-	VestMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VestMeshComponent"));
-	HelmetMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HelmetMeshComponent"));
+	TArray<EModularMeshType> ModuleTypes = {
+	EModularMeshType::Heads,
+	EModularMeshType::Hands,
+	EModularMeshType::Belt,
+	EModularMeshType::Pants,
+	EModularMeshType::Foots,
+	EModularMeshType::Backpack,
+	EModularMeshType::Vest,
+	EModularMeshType::Helmet
+	};
+
+	for ( EModularMeshType ModuleType : ModuleTypes )
+	{
+		FString ComponentName = UEnum::GetValueAsString(ModuleType) + TEXT("MeshComponent");
+		USkeletalMeshComponent* MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(*ComponentName);
+		MeshComponent->ComponentTags.Add(FName("ModuleMesh.Heads"));
+		MeshComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
+		SkeletalMeshComponents.Add(ModuleType, MeshComponent);
+	}
+
+	SkeletalMeshComponents.Add(EModularMeshType::Body, GetMesh());
 
 	// WeaponComponent
 	WeaponComponent = CreateDefaultSubobject<UXZWeaponComponent>(TEXT("WeaponComponent"));
