@@ -1,8 +1,6 @@
 #include "HUD/XZCustomizationHUD.h"
-#include "Widget/XZModuleCustomizingLayer.h"
-#include "Widget/XZModuleSelectSlot.h"
+#include "Widget/Layers/XZModuleCustomizingLayer.h"
 #include "Character/XZCharacter.h"
-#include "Component/XZModularComponent.h"
 
 AXZCustomizationHUD::AXZCustomizationHUD()
 {
@@ -28,13 +26,6 @@ void AXZCustomizationHUD::BeginPlay()
 
 			AXZCharacter* Character = Cast<AXZCharacter>(GetOwningPawn());
 			if ( nullptr == Character )
-			{
-				return;
-			}
-
-			UXZModularComponent* ModularComponent = Character->GetModularComponent();
-
-			if ( nullptr == ModularComponent )
 			{
 				return;
 			}

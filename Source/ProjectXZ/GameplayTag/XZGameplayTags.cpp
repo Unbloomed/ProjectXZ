@@ -97,11 +97,11 @@ void FXZTags::InitializeNativeGameplayTags()
 
 	//********************************************************
 	// Widgets
-	GameplayTags.Widget_Layer_FullUI = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.FullUI"), FString("아이템 구급상자"));
-	GameplayTags.Widget_Layer_PopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.PopUpType"), FString("아이템 구급상자"));
-	GameplayTags.Widget_Layer_SubPopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.SubPopUpType"), FString("아이템 구급상자"));
-	GameplayTags.Widget_Layer_TutorialType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.TutorialType"), FString("아이템 구급상자"));
-	GameplayTags.Widget_Layer_NoticeType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.Layer.NoticeType"), FString("아이템 구급상자"));
+	GameplayTags.Widget_UIType_FullUI = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.UIType.FullUI"), FString("UI 전체 화면"));
+	GameplayTags.Widget_UIType_PopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.UIType.PopUpType"), FString("팝업 UI"));
+	GameplayTags.Widget_UIType_SubPopUpType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.UIType.SubPopUpType"), FString("SubPopUp UI"));
+	GameplayTags.Widget_UIType_TutorialType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.UIType.TutorialType"), FString("튜토리얼 UI"));
+	GameplayTags.Widget_UIType_NoticeType = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Widget.UIType.NoticeType"), FString("Notice UI"));
 
 	// Input 상태: Pressed, Held, Released
 	//GameplayTags.BlockTag_InputPressed = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("BlockTag.InputPressed"), FString("Block: Input Pressed 상태"));

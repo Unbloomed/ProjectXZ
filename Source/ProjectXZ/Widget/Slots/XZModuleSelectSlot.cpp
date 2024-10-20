@@ -1,4 +1,4 @@
-#include "Widget/XZModuleSelectSlot.h"
+#include "XZModuleSelectSlot.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
@@ -124,6 +124,12 @@ void UXZModuleSelectSlot::OnUpdate()
 
 void UXZModuleSelectSlot::SetModuleImage()
 {
+	if ( false == IsValid(PreviewImage) )
+	{
+		return;
+	}
+
+	return;
 	if ( false == IsValid(PreviewImage) )
 	{
 		return;

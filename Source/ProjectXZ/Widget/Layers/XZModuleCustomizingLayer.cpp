@@ -1,13 +1,15 @@
 
-#include "Widget/XZModuleCustomizingLayer.h"
-#include "Widget/XZModuleSelectSlot.h"
+#include "XZModuleCustomizingLayer.h"
+#include "Widget/Slots/XZModuleSelectSlot.h"
 #include "GameplayTag/XZGameplayTags.h"
 #include "Components/ListView.h"
 
 UXZModuleCustomizingLayer::UXZModuleCustomizingLayer(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
-	LayerType = FXZTags::GetXZTags().Widget_Layer_FullUI;
+	LayerType = FXZTags::GetXZTags().Widget_UIType_FullUI;
+
+	UITag = FGameplayTag::RequestGameplayTag(FName("UI.Layer.ModuleCustimizingLayer"));
 }
 
 void UXZModuleCustomizingLayer::NativeConstruct()

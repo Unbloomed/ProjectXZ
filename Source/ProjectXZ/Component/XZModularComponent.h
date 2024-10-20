@@ -42,11 +42,4 @@ private:
 	int32 GetBaseModuleItemIndex(const int32 ModuleMainID) const;
 	FName GetModuleName(const EModularMeshType ModuleType);
 	USkeletalMeshComponent* GetSkeletalMeshComponent(EModularMeshType ModuleType) const;
-
-protected:
-	UPROPERTY()
-	TObjectPtr<class AXZCharacter> Character;
-
-private:
-	FSoftObjectPath AssetPath;
 };

@@ -106,11 +106,11 @@ public:
 	 
 	//********************************************************
 	 // Widgets
-	FGameplayTag Widget_Layer_FullUI;
-	FGameplayTag Widget_Layer_PopUpType;
-	FGameplayTag Widget_Layer_SubPopUpType;
-	FGameplayTag Widget_Layer_TutorialType;
-	FGameplayTag Widget_Layer_NoticeType;
+	FGameplayTag Widget_UIType_FullUI;
+	FGameplayTag Widget_UIType_PopUpType;
+	FGameplayTag Widget_UIType_SubPopUpType;
+	FGameplayTag Widget_UIType_TutorialType;
+	FGameplayTag Widget_UIType_NoticeType;
 	 
 	//********************************************************
 

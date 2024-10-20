@@ -10,14 +10,11 @@ UXZModularComponent::UXZModularComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
     bWantsInitializeComponent = true;
-    Character = nullptr;
 }
 
 void UXZModularComponent::InitializeComponent()
 {
     Super::InitializeComponent();
-
-    Character = Cast<AXZCharacter>(GetOwner());
 }
 
 void UXZModularComponent::BeginPlay()
@@ -73,14 +70,17 @@ void UXZModularComponent::Attach(EModularMeshType ModuleType, int32 ItemID)
         if ( FItemTable_Module* ModuleAsset = DataManager->TryGetModuleAsset(ModuleIDName) )
         {
             ensure(SkeletalMeshComponent);
-            ensure(Character);
-            ensure(Character->GetMesh());
 
             UXZAssetManager& AssetManager = UXZAssetManager::GetXZAssetManager();
             FSoftObjectPath AssetPath = ModuleAsset->ASSETPATH;
 
             AssetManager.GetStreamableManager().RequestAsyncLoad(AssetPath, FStreamableDelegate::CreateLambda([this, SkeletalMeshComponent, AssetPath]()
             {
+                    AXZCharacter* Character = Cast<AXZCharacter>(GetOwner());
+                    
+                    ensure(Character);
+                    ensure(Character->GetMesh());
+
                 if (USkeletalMesh* SkeletalMesh = Cast<USkeletalMesh>(AssetPath.TryLoad()))
                 {
                     SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
@@ -134,5 +134,10 @@ FName UXZModularComponent::GetModuleName(const EModularMeshType ModuleType)
 
 USkeletalMeshComponent* UXZModularComponent::GetSkeletalMeshComponent(EModularMeshType ModuleType) const
 {
-    return Character->GetSkeletalMeshComponent(ModuleType);
+    if ( AXZCharacter* Character = Cast<AXZCharacter>(GetOwner()) ) 
+    {
+        return Character->GetSkeletalMeshComponent(ModuleType);
+    }
+
+    return nullptr;
 }

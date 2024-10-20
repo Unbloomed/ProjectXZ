@@ -203,7 +203,7 @@ void AXZCharacter::EndDeadEvent()
 			{
 				if (AXZHUD* XZHUD = Cast<AXZHUD>(PC->GetHUD())) 
 				{
-					XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData->RespawnTime);
+					// XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData->RespawnTime);
 				}
 			}
 		}
@@ -239,7 +239,7 @@ void AXZCharacter::RespawnPlayer()
 	{
 		if (AXZHUD* XZHUD = Cast<AXZHUD>(PC->GetHUD()))
 		{
-			XZHUD->GetRespawnTimerWidget()->StopTimer();
+			// XZHUD->GetRespawnTimerWidget()->StopTimer();
 		}
 	}
 }
@@ -258,8 +258,8 @@ void AXZCharacter::SetUpWidget(AXZHUD* XZHUD)
 {
 	if (IsValid(XZHUD)) 
 	{
-		GetStatComponent()->OnHpChanged.AddUObject(XZHUD, &AXZHUD::UpdateHPBarWidget);
-		XZHUD->UpdateHPBarWidget(1.0f, 1.0f);
+		// GetStatComponent()->OnHpChanged.AddUObject(XZHUD, &AXZHUD::UpdateHPBarWidget);
+		// XZHUD->UpdateHPBarWidget(1.0f, 1.0f);
 	}
 }
 
@@ -337,4 +337,38 @@ void AXZCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void AXZCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	TeamID = NewTeamID;
+}
+
+void AXZCharacter::StartUIMode()
+{
+	DisablePlayerInput();
+	UE_LOG(LogTemp, Log, TEXT("[Test] StartUIMode"));
+	
+	if (false == IsValid(PlayerController))
+	{
+		PlayerController = Cast<APlayerController>(GetController());
+	}
+
+	if (PlayerController)
+	{
+		FInputModeUIOnly UIOnlyInputMode;
+		PlayerController->SetInputMode(UIOnlyInputMode);
+	}
+}
+
+void AXZCharacter::EndUIMode()
+{
+	EnablePlayerInput();
+	UE_LOG(LogTemp, Log, TEXT("[Test] EndUIMode"));
+
+	if (false == IsValid(PlayerController))
+	{
+		PlayerController = Cast<APlayerController>(GetController());
+	}
+
+	if (PlayerController)
+	{
+		FInputModeGameOnly GameOnlyInputMode;
+		PlayerController->SetInputMode(GameOnlyInputMode);
+	}
 }

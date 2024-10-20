@@ -17,9 +17,10 @@ class PROJECTXZ_API UXZLayerBase : public UXZUserWidget
 	
 public:
 	UXZLayerBase(const FObjectInitializer& ObjectInitializer);
-	//void AddSlot(class UXZSlotBase* NewSlot);
+
+	void OpenLayer();
+	void CloseLayer();
 
 protected:
-	//TArray<UXZSlotBase*> Slots;
 	FGameplayTag LayerType;
 };

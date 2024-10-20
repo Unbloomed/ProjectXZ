@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widget/XZSlotBase.h"
+#include "Widget/Base/XZSlotBase.h"
 #include "Component/XZModularComponent.h"
-#include "Widget/XZModuleCustomizingLayer.h"
 #include "Blueprint/IUserObjectListEntry.h"
 #include "XZModuleSelectSlot.generated.h"
 
