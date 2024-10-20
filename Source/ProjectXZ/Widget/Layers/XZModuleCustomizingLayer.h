@@ -1,9 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Widget/XZLayerBase.h"
+#include "Widget/Base/XZLayerBase.h"
 #include "Component/XZModularComponent.h"
 #include "XZModuleCustomizingLayer.generated.h"
 
@@ -18,15 +16,9 @@ USTRUCT(BlueprintType)
 struct FXZModuleSelectSlotInfo
 {
 	GENERATED_BODY()
-
+	
 	UPROPERTY(EditDefaultsOnly)
 	EModularMeshType ModuleType;
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UMaterialInstance> SlotMaterialInstance;
-
-	UPROPERTY(EditDefaultsOnly)
-	FString SubObjectNameStirng;
 };
 
 UCLASS()

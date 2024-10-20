@@ -14,4 +14,8 @@ void UXZAssetManager::StartInitialLoading()
 	Super::StartInitialLoading();
 
 	FXZTags::InitializeNativeGameplayTags();
+
+
+	
+
 }

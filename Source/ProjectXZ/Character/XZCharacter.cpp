@@ -17,6 +17,7 @@
 #include "Manager/XZSpawnManager.h"
 #include "HUD/XZHUD.h"
 #include "Widget/XZTimerWidget.h"
+#include "SkeletalMeshComponent/XZSkeletalMeshComponent.h"
 #include "ProjectXZ.h"
 
 AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
@@ -79,15 +80,30 @@ AXZCharacter::AXZCharacter(const FObjectInitializer& ObjectInitializer)
 	// ModualrComponent
 	ModularComponent = CreateDefaultSubobject<UXZModularComponent>(TEXT("ModularComponent"));
 
+
+
 	// SkeletalMeshComponent
-	HeadMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HeadsMeshComponent"));
-	HandsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HandsMeshComponent"));
-	BeltMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BeltMeshComponent"));
-	PantsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("PantsMeshComponent"));
-	FootsMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("FootsMeshComponent"));
-	BackpackMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("BackpackMeshComponent"));
-	VestMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("VestMeshComponent"));
-	HelmetMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("HelmetMeshComponent"));
+	TArray<EModularMeshType> ModuleTypes = {
+	EModularMeshType::Heads,
+	EModularMeshType::Hands,
+	EModularMeshType::Belt,
+	EModularMeshType::Pants,
+	EModularMeshType::Foots,
+	EModularMeshType::Backpack,
+	EModularMeshType::Vest,
+	EModularMeshType::Helmet
+	};
+
+	for ( EModularMeshType ModuleType : ModuleTypes )
+	{
+		FString ComponentName = UEnum::GetValueAsString(ModuleType) + TEXT("MeshComponent");
+		USkeletalMeshComponent* MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(*ComponentName);
+		MeshComponent->ComponentTags.Add(FName("ModuleMesh.Heads"));
+		MeshComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform);
+		SkeletalMeshComponents.Add(ModuleType, MeshComponent);
+	}
+
+	SkeletalMeshComponents.Add(EModularMeshType::Body, GetMesh());
 
 	// WeaponComponent
 	WeaponComponent = CreateDefaultSubobject<UXZWeaponComponent>(TEXT("WeaponComponent"));
@@ -187,7 +203,7 @@ void AXZCharacter::EndDeadEvent()
 			{
 				if (AXZHUD* XZHUD = Cast<AXZHUD>(PC->GetHUD())) 
 				{
-					XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData->RespawnTime);
+					// XZHUD->GetRespawnTimerWidget()->StartTimer(CharacterStatData->RespawnTime);
 				}
 			}
 		}
@@ -223,7 +239,7 @@ void AXZCharacter::RespawnPlayer()
 	{
 		if (AXZHUD* XZHUD = Cast<AXZHUD>(PC->GetHUD()))
 		{
-			XZHUD->GetRespawnTimerWidget()->StopTimer();
+			// XZHUD->GetRespawnTimerWidget()->StopTimer();
 		}
 	}
 }
@@ -242,8 +258,8 @@ void AXZCharacter::SetUpWidget(AXZHUD* XZHUD)
 {
 	if (IsValid(XZHUD)) 
 	{
-		GetStatComponent()->OnHpChanged.AddUObject(XZHUD, &AXZHUD::UpdateHPBarWidget);
-		XZHUD->UpdateHPBarWidget(1.0f, 1.0f);
+		// GetStatComponent()->OnHpChanged.AddUObject(XZHUD, &AXZHUD::UpdateHPBarWidget);
+		// XZHUD->UpdateHPBarWidget(1.0f, 1.0f);
 	}
 }
 
@@ -321,4 +337,38 @@ void AXZCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 void AXZCharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	TeamID = NewTeamID;
+}
+
+void AXZCharacter::StartUIMode()
+{
+	DisablePlayerInput();
+	UE_LOG(LogTemp, Log, TEXT("[Test] StartUIMode"));
+	
+	if (false == IsValid(PlayerController))
+	{
+		PlayerController = Cast<APlayerController>(GetController());
+	}
+
+	if (PlayerController)
+	{
+		FInputModeUIOnly UIOnlyInputMode;
+		PlayerController->SetInputMode(UIOnlyInputMode);
+	}
+}
+
+void AXZCharacter::EndUIMode()
+{
+	EnablePlayerInput();
+	UE_LOG(LogTemp, Log, TEXT("[Test] EndUIMode"));
+
+	if (false == IsValid(PlayerController))
+	{
+		PlayerController = Cast<APlayerController>(GetController());
+	}
+
+	if (PlayerController)
+	{
+		FInputModeGameOnly GameOnlyInputMode;
+		PlayerController->SetInputMode(GameOnlyInputMode);
+	}
 }

@@ -23,4 +23,5 @@ protected:
 	TObjectPtr<AActor> OwningActor;
 
 	FName WidgetName;
+	FGameplayTag UITag;
 };

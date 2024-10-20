@@ -1,6 +1,5 @@
 
 #include "HUD/XZHUDBase.h"
-#include "Widget/XZModuleCustomizingLayer.h"
 
 AXZHUDBase::AXZHUDBase()
 {

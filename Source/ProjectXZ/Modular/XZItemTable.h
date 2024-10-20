@@ -17,11 +17,13 @@ struct PROJECTXZ_API FItemTable_MainInfo : public FTableRowBase
 	GENERATED_BODY()
 public:
 	FItemTable_MainInfo() { }
-	FItemTable_MainInfo(int32 _ID, int32 _CategoryID, int32 _CategoryKey, int32 _Ability1, int32 _Ability2,
+	FItemTable_MainInfo(FString _ItemName,int32 _ID, int32 _CategoryID, int32 _CategoryKey, int32 _Ability1, int32 _Ability2,
 		FGameplayTag _Tag, FString _Name, FString _Description_Kor, FString _ImagePath, FString _DataAsset) :
-		ID(_ID), CATEGORY_ID(_CategoryID), CATEGORY_KEY(_CategoryKey), ABILITY_1(_Ability1), ABILITY_2(_Ability2), TAG(_Tag), 
+		ITEMNAME(_ItemName), ID(_ID), CATEGORY_ID(_CategoryID), CATEGORY_KEY(_CategoryKey), ABILITY_1(_Ability1), ABILITY_2(_Ability2), TAG(_Tag),
 		DESCRIPTION(_Description_Kor), IMAGEPATH(_ImagePath), DATAASSET(_DataAsset)
 	{  }
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
+	FString ITEMNAME;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
 	int32 ID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Item)
@@ -129,7 +131,7 @@ struct PROJECTXZ_API FItemTable_ModuleInfo : public FTableRowBase
 	public:
 		FItemTable_ModuleInfo() { }
 		FItemTable_ModuleInfo(int32 _ID, EModularMeshType _ModuleType, FGameplayTag _Tag)
-		: ID(_ID), ModuleType(_ModuleType), Tag(_Tag), Obtainable(false)
+		: ID(_ID), ModuleType(_ModuleType), Tag(_Tag), Obtainable(false), ColumnIndex(0),RowIndex(0), MaterialPath(TEXT(""))
 	{
 	}
 
@@ -145,6 +147,9 @@ struct PROJECTXZ_API FItemTable_ModuleInfo : public FTableRowBase
 	int32  ColumnIndex ;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Module)
 	int32  RowIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Module)
+	FString MaterialPath;
+
 };
 
 USTRUCT(BlueprintType)
